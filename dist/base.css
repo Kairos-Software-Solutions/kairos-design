@@ -9,6 +9,16 @@
    Import order: tokens.css, base.css, kairos.css.
    ========================================================================== */
 
+/* The universal form of the box-sizing reset. `kairos.css` scopes the same
+   rule to its own classes so it stands alone; this widens it to the host app,
+   which is the behaviour a new Kairos app wants and an app mid-adoption may
+   not. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 a {
   color: inherit;
 }

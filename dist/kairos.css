@@ -17,6 +17,23 @@
    docs/decisions.md. See scripts/extract-from-paykit.mjs for the port.
    ========================================================================== */
 
+/* --- Box sizing ----------------------------------------------------------
+   Paykit inherits `box-sizing: border-box` from Tailwind's preflight, which
+   the registry does not ship. Without it every padded, bordered component
+   measures wider than the width it was given, and a field inside a 272px
+   column renders 296px — the exact 320px panel overflow the brand audit
+   flagged in Mailkit.
+
+   Scoped by attribute so `kairos.css` is self-sufficient without restyling a
+   host app's own elements. `base.css` carries the universal form for apps that
+   want it. */
+
+[class*='kairos-'],
+[class*='kairos-']::before,
+[class*='kairos-']::after {
+  box-sizing: border-box;
+}
+
 /* --- Form control reset --------------------------------------------------
    Paykit's component layer runs behind Tailwind's preflight, which sets
    `appearance: none` on every control before any Kairos rule is read. The
