@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kairos registry preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Epilogue:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../dist/tokens.css">
+<link rel="stylesheet" href="../dist/base.css">
+<link rel="stylesheet" href="../dist/kairos.css">
+<style>
+  /* Preview-page chrome only. Not part of the registry. */
+  body { margin: 0; background: var(--kairos-bg); color: var(--kairos-text); font-family: var(--kairos-body); font-size: var(--kairos-text-body); line-height: var(--kairos-text-body-lh); }
+  .preview { max-width: 1100px; margin: 0 auto; padding: 24px; display: grid; gap: 32px; }
+  .preview h2 { font-family: var(--kairos-body); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--kairos-text-muted); margin: 0 0 12px; }
+  .preview section > .stack { display: grid; gap: 12px; }
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .swatch { border: 1px solid var(--kairos-border); padding: 8px; font-size: 0.6875rem; }
+  .swatch i { display: block; height: 36px; margin-bottom: 6px; border: 1px solid var(--kairos-border); font-style: normal; }
+</style>
+</head>
+<body>
+<a class="kairos-skip-link" href="#main">Skip to content</a>
+<div class="preview">
+
+  <header class="kairos-page-header">
+    <h1 class="kairos-page-title">Registry preview</h1>
+    <div class="kairos-page-header-actions">
+      <button class="kairos-button kairos-page-header-primary" type="button">New invoice</button>
+      <button class="kairos-button" type="button" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">Toggle theme</button>
+    </div>
+  </header>
+
+  <main id="main" style="display: grid; gap: 32px;">
+
+  <section>
+    <h2>Tokens</h2>
+    <div class="swatches">
+      <div class="swatch"><i style="background: var(--kairos-bg)"></i>bg</div>
+      <div class="swatch"><i style="background: var(--kairos-surface)"></i>surface</div>
+      <div class="swatch"><i style="background: var(--kairos-elevated)"></i>elevated</div>
+      <div class="swatch"><i style="background: var(--kairos-accent)"></i>accent</div>
+      <div class="swatch"><i style="background: var(--kairos-state-settled-tint)"></i>settled tint</div>
+      <div class="swatch"><i style="background: var(--kairos-state-overdue-tint)"></i>overdue tint</div>
+      <div class="swatch"><i style="background: var(--kairos-state-awaiting-tint)"></i>awaiting tint</div>
+      <div class="swatch"><i style="background: var(--kairos-state-draft-tint)"></i>draft tint</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>State chips — one vocabulary, four states</h2>
+    <div class="stack">
+      <div class="kairos-chip-row">
+        <span class="kairos-state-chip kairos-state-chip--settled"><span class="kairos-state-chip-glyph" aria-hidden="true">&#10003;</span>Settled</span>
+        <span class="kairos-state-chip kairos-state-chip--overdue"><span class="kairos-state-chip-glyph" aria-hidden="true">!</span>Overdue</span>
+        <span class="kairos-state-chip kairos-state-chip--awaiting"><span class="kairos-state-chip-glyph" aria-hidden="true">&#8594;</span>Awaiting</span>
+        <span class="kairos-state-chip kairos-state-chip--draft">Draft</span>
+        <span class="kairos-state-chip kairos-state-chip--neutral">Neutral</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Buttons</h2>
+    <div class="kairos-action-row">
+      <button class="kairos-button kairos-page-header-primary" type="button">Primary</button>
+      <button class="kairos-button" type="button">Secondary</button>
+      <button class="kairos-button kairos-button--sm" type="button">Small</button>
+      <button class="kairos-button" type="button" disabled>Disabled</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>Table — 44px rows, sortable headers, status first</h2>
+    <div class="kairos-table-panel">
+      <div class="kairos-table-wrap">
+        <table class="kairos-table">
+          <thead>
+            <tr>
+              <th scope="col" aria-sort="none"><button class="kairos-sort-header" type="button">Status</button></th>
+              <th scope="col"><button class="kairos-sort-header" type="button">Customer</button></th>
+              <th scope="col">Reference</th>
+              <th scope="col" class="kairos-align-right"><button class="kairos-sort-header" type="button">Amount</button></th>
+              <th scope="col">Due</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="kairos-state-chip kairos-state-chip--settled"><span class="kairos-state-chip-glyph" aria-hidden="true">&#10003;</span>Settled</span></td>
+              <td><a class="kairos-record-link" href="#main">Ramdass Hardware</a></td>
+              <td class="kairos-mono">INV-1043</td>
+              <td class="kairos-align-right kairos-figure">TTD&nbsp;8,500.00</td>
+              <td>19 Aug 2026</td>
+            </tr>
+            <tr>
+              <td><span class="kairos-state-chip kairos-state-chip--overdue"><span class="kairos-state-chip-glyph" aria-hidden="true">!</span>Overdue</span></td>
+              <td><a class="kairos-record-link" href="#main">Trini Fresh Produce</a></td>
+              <td class="kairos-mono">INV-1041</td>
+              <td class="kairos-align-right kairos-figure">TTD&nbsp;41,800.00</td>
+              <td>02 Aug 2026</td>
+            </tr>
+            <tr>
+              <td><span class="kairos-state-chip kairos-state-chip--draft">Draft</span></td>
+              <td><a class="kairos-record-link" href="#main">Kaizen Auto Works</a></td>
+              <td class="kairos-mono">INV-1044</td>
+              <td class="kairos-align-right kairos-figure">TTD&nbsp;1,275.50</td>
+              <td>&mdash;</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Banner — merged from Paykit's notice and callout</h2>
+    <div class="stack">
+      <p class="kairos-banner">A plain notice, one per screen.</p>
+      <p class="kairos-banner kairos-banner--danger">The payment could not be sent. Check the account number and try again.</p>
+      <p class="kairos-banner kairos-banner--warning">Two invoices are past due.</p>
+      <p class="kairos-banner kairos-banner--success">Invoice sent to Ramdass Hardware.</p>
+      <p class="kairos-banner kairos-banner--inline">The inline form, for a note beside content.</p>
+      <p class="kairos-banner kairos-banner--inline kairos-banner--danger">Inline, in the overdue state.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Empty state and metrics</h2>
+    <div style="display: grid; gap: 16px; grid-template-columns: 1fr 1fr;">
+      <div class="kairos-empty-state">
+        <p>No invoices yet.</p>
+        <button class="kairos-button kairos-page-header-primary" type="button">New invoice</button>
+      </div>
+      <div class="kairos-panel kairos-pad">
+        <div class="kairos-metric-row">
+          <div class="kairos-metric">
+            <span class="kairos-metric-label">Outstanding</span>
+            <span class="kairos-metric-value kairos-figure">TTD&nbsp;51,575.50</span>
+          </div>
+          <div class="kairos-metric">
+            <span class="kairos-metric-label">Settled this month</span>
+            <span class="kairos-metric-value kairos-figure">TTD&nbsp;8,500.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Fields</h2>
+    <div class="kairos-form-grid">
+      <div class="kairos-field">
+        <label class="kairos-input-label" for="customer">Customer</label>
+        <input class="kairos-input-field" id="customer" type="text" value="Ramdass Hardware">
+        <p class="kairos-field-hint">The business the invoice is addressed to.</p>
+      </div>
+      <div class="kairos-field">
+        <label class="kairos-input-label" for="amount">Amount</label>
+        <input class="kairos-input-field" id="amount" type="text" value="8500.00">
+        <p class="kairos-field-error">Enter an amount greater than zero.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Segmented and skeleton</h2>
+    <div class="stack">
+      <div class="kairos-segmented" role="group">
+        <button class="kairos-segmented-option" type="button" aria-pressed="true">System</button>
+        <button class="kairos-segmented-option" type="button" aria-pressed="false">Light</button>
+        <button class="kairos-segmented-option" type="button" aria-pressed="false">Dark</button>
+      </div>
+      <div class="kairos-skeleton-stack">
+        <div class="kairos-skeleton kairos-skeleton--heading"></div>
+        <div class="kairos-skeleton kairos-skeleton--line"></div>
+        <div class="kairos-skeleton kairos-skeleton--line"></div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div>
+
+<div class="kairos-toast-region" role="status" aria-live="polite">
+  <div class="kairos-toast">Invoice INV-1043 marked settled.</div>
+</div>
+</body>
+</html>

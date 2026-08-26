@@ -1,0 +1,54 @@
+/* ==========================================================================
+   Kairos base layer — optional
+   ==========================================================================
+   Element-level defaults: link colour, table layout, scrollbars, print page
+   setup. A new Kairos app wants these. An existing app adopting the registry
+   piecemeal should take `kairos.css` alone first and add this once it is ready
+   for the registry to restyle bare elements.
+
+   Import order: tokens.css, base.css, kairos.css.
+   ========================================================================== */
+
+a {
+  color: inherit;
+}
+
+/* Long identifiers, emails, and document numbers wrap instead of widening the
+   page on a phone. */
+p,
+li,
+td,
+th,
+dd,
+dt,
+figcaption {
+  overflow-wrap: anywhere;
+}
+
+img,
+svg,
+video,
+canvas,
+table {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+@page {
+  margin: 14mm 12mm;
+}

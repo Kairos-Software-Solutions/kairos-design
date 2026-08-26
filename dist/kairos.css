@@ -1,0 +1,2902 @@
+/* ==========================================================================
+   Kairos component vocabulary
+   ==========================================================================
+   The `kairos-*` class layer, framework-agnostic, consuming `tokens.css` and
+   nothing else. Import `tokens.css` first.
+
+   No raw hex, no shadow offset, and no row height appears below this header.
+   If you need one, it is a token that does not exist yet: add it to
+   `tokens.css` and reference it here.
+
+   Every rule is scoped to a `kairos-` class. Nothing here restyles a bare
+   element in the host app; that is `base.css`, which is optional.
+
+   Provenance: ported from Paykit's component layer, the most complete Kairos
+   implementation, with `kairos-empty-state` and `kairos-banner` from Mailkit
+   and `kairos-toast` from Uptime, which Paykit does not have. Names follow
+   docs/decisions.md. See scripts/extract-from-paykit.mjs for the port.
+   ========================================================================== */
+
+/* --- Form control reset --------------------------------------------------
+   Paykit's component layer runs behind Tailwind's preflight, which sets
+   `appearance: none` on every control before any Kairos rule is read. The
+   registry ships no preflight — an app may install `kairos.css` alone — so the
+   controls neutralise the native widget themselves.
+
+   Without this, Chrome paints its own button and input chrome underneath, and
+   the failure only shows on the dark theme: the native light-grey widget face
+   survives on a cream page and reads as a rendering glitch on an ink one.
+
+   This is a reset, so it sits ahead of the component rules and every one of
+   them overrides it. Putting it last instead costs the primary button its ink
+   label, because `color: inherit` then beats the variant that sets it.
+
+   Scoped to `kairos-` classes, so an app with its own preflight is unaffected
+   and no bare element in the host app is touched. */
+
+.kairos-button,
+.kairos-icon-action,
+.kairos-input-field,
+.kairos-select,
+.kairos-segmented-option,
+.kairos-sort-header,
+.kairos-overflow-trigger,
+.kairos-theme-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: none;
+  font-family: inherit;
+}
+
+/* `appearance: none` takes the native arrow off a select with it, so the caret
+   has to be drawn. It is a rotated border rather than a background image, so
+   it follows `--kairos-text-muted` through both themes instead of baking a
+   colour into a data URI. */
+.kairos-select-wrap {
+  position: relative;
+  display: inline-grid;
+}
+
+.kairos-select-wrap > .kairos-select {
+  padding-right: 32px;
+}
+
+.kairos-select-wrap::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-70%) rotate(45deg);
+  border-right: 2px solid var(--kairos-text-muted);
+  border-bottom: 2px solid var(--kairos-text-muted);
+  pointer-events: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--kairos-display);
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+/* Inside the tool, Bebas is the page title and nothing else. It has no
+   lowercase and tight counters, so it is slow to scan in bulk; a screen of
+   Bebas section headings reads as a poster rather than as a working list. The
+   public document surfaces outside the shell keep the Brand Scale headings. */
+.kairos-app-shell :is(h2, h3, h4, h5, h6) {
+  font-family: var(--kairos-body);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  line-height: 1.3;
+  text-transform: none;
+}
+
+::selection {
+  background: var(--kairos-accent);
+  color: var(--kairos-accent-text);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--kairos-border-subtle);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kairos-text-muted);
+}
+
+/* The focus ring is a two-tone stamp: a 2px ink outline sat 2px off the
+   element, with that 2px gap filled by an amber inner ring. Amber on its own
+   is 1.52:1 on cream and 1.31:1 on the sidebar — a ring a low-vision keyboard
+   user cannot find, worst on the active navigation item, which is amber-filled
+   and the most common place to land. The ink carries the contrast; the amber
+   makes the ring legibly Kairos. On the dark base the two invert. */
+:focus-visible {
+  outline: 2px solid var(--kairos-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px var(--kairos-focus-inner);
+}
+
+/* Elements that already carry a stamped shadow keep it: the inner ring is
+   layered in front rather than replacing it. */
+.kairos-button:focus-visible {
+  box-shadow: 0 0 0 2px var(--kairos-focus-inner), var(--button-shadow, none);
+}
+
+@keyframes kairos-spin {
+  to { transform: rotate(360deg); }
+}
+
+.kairos-spin {
+  animation: kairos-spin 0.8s linear infinite;
+}
+
+.kairos-skip-link {
+  position: fixed;
+  top: 14px;
+  left: 16px;
+  z-index: 100;
+  padding: 10px 14px;
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-accent);
+  box-shadow: var(--kairos-shadow);
+  color: var(--kairos-accent-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+  /* Its own height plus the 14px top offset plus a margin, so the button parks
+     fully off-screen. A percentage alone is measured against the button, not
+     against the distance it has to travel, and left a strip of it showing. */
+  transform: translateY(calc(-100% - 24px));
+  transition: transform 250ms ease-out;
+}
+
+.kairos-skip-link:focus-visible {
+  transform: translateY(0);
+}
+
+/* Brand lockup ------------------------------------------------------------
+   Two files, one shown. Which one is a question about the surface under it,
+   and the surface follows `data-theme` as well as the device — so the choice
+   is made by the same selectors that pick the colour tokens, not by a
+   `<picture media>` that only ever hears the device. */
+
+.kairos-lockup {
+  display: block;
+}
+
+.kairos-lockup--dark {
+  display: none;
+}
+
+/* Theme toggle -----------------------------------------------------------
+   Fixed bottom-right on every screen, because not every screen has a header
+   to put it in. It clears the mobile bottom navigation, which is fixed to the
+   same corner, and sits under the skip link's z-index so a keyboard user's
+   first stop is still the skip link. */
+
+.kairos-theme-toggle {
+  position: fixed;
+  right: 12px;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 68px);
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border: 2px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  box-shadow: none;
+  color: var(--kairos-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+/* The word always ships with the glyph. A lone sun or moon is the most
+   commonly misread control in this class, because it is ambiguous about
+   whether it shows the current theme or the one you would get. */
+.kairos-theme-toggle-text {
+  white-space: nowrap;
+}
+
+.kairos-theme-toggle:hover {
+  background: var(--kairos-elevated);
+  box-shadow: none;
+}
+
+.kairos-theme-toggle:active {
+  transform: none;
+  box-shadow: none;
+}
+
+@media (min-width: 900px) {
+  .kairos-theme-toggle {
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+    }
+}
+
+/* Inside an app shell the real control lives where the pattern puts it: the
+   settings screen for the tenant app, the top bar for the control plane. The
+   floating button is only for the public screens that have neither, so it is
+   hidden wherever a shell is rendering. */
+.kairos-app-shell ~ .kairos-theme-toggle {
+  display: none;
+}
+
+.kairos-theme-toggle--inline {
+  position: static;
+  bottom: auto;
+  right: auto;
+}
+
+/* A labelled settings row: the label on the left, the control on the right. It
+   carries nothing that changes with the control's own value — a row that
+   restated the current choice resized itself every time the choice was made. */
+.kairos-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* The control keeps its shape whatever sits beside it. A segmented control
+   that wrapped mid-row moved its own buttons out from under the thumb that had
+   just tapped one, so it is the label that gives way, never the buttons. */
+.kairos-setting-row > :first-child {
+  min-width: 0;
+}
+
+.kairos-setting-row .kairos-segmented {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Operational app shell — mobile first.
+   Phones get a bottom navigation bar; laptops get the sidebar. The breakpoint
+   is CSS-only so the server and client render the same markup.
+   ========================================================================== */
+
+.kairos-app-shell {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--kairos-bg);
+}
+
+.kairos-shell-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.kairos-sidebar {
+  display: none;
+  z-index: 2;
+  flex-direction: column;
+  width: 244px;
+  min-width: 244px;
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  background: var(--kairos-sidebar);
+  /* Shadow Rank: chrome is the page, not a layer floating above it. The border
+     is what separates the sidebar from the content beside it. */
+  border-right: 1px solid var(--kairos-border);
+}
+
+/* The logo block, capped so it stays a mark rather than a banner. */
+/* The App Shell Contract caps the logo block at 64px. Left to scale on its
+   own the lockup took 119px, which is a fifth of the room the nav has for
+   destinations at a 768px viewport height. */
+.kairos-sidebar-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 20px 10px;
+  background: var(--kairos-text);
+}
+
+.kairos-sidebar-brand img {
+  display: block;
+  width: 100%;
+  max-width: 150px;
+  max-height: 34px;
+  height: auto;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.kairos-sidebar-product {
+  color: var(--kairos-bg);
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.kairos-sidebar-nav {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 6px 10px;
+  overflow-y: auto;
+}
+
+.kairos-sidebar-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.kairos-sidebar-footer {
+  padding: 10px;
+  border-top: 1px solid var(--kairos-border);
+}
+
+/* ==========================================================================
+   Layout and type utilities.
+
+   The layering rule is that a screen file contains no colour, no shadow, and
+   no pixel measurement. These are the spacing, alignment, and type primitives
+   that were being written inline at hundreds of call sites — one `padding`
+   value repeated in fifteen files is fifteen places to change it, and it is
+   how a panel drifts from `20px` to `18px` to `24px` across one app.
+   ========================================================================== */
+
+.kairos-flush {
+  margin: 0;
+}
+
+.kairos-fit {
+  width: fit-content;
+}
+
+.kairos-bold {
+  font-weight: 700;
+}
+
+.kairos-align-right {
+  text-align: right;
+}
+
+/* A link styled as a button already carries the button's own affordances. */
+.kairos-plain-link {
+  text-decoration: none;
+}
+
+.kairos-underline {
+  text-decoration: underline;
+}
+
+/* Type ranks. Data outweighs the labels describing it, and metadata sits
+   below both. These replaced a spread of inline 0.82/0.84/0.85/0.86/0.88rem
+   values that were the same rank written five ways — the drift itself was the
+   defect. */
+.kairos-body {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.kairos-body-muted {
+  margin: 0;
+  color: var(--kairos-text-2);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.kairos-meta {
+  margin: 0;
+  color: var(--kairos-text-muted);
+  font-size: 0.8rem;
+}
+
+.kairos-text-secondary {
+  color: var(--kairos-text-2);
+}
+
+.kairos-text-tertiary {
+  color: var(--kairos-text-muted);
+}
+
+/* Panel sub-heading: below `.kairos-panel-heading`, still Epilogue. */
+.kairos-panel-subheading {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Prose stops at a readable measure rather than running the panel's width. */
+.kairos-measure-sm {
+  max-width: 58ch;
+}
+
+/* An auto-fitting grid of panels or figures. */
+.kairos-grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: 12px;
+}
+
+/* A row where one cell is a bordered card and the other is a list.
+   
+   Grid stretches by default, so the card is dragged to the list's height and
+   the slack lands inside it: on `/expenses/categories` the Add-category card
+   measured 478.4px beside eight categories and 183.1px beside none — the same
+   card, sized by its neighbour, with the heading blown from 16.9px to 115.3px
+   and the input's track from 36px to 85.2px while the input stayed 36px.
+   
+   This is deliberately a modifier and not a change to `.kairos-grid-auto`
+   itself. The tile grid on `/crm` wants stretch — measured 131.5px across three
+   tiles, and 91.2/131.5/91.2 without it, which is a ragged row of bordered
+   panels — and the field rows in the composers are worse off with it too. */
+.kairos-grid-auto--top {
+  align-items: start;
+}
+
+/* Cards that need to read as cards rather than as chips: a heading, a figure,
+   and a line of description do not fit in 200px. */
+.kairos-grid-auto--wide {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: 14px;
+}
+
+.kairos-action-row--end {
+  justify-content: flex-end;
+}
+
+.kairos-split--lg { --split-gap: 18px; }
+
+.kairos-mb-lg {
+  margin-bottom: 24px;
+}
+
+.kairos-mt-md {
+  margin-top: 20px;
+}
+
+.kairos-muted {
+  margin: 0;
+  color: var(--kairos-text-2);
+}
+
+.kairos-muted-sm {
+  margin: 0;
+  color: var(--kairos-text-2);
+  font-size: 0.84rem;
+}
+
+.kairos-error-text {
+  margin: 0;
+  color: var(--kairos-state-overdue);
+  font-size: 0.82rem;
+}
+
+/* Panel heading rank: Epilogue 600. Bebas is the page title and nothing else
+   in a tool, so a panel that reached for the display face would be a second
+   page title. */
+.kairos-panel-heading {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+/* Vertical stacks. The gap is a token choice, so it lives here rather than at
+   the call site. */
+.kairos-stack {
+  display: grid;
+  gap: var(--stack-gap, 12px);
+}
+
+.kairos-stack--xs { --stack-gap: 6px; }
+
+.kairos-stack--sm { --stack-gap: 10px; }
+
+.kairos-stack--md { --stack-gap: 14px; }
+
+.kairos-stack--lg { --stack-gap: 18px; }
+
+.kairos-stack--xl { --stack-gap: 24px; }
+
+.kairos-pad {
+  padding: var(--pad, 20px);
+}
+
+.kairos-pad--xs { --pad: 14px; }
+
+.kairos-pad--sm { --pad: 16px; }
+
+.kairos-pad--lg { --pad: 24px; }
+
+/* A label and its field. */
+.kairos-field {
+  display: grid;
+  gap: 6px;
+}
+
+.kairos-field-hint,
+.kairos-field-error {
+  min-height: 17px;
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.kairos-field-hint {
+  color: var(--kairos-text-muted);
+}
+
+.kairos-field-error {
+  color: var(--kairos-state-overdue);
+}
+
+/* A row of actions. Never more than three bordered buttons in one group. */
+.kairos-action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.kairos-action-row--top {
+  align-items: flex-start;
+}
+
+/* Two things at opposite ends of a row, wrapping rather than overflowing. */
+.kairos-split {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--split-gap, 12px);
+}
+
+.kairos-split--sm { --split-gap: 10px; align-items: center; }
+
+.kairos-split--baseline { align-items: baseline; }
+
+.kairos-split--md { --split-gap: 14px; }
+
+.kairos-split--end { align-items: flex-end; }
+
+.kairos-plain-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A row separated from the next by a rule, not by its own border. */
+.kairos-ruled-row {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--kairos-border);
+}
+
+.kairos-label-caps {
+  color: var(--kairos-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kairos-section {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.kairos-section-lede {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.kairos-section-glyph {
+  color: var(--kairos-accent-on-light);
+  flex: 0 0 auto;
+}
+
+/* Panel heading rank: Epilogue 600, not Bebas. Bebas is the page title and
+   nothing else in a tool. */
+.kairos-section-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.kairos-section-body {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--kairos-text-2);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+
+.kairos-section-meta {
+  margin: 4px 0 0;
+  color: var(--kairos-text-muted);
+  font-size: 0.82rem;
+}
+
+.kairos-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 14px;
+  align-items: end;
+}
+
+.kairos-form-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.kairos-fit {
+  width: fit-content;
+}
+
+/* Rows inside a panel, separated by rules. One border level: below 430px a
+   nested card per record costs about a quarter of the screen width. */
+.kairos-record-rows {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kairos-record-row {
+  display: grid;
+  gap: 8px;
+  min-height: var(--kairos-row-h);
+  padding: 8px 0;
+  border-top: 1px solid var(--kairos-border-subtle);
+}
+
+.kairos-record-rows > .kairos-record-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.kairos-record-row-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.kairos-record-row-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Where the list of rows is itself the panel, the panel's border is the frame
+   the rows sit in, and a row with no horizontal padding puts its text 1px from
+   that border. The nine screens that use `.kairos-record-rows` on its own have
+   no border and are correctly flush, so this is scoped to the paired case. */
+.kairos-panel.kairos-record-rows > .kairos-record-row {
+  padding: 8px 16px;
+}
+
+.kairos-panel.kairos-record-rows > .kairos-record-row:first-child {
+  padding-top: 8px;
+}
+
+/* A row that carries its own padding, for lists rendered straight into a
+   panel with no inner container. */
+.kairos-record-row--padded {
+  padding: 8px 16px;
+}
+
+.kairos-record-rows > .kairos-record-row--padded:first-child {
+  padding-top: 8px;
+}
+
+.kairos-section--alert {
+  border-left: 4px solid var(--kairos-state-overdue);
+}
+
+.kairos-row-error {
+  margin: 0;
+  color: var(--kairos-state-overdue);
+  font-size: 0.82rem;
+}
+
+/* Opaque provider ids and job types break anywhere rather than widening the
+   panel past the viewport. */
+.kairos-break {
+  overflow-wrap: anywhere;
+}
+
+.kairos-bullets {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 4px;
+  font-size: 0.88rem;
+}
+
+/* A row of figures. Not cards: five bordered boxes for five numbers is four
+   borders more than the numbers need. */
+.kairos-metric-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr));
+  gap: 14px;
+}
+
+.kairos-metric-row > div {
+  display: grid;
+  gap: 2px;
+}
+
+.kairos-metric-label {
+  color: var(--kairos-text-2);
+  font-size: 0.78rem;
+}
+
+/* A bordered block inside a panel: a connection, a grant. One level only —
+   rows separated by rules is the default, and this is for the cases that
+   genuinely group several fields plus their own form. */
+.kairos-subpanel {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+}
+
+.kairos-definition-grid {
+  margin: 0;
+}
+
+.kairos-definition-grid dt {
+  color: var(--kairos-text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.kairos-definition-grid dd {
+  margin: 4px 0 0;
+  font-size: 1.05rem;
+}
+
+.kairos-breadcrumb {
+  display: flex;
+}
+
+/* An anchored section: the step links jump here, so the heading must not land
+   under the sticky top bar. */
+.kairos-section--anchored {
+  scroll-margin-top: 20px;
+}
+
+/* The onboarding step rail. */
+.kairos-wizard-steps {
+  max-width: 100%;
+  padding: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kairos-wizard-steps-list {
+  display: flex;
+  gap: 8px;
+  min-width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kairos-wizard-step {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  color: var(--kairos-text);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.kairos-wizard-step-marker {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--kairos-border);
+  background: var(--kairos-surface);
+}
+
+/* Done is carried by the tick as well as the fill, so it survives greyscale. */
+.kairos-wizard-step[data-done='true'] .kairos-wizard-step-marker {
+  background: var(--kairos-state-settled-tint);
+}
+
+.kairos-wizard-step[data-done='true'] {
+  border-width: 2px;
+  border-color: var(--kairos-border);
+}
+
+/* The sign-in column: one card, centred, capped so the fields stay a
+   comfortable width on a laptop. */
+.kairos-sign-in {
+  width: min(25rem, calc(100vw - 32px));
+}
+
+.kairos-sign-in-brand {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.kairos-block {
+  width: 100%;
+}
+
+/* Prose and single-column forms stop at a readable measure. */
+.kairos-measure {
+  max-width: 34rem;
+}
+
+.kairos-mono {
+  font-family: var(--kairos-mono, monospace);
+}
+
+/* A native disclosure, restyled to the Kairos border language. The panel
+   animates open with the same 200ms ease-out as every other disclosure, and
+   the global reduced-motion rule collapses that to nothing. */
+.kairos-collapsible-card {
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-elevated);
+  padding: 12px 14px;
+}
+
+.kairos-collapsible-card-summary {
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.kairos-collapsible-card-summary:focus-visible {
+  outline: 2px solid var(--kairos-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--kairos-focus-inner);
+}
+
+.kairos-collapsible-card-body {
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: 8px;
+  margin-top: 10px;
+  color: var(--kairos-text-2);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  animation: disclose 200ms ease-out;
+}
+
+@keyframes disclose {
+  from { grid-template-rows: 0fr; opacity: 0; }
+  to { grid-template-rows: 1fr; opacity: 1; }
+}
+
+/* A single-column screen: a boundary message, a sign-in card. */
+.kairos-narrow {
+  max-width: 42rem;
+  margin: 0 auto;
+}
+
+.kairos-main {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 100%;
+  padding: 20px 16px calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+.kairos-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-top, 0px));
+  background: var(--kairos-surface);
+  border-bottom: 1px solid var(--kairos-border);
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.kairos-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-family: var(--kairos-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* Bottom navigation ------------------------------------------------------ */
+
+.kairos-bottom-nav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  background: var(--kairos-surface);
+  border-top: 2px solid var(--kairos-border);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.kairos-bottom-nav-link {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  /* One-handed phone use: comfortably above the 44px minimum. */
+  min-height: 58px;
+  padding: 8px 4px;
+  border: 0;
+  border-right: 1px solid var(--kairos-border-subtle);
+  background: transparent;
+  color: var(--kairos-text-2);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  touch-action: manipulation;
+  transition: background-color 200ms ease-out, color 200ms ease-out;
+}
+
+.kairos-bottom-nav-link:last-child {
+  border-right: 0;
+}
+
+.kairos-bottom-nav-link[aria-current='page'] {
+  background: var(--kairos-accent);
+  color: var(--kairos-accent-text);
+}
+
+.kairos-bottom-nav-link[aria-current='page'] .kairos-bottom-nav-label {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kairos-skeleton {
+  background: var(--kairos-skeleton-bg);
+  border: 1px solid var(--kairos-skeleton-fg);
+  border-radius: var(--kairos-radius-input);
+  animation: kairosPulse 1.4s ease-out infinite;
+}
+
+@keyframes kairosPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.kairos-progress-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+}
+
+/* Horizontal-scroll escape hatch. Wide data tables scroll inside this box so
+   the page itself never does. */
+.kairos-table-wrap {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kairos-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.kairos-kicker {
+  display: inline-block;
+  margin: 0 0 10px;
+  color: var(--kairos-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* A kicker that is also the way back to the screen above it. It keeps the
+   eyebrow's rank — this is a breadcrumb, not an action — and gains the
+   underline and the touch height a link needs. It replaces the `BACK TO …`
+   bordered buttons that were spending a secondary action slot on navigation. */
+.kairos-kicker-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--kairos-text-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.kairos-kicker-link::before {
+  content: '\2190';
+  margin-right: 5px;
+}
+
+.kairos-page-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 2.8rem);
+}
+
+.kairos-app-shell .kairos-page-title {
+  font-size: 24px;
+}
+
+.kairos-tool-surface .kairos-page-title {
+  font-size: 24px;
+}
+
+/* A tool screen that renders outside the app shell — control-plane sign-in.
+   It still sizes at Product Scale: a website hero heading on an operations
+   sign-in reads as marketing, and this screen is not selling anything. */
+.kairos-tool-surface {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 32px 16px;
+}
+
+.kairos-auth {
+  width: min(24rem, calc(100vw - 32px));
+}
+
+.kairos-auth-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.kairos-auth-header .kairos-page-title,
+.kairos-auth-header .kairos-body-muted {
+  margin: 0;
+}
+
+.kairos-auth-header .kairos-body-muted {
+  margin-top: 6px;
+}
+
+.kairos-auth-form {
+  width: 100%;
+}
+
+.kairos-auth-error {
+  min-height: 20px;
+}
+
+.kairos-auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  color: var(--kairos-text);
+  font-size: 0.82rem;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Rank 2: outline, 2px ink border, no stamp in any state. */
+.kairos-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.kairos-page-header-body {
+  min-width: 0;
+}
+
+.kairos-page-header-description {
+  max-width: 68ch;
+  margin: 8px 0 0;
+  color: var(--kairos-text-2);
+  font-size: 0.88rem;
+}
+
+.kairos-page-header-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* The one amber action on a screen. The treatment lives here rather than as
+   inline custom properties on `PageHeader`'s link, so a primary that is a
+   button — one that opens a dialog instead of navigating — is the same rank as
+   one that is a link, with nothing to keep in step by hand. */
+.kairos-page-header-primary {
+  --button-bg: var(--kairos-accent);
+  --button-hover-bg: var(--kairos-accent-hover);
+  --button-color: var(--kairos-accent-text);
+  --button-border: var(--kairos-border);
+  --button-border-width: 2px;
+  --button-shadow: var(--kairos-shadow);
+  --button-shadow-hover: var(--kairos-shadow-card);
+  --button-shadow-active: 2px 2px 0 var(--kairos-shadow-color);
+  text-decoration: none;
+}
+
+/* Descendant, not child: a secondary action wrapped in anything — a span, a
+   form — is still in the header's action group and still rank 2. */
+.kairos-page-header-actions .kairos-button:not(.kairos-page-header-primary) {
+  --button-border-width: 2px;
+  --button-shadow: none;
+  --button-shadow-hover: none;
+}
+
+/* The page header is one 56px row: title left, action group right. */
+.kairos-app-shell .kairos-page-header {
+  min-height: 56px;
+}
+
+/* Bebas Neue ships one weight. Asking for 900 makes the browser synthesise a
+   bold by smearing the outline, which thickens the stems unevenly and closes
+   the already-tight counters. The face is only ever `400`. */
+.kairos-wordmark {
+  font-family: var(--kairos-display);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  letter-spacing: 0.04em;
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+/* Shadow Rank: an offset shadow means "this floats above the page". It is a
+   rank, not a texture, and it belongs to raised interactive layers only —
+   buttons, menus, and modals. A panel is the page; giving every panel a stamp
+   spends the only elevation signal the brand has on the thing that needs it
+   least, and leaves a real popover with nothing left to say. */
+.kairos-panel {
+  background: var(--kairos-surface);
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-panel);
+}
+
+.kairos-card {
+  background: var(--kairos-elevated);
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+}
+
+.kairos-button {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+  height: var(--button-height);
+  min-height: var(--button-height);
+  padding: 0 14px;
+  border: var(--button-border-width, 2px) solid var(--button-border, var(--kairos-border));
+  border-radius: 0;
+  background: var(--button-bg, var(--kairos-surface));
+  box-shadow: var(--button-shadow, none);
+  color: var(--button-color, var(--kairos-text));
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    transform 250ms ease-out,
+    box-shadow 250ms ease-out,
+    background-color 250ms ease-out,
+    color 250ms ease-out,
+    opacity 250ms ease-out;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+/* Utility specificity must beat the button's intrinsic content width. */
+.kairos-button.kairos-block {
+  width: 100%;
+}
+
+.kairos-button:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--button-shadow-hover, var(--button-shadow, none));
+  background: var(--button-hover-bg, var(--button-bg, var(--kairos-surface)));
+}
+
+/* A button that names its own fill is ranked, and its variant supplies the
+   border weight and stamp. This rule used to promote every one of them to a
+   3px border and a 6px stamp, which made a secondary look exactly like the
+   primary and left the screen with two rank-1 actions. */
+.kairos-button[style*='--button-bg'] {
+  --button-border-width: 2px;
+}
+
+.kairos-button:active:not(:disabled) {
+  transform: translate(1px, 1px);
+  box-shadow: var(--button-shadow-active, none);
+}
+
+.kairos-button--sm {
+  height: var(--button-height-sm);
+  min-height: var(--button-height-sm);
+  padding: 0 10px;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
+
+.kairos-submit-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kairos-action-status {
+  margin: 0;
+  color: var(--kairos-text-2);
+  font-size: 0.72rem;
+  line-height: 1.2;
+}
+
+.kairos-submit-error {
+  border-left: 4px solid var(--kairos-state-overdue);
+  padding-left: 10px;
+  color: var(--kairos-state-overdue);
+}
+
+/* A disabled primary keeps its amber and is dimmed instead. Repainting it
+   cream made it identical to an enabled rank 2, so at the exact moment
+   somebody is looking for the way forward the screen showed two outlined
+   buttons and no primary.
+
+   Opacity dims a label against its own fill as much as it dims the fill
+   against the page, so at 0.45 the amber primary lost its label while the
+   outlined secondary beside it kept its ink border — the ranks inverted, both
+   disabled. At 0.7 the fill still says which one is the primary and its label
+   still reads. Dropping the stamp is what says "not pressable": Shadow Rank
+   already means "raised interactive layer", so removing it is a rank signal
+   rather than another colour one, and it costs no contrast. */
+.kairos-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Checkboxes and radios were shipping the browser default, which paints them
+   in the operating system accent — blue on most machines, and the one colour
+   the brand never uses. `accent-color` restyles the native control without
+   replacing it, so it keeps its keyboard behaviour and its platform hit area.
+   Ink rather than amber: a ticked box is a state, and amber is the action
+   colour. */
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--kairos-text);
+  cursor: pointer;
+}
+
+/* A native checkbox keeps browser accessibility while the copy stays aligned
+   and readable at phone width. It is a form choice, not another card. */
+/* A checkbox and one line of label, for a choice that needs no explanation.
+   Where the choice does need a sentence under it, that is `.kairos-choice-row`.
+   The label is the tap target, so it carries the height rather than the box. */
+.kairos-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  color: var(--kairos-text);
+  cursor: pointer;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.kairos-checkbox-row input {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+.kairos-choice-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.kairos-choice-row input {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  flex: 0 0 auto;
+}
+
+.kairos-choice-row span {
+  display: grid;
+  gap: 2px;
+}
+
+.kairos-choice-row span span {
+  color: var(--kairos-text-2);
+  font-size: 0.8rem;
+}
+
+.kairos-input-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--kairos-text-2);
+}
+
+.kairos-input-field,
+.kairos-select {
+  width: 100%;
+  height: var(--kairos-control-h);
+  min-height: var(--kairos-control-h);
+  padding: 0 10px;
+  font-size: 16px;
+  line-height: 1.2;
+  border: 2px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  color: var(--kairos-text);
+  transition:
+    box-shadow 250ms ease-out,
+    border-color 250ms ease-out,
+    background-color 250ms ease-out;
+}
+
+textarea.kairos-input-field {
+  height: auto;
+  min-height: 80px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.kairos-input-field:hover,
+.kairos-select:hover {
+  background: var(--kairos-elevated);
+}
+
+/* A focused field used to set `outline: none` and turn its border amber, which
+   took the field's own boundary from 18.76:1 down to 1.61:1 at the moment it
+   became the thing the person was working in. It now takes the same two-tone
+   ring as every other control — a ring appearing is a shape change, so the
+   signal does not depend on seeing colour, which is what the old lift-and-stamp
+   was there to provide. Inputs carry no stamp: one that does reads as a button,
+   and "typeable" and "clickable" have to stay distinguishable. */
+.kairos-input-field:focus-visible,
+.kairos-select:focus-visible {
+  border-color: var(--kairos-border);
+}
+
+/* State chips. Every state carries a border style and a glyph as well as a
+   tint, so status never depends on colour alone (WCAG 1.4.1). Full-saturation
+   amber is deliberately absent: it belongs to actions and active navigation,
+   and a screen where a chip and the primary button are both amber has no
+   primary. */
+/* A chip broken over three lines stops reading as a chip and pushes the row
+   past its 44px. It holds one line and the column widens to fit. */
+.kairos-state-chip {
+  white-space: nowrap;
+  overflow-wrap: normal;
+  display: inline-flex;
+  /* An inline-flex chip shrink-wraps everywhere except inside a grid, where a
+     grid item takes `justify-self: stretch` by default. `.kairos-record-row`
+     is a grid, so every chip in one ran the full width of the row and four
+     stacked "ACTIVE" bars read as fills rather than as status. The chip is one
+     word wide wherever it sits. */
+  justify-self: start;
+  align-items: center;
+  gap: 5px;
+  border: 1px var(--chip-border-style, solid) var(--chip-color, var(--kairos-border));
+  border-radius: 2px;
+  background: var(--chip-tint, var(--kairos-elevated));
+  color: var(--chip-color, var(--kairos-text));
+  font-family: var(--kairos-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 5px 8px;
+  text-transform: uppercase;
+}
+
+.kairos-state-chip--settled {
+  --chip-color: var(--kairos-state-settled);
+  --chip-tint: var(--kairos-state-settled-tint);
+}
+
+.kairos-state-chip--overdue {
+  --chip-color: var(--kairos-state-overdue);
+  --chip-tint: var(--kairos-state-overdue-tint);
+}
+
+.kairos-state-chip--awaiting {
+  --chip-color: var(--kairos-state-awaiting);
+  --chip-tint: var(--kairos-state-awaiting-tint);
+}
+
+/* Draft is the one dashed chip: the record is not yet real. */
+.kairos-state-chip--draft {
+  --chip-color: var(--kairos-state-draft);
+  --chip-tint: var(--kairos-state-draft-tint);
+  --chip-border-style: dashed;
+}
+
+.kairos-state-chip--neutral {
+  --chip-color: var(--kairos-text-2);
+  --chip-tint: var(--kairos-elevated);
+}
+
+/* The glyph is the non-colour half of the signal. It is decorative only where
+   the chip's own text already names the state. */
+.kairos-state-chip-glyph {
+  flex: 0 0 auto;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.kairos-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--kairos-overlay);
+  z-index: 50;
+}
+
+.kairos-dialog-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--kairos-surface);
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-panel);
+  box-shadow: var(--kairos-shadow-lg);
+  padding: 24px;
+  z-index: 51;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.kairos-dialog-title {
+  margin: 0;
+  font-family: var(--kairos-body);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  text-transform: none;
+}
+
+/* Icon-only actions need a 36px minimum hit area. The glyph inside stays
+   small; the target around it is what has to be reachable. */
+/* The dialog's action row. The committing button carries a 4px stamp, so the
+   12px gap is the Shadow Rank clearance (offset + 8px) that keeps the stamp
+   off its neighbour. Below 420px the two stack reversed, which puts the
+   destructive confirm at the top and leaves Cancel in the thumb zone — a
+   mis-tap at the bottom of a phone should land on the reversible option. */
+.kairos-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 420px) {
+  .kairos-dialog-actions {
+      flex-direction: column-reverse;
+      align-items: stretch;
+    }
+  
+  .kairos-dialog-actions > .kairos-button {
+      width: 100%;
+    }
+}
+
+.kairos-icon-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid transparent;
+  border-radius: var(--kairos-radius-input);
+  background: transparent;
+  color: var(--kairos-text-muted);
+  cursor: pointer;
+  transition:
+    transform 250ms ease-out,
+    border-color 250ms ease-out,
+    background-color 250ms ease-out,
+    color 250ms ease-out;
+}
+
+.kairos-icon-action:hover {
+  transform: translate(-1px, -1px);
+  border-color: var(--kairos-border);
+  background: var(--kairos-elevated);
+  color: var(--kairos-text);
+}
+
+.kairos-icon-action--danger:hover {
+  color: var(--kairos-state-overdue);
+}
+
+.kairos-icon-action--accent:hover {
+  color: var(--kairos-accent-text);
+  background: var(--kairos-accent);
+}
+
+.kairos-login-grid {
+  display: grid;
+  place-items: center;
+}
+
+.kairos-nav-group {
+  display: block;
+  padding: 10px 10px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--kairos-text-muted);
+  text-transform: uppercase;
+}
+
+.kairos-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: var(--kairos-nav-row-h);
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--kairos-text-2);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+  transition:
+    background-color 250ms ease-out,
+    color 250ms ease-out,
+    border-color 250ms ease-out;
+}
+
+.kairos-nav-link:hover {
+  background: var(--kairos-elevated);
+  border-color: var(--kairos-border);
+  color: var(--kairos-text);
+}
+
+.kairos-nav-link.active {
+  background: var(--kairos-accent);
+  border-color: var(--kairos-border);
+  color: var(--kairos-accent-text);
+  font-weight: 700;
+}
+
+/* Tabs (Radix) — used in the company settings form */
+.kairos-tabs-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  border-bottom: 1px solid var(--kairos-border);
+  padding-bottom: 10px;
+}
+
+.kairos-tab {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid var(--kairos-border);
+  background: var(--kairos-surface);
+  color: var(--kairos-text-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 200ms ease-out;
+}
+
+.kairos-tab:hover {
+  background: var(--kairos-elevated);
+}
+
+/* The selected tab is underlined as well as filled, the same way the bottom
+   navigation marks the current screen. Amber on white is 1.61:1, so a fill on
+   its own is a selection some people cannot see; the underline is ink on amber
+   at 11.67:1 and says the same thing without asking anyone to compare colours. */
+.kairos-tab[data-state="active"] {
+  background: var(--kairos-accent);
+  color: var(--kairos-accent-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Overflow menu -----------------------------------------------------------
+   Rank 5. One per row, at the end of the row, holding everything that is not
+   the record's own linked identifier. The trigger carries a subtle border at
+   rest: an action that only appears on hover does not exist on a phone. The
+   menu itself is a raised layer, so it is one of the few things that earns a
+   stamped shadow. */
+
+.kairos-overflow {
+  position: relative;
+  display: inline-flex;
+}
+
+.kairos-overflow-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  padding: 0;
+  border: 1px solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  color: var(--kairos-text-2);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 200ms ease-out, border-color 200ms ease-out, color 200ms ease-out;
+}
+
+.kairos-overflow-trigger:hover,
+.kairos-overflow-trigger[aria-expanded='true'] {
+  border-color: var(--kairos-border);
+  background: var(--kairos-elevated);
+  color: var(--kairos-text);
+}
+
+.kairos-overflow-trigger--header {
+  border-width: 2px;
+  border-color: var(--kairos-border);
+  border-radius: 0;
+}
+
+.kairos-overflow-menu {
+  /* Rendered through a body-level portal by OverflowMenu. A fixed layer is
+     intentional: table panels use overflow-x:auto and must never clip or
+     scroll just because a row menu is open. */
+  position: fixed;
+  z-index: 1000;
+  display: flex;
+  min-width: 190px;
+  max-width: min(260px, calc(100vw - 16px));
+  max-height: calc(100vh - 16px);
+  flex-direction: column;
+  overflow-y: auto;
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  box-shadow: var(--kairos-shadow);
+  padding: 4px;
+}
+
+.kairos-overflow-item {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--kairos-text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: background-color 150ms ease-out;
+}
+
+.kairos-overflow-item:hover {
+  background: var(--kairos-row-hover);
+}
+
+/* A destructive action is separated from the routine ones by a rule and a gap
+   so it is never the thing under a finger heading somewhere else. */
+.kairos-overflow-item--divided {
+  margin-top: 4px;
+  border-top: 1px solid var(--kairos-border-subtle);
+  padding-top: 10px;
+}
+
+.kairos-overflow-item--destructive {
+  color: var(--kairos-state-overdue);
+  font-weight: 600;
+}
+
+.kairos-overflow-item--destructive:hover {
+  background: var(--kairos-state-overdue-tint);
+}
+
+/* Data table */
+.kairos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+/* Header row `32px`, data rows `44px`. The header sits on the elevated surface
+   with a 2px ink rule so a scrolled table still shows where the data starts. */
+.kairos-table th {
+  height: 32px;
+  text-align: left;
+  padding: 0 12px;
+  /* Headers are short labels, and the global `overflow-wrap: anywhere` that
+     stops a long reference overflowing a cell will happily break one of them
+     mid-word into "AMOUN / T". Labels never wrap; the data below them still
+     can. */
+  white-space: nowrap;
+  overflow-wrap: normal;
+  background: var(--kairos-elevated);
+  font-family: var(--kairos-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--kairos-text-muted);
+  border-bottom: 2px solid var(--kairos-border);
+}
+
+.kairos-table td {
+  height: var(--kairos-row-h);
+  padding: 6px 12px;
+  border-bottom: 1px solid var(--kairos-border-subtle);
+  color: var(--kairos-text);
+}
+
+.kairos-sort-header {
+  appearance: none;
+  width: 100%;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-align: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+/* The caret is an affordance, not a decoration. An unsorted column shows
+   nothing at rest and a muted caret on hover or focus, so the header row does
+   not become a row of arrows. The caret is ink, never amber — amber is the
+   screen's one action. The glyph is reserved at all times so hovering a header
+   does not shift the label. */
+.kairos-sort-header::after {
+  content: '↕';
+  margin-left: 6px;
+  color: var(--kairos-text-muted);
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+.kairos-sort-header:hover::after,
+.kairos-sort-header:focus-visible::after { opacity: 0.6; }
+
+th[aria-sort='ascending'] .kairos-sort-header::after {
+  content: '↑';
+  color: var(--kairos-text);
+  opacity: 1;
+}
+
+th[aria-sort='descending'] .kairos-sort-header::after {
+  content: '↓';
+  color: var(--kairos-text);
+  opacity: 1;
+}
+
+/* Rank 4: the record's own identifier as the row's action. Bold is what marks
+   it against the normal-weight data around it, so the action is visible at
+   rest rather than on hover. This was an inline font-weight repeated at each
+   call site; it is a primitive, so it lives here. */
+.kairos-record-link {
+  font-weight: 700;
+}
+
+/* A money or count cell. Right aligned so the digits line up down the column,
+   and weighted because the figure is the data the row exists for. This was an
+   inline textAlign plus fontWeight repeated at every call site; it is a
+   primitive, so it lives here. */
+.kairos-table td.kairos-figure,
+.kairos-table th.kairos-figure,
+.kairos-table th[data-align='right'],
+.kairos-table td[data-align='right'] {
+  text-align: right;
+}
+
+.kairos-table td.kairos-figure {
+  font-weight: 700;
+}
+
+/* Text primitives. These were inline textTransform and whiteSpace repeated at
+   call sites; a screen file should not be writing type or layout values. */
+/* A second line under a cell's identifier: an archived marker, a truncated
+   description. Metadata rank, so it never outweighs the data above it. */
+.kairos-cell-note {
+  display: block;
+  margin-top: 3px;
+  color: var(--kairos-text-muted);
+  font-size: 0.75rem;
+}
+
+.kairos-cell-secondary {
+  color: var(--kairos-text-2);
+}
+
+.kairos-capitalize {
+  text-transform: capitalize;
+}
+
+.kairos-nowrap {
+  white-space: nowrap;
+}
+
+/* A figure split across two lines is not a figure. Money and counts hold one
+   line and widen their column instead. */
+.kairos-table td.tabular,
+.kairos-table th.tabular {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
+
+/* Row hover and selection have their own tokens. `--kairos-elevated` already
+   means panel header and Draft chip; reusing it here would give one value
+   three jobs and leave a hovered draft row indistinguishable from its chip. */
+/* The fill is row tracking and applies to every row. The pointer cursor is a
+   promise that the row opens something, so it is scoped to rows the row-link
+   enhancer has actually wired up. A pointer on an inert row costs the user a
+   click to learn the row does nothing. */
+.kairos-table tbody tr:hover td {
+  background: var(--kairos-row-hover);
+}
+
+.kairos-table tr.row-link,
+.kairos-table tr[data-row-link='true'] {
+  cursor: pointer;
+}
+
+.kairos-table tbody tr[aria-selected='true'] td,
+.kairos-table tbody tr.is-selected td {
+  background: var(--kairos-row-selected);
+}
+
+/* One card list for every screen that renders a table as cards below 768px.
+   This was six near-identical class blocks, one per list screen, which is why
+   the same defect — a card holding every field, plus an Open button — had to be
+   fixed in six places. `RecordCard` is the only component that writes them. */
+.kairos-desktop-table {
+  display: block;
+}
+
+/* The panel a table sits in: no padding of its own, and it scrolls sideways
+   rather than letting the table push the page past 320px. Composed with
+   `.kairos-desktop-table` on any list that becomes cards below 768px. */
+.kairos-table-panel {
+  max-width: 100%;
+  padding: 0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.kairos-record-list {
+  display: none;
+}
+
+/* Skeleton shapes. A skeleton is a promise about what is arriving, so a form
+   loads as fields and a record screen loads as a summary above its lines. */
+.kairos-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.kairos-skeleton-field {
+  display: grid;
+  gap: 6px;
+}
+
+.kairos-skeleton--heading {
+  height: 14px;
+  width: 38%;
+}
+
+.kairos-skeleton--label {
+  height: 10px;
+  width: 26%;
+}
+
+.kairos-skeleton--control {
+  height: var(--kairos-control-h);
+  width: 100%;
+}
+
+.kairos-skeleton--summary {
+  height: 72px;
+  width: 100%;
+}
+
+.kairos-skeleton--line {
+  height: 16px;
+  width: 100%;
+}
+
+.kairos-skeleton--row {
+  height: 40px;
+  width: 100%;
+}
+
+/* A link that acts on the record beside it: underlined, its own width, and a
+   real touch target. Four of these reading "Open" on one screen is what the
+   accessible name is for — the visible word stays short and the record's name
+   travels in `.kairos-visually-hidden` text, so each link names its own
+   destination without four rows of repeated copy. */
+.kairos-inline-action {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 24px;
+  font-size: 0.85rem;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The mobile half of column sorting. It appears exactly where the header row
+   disappears, so a screen never offers both the sortable headers and the
+   select that stands in for them. */
+.kairos-record-list-sort {
+  display: none;
+}
+
+/* The card is an anchor, so it carries the link affordances a panel does not:
+   its own text colour, no underline, and a hover that tracks the row. It holds
+   no buttons — the whole card is the target, which is what makes it forgiving
+   under a thumb. */
+.kairos-record-card {
+  display: grid;
+  gap: 8px;
+  /* Condensed on purpose: this lands the card at roughly 88px so three or four
+     records fit above the fold at 390x844. Scanning is what the list is for;
+     reading is what the detail screen is for. */
+  padding: 14px 16px;
+  border: 1px solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  color: var(--kairos-text);
+  text-decoration: none;
+  touch-action: manipulation;
+  transition: background-color 150ms ease-out;
+}
+
+/* The segmented control. One control, shared borders, one active segment —
+   deliberately not shaped like the page header's buttons, because a filter is
+   not an action. The active segment uses the amber active-navigation
+   treatment, and never the primary's 2px border plus stamp. */
+.kairos-segmented {
+  display: inline-flex;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  overflow: hidden;
+  background: var(--kairos-surface);
+}
+
+.kairos-segmented-option {
+  appearance: none;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-left: 1px solid var(--kairos-border-subtle);
+  background: transparent;
+  color: var(--kairos-text-2);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.kairos-segmented-option:first-child {
+  border-left: 0;
+}
+
+.kairos-segmented-option[aria-pressed='true'] {
+  background: var(--kairos-accent);
+  color: var(--kairos-accent-text);
+  font-weight: 800;
+}
+
+.kairos-segmented-option:focus-visible {
+  outline: 2px solid var(--kairos-focus);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px var(--kairos-focus-inner);
+}
+
+/* The same control as links. A filter that lives in the URL belongs to a server
+   component, which cannot hold the button state `Segmented` needs — so this is
+   the segmented control's own language with anchors in it, and not a second
+   chip style. The active link takes the same active-nav treatment; it never
+   takes the primary's 2px border and stamp.
+
+   The rail scrolls sideways; the page must not. */
+.kairos-segmented--links {
+  display: flex;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.kairos-segmented--links::-webkit-scrollbar {
+  display: none;
+}
+
+.kairos-segmented-link {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  /* 44px here rather than in the coarse-pointer block: this rail only exists
+     below the sidebar breakpoint, which is where a thumb is using it. */
+  min-height: 44px;
+  padding: 0 14px;
+  border-left: 1px solid var(--kairos-border-subtle);
+  background: transparent;
+  color: var(--kairos-text-2);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.kairos-segmented-link:first-child {
+  border-left: 0;
+}
+
+.kairos-segmented-link[aria-current='page'] {
+  background: var(--kairos-accent);
+  color: var(--kairos-accent-text);
+  font-weight: 800;
+}
+
+.kairos-segmented-link:focus-visible {
+  outline: 2px solid var(--kairos-focus);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 2px var(--kairos-focus-inner);
+}
+
+.kairos-segmented-link-count {
+  font-weight: 800;
+  opacity: 0.7;
+}
+
+/* A navigation tile: a destination, its count, and one line saying what is
+   behind it. `/crm` is a grid of these. It is a link, so it carries the link
+   affordances a panel does not. */
+.kairos-tile {
+  display: grid;
+  gap: 8px;
+  padding: 20px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.kairos-tile-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-weight: 700;
+}
+
+.kairos-tile-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.kairos-tile-count {
+  font-size: 1.25rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The filter row above a list: a search field that takes the space, and the
+   selects and buttons that do not. */
+.kairos-filter-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  /* Fields line up on their controls, not on their outer boxes. A date field
+     carries a line restating its value, so aligning the bottoms put a select's
+     box level with that hint instead of level with the other inputs. */
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+/* The submit button has no label of its own, so it needs the label row's
+   height to sit level with the controls beside it. That offset used to be an
+   `aria-hidden` span reading "Report", which did the job on a desktop grid and
+   left a stray tracked-caps label floating on a phone, where the row stacks and
+   there is nothing left to align to. Spacing is spacing; it lives here. */
+.kairos-filter-bar-action {
+  margin-top: calc(0.76rem * 1.4 + 6px);
+  --button-shadow: none;
+  --button-shadow-hover: none;
+}
+
+@media (max-width: 767px) {
+  .kairos-filter-bar-action {
+      margin-top: 0;
+      width: 100%;
+    }
+}
+
+.kairos-filter-bar-search {
+  display: grid;
+  grid-column: span 2;
+  gap: 6px;
+}
+
+@media (max-width: 520px) {
+  .kairos-filter-bar-search {
+      grid-column: auto;
+    }
+}
+
+/* A compact data value with its overflow menu, used on record headers. */
+.kairos-inline-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+/* The list/board toggle. The chosen view takes the inverted treatment, never
+   amber: amber is the screen's one primary action, and choosing a view is not
+   an action. */
+.kairos-view-toggle .kairos-button[aria-current='page'] {
+  --button-bg: var(--kairos-invert-bg);
+  --button-color: var(--kairos-invert-fg);
+}
+
+/* A card with no detail screen to open. It keeps the card's shape so the list
+   stays a list, and drops the link affordances so it promises nothing. */
+.kairos-record-card--inert {
+  cursor: default;
+}
+
+.kairos-record-card--inert:hover {
+  background: var(--kairos-surface);
+}
+
+/* A row identifier whose destination is a dialog rather than a screen.
+   It is a button, because it opens nothing a URL could name and nothing a
+   middle-click could open in a tab — but it is still the row's identifier, so
+   it carries the identifier's own weight and none of a button's chrome. Used
+   where the card cannot be one link: the records a note is filed against are
+   links of their own, and a button may not contain them. */
+.kairos-record-open {
+  /* A column rather than a block, so the 44px touch minimum on a phone grows
+     the target around the text instead of leaving it stuck to the top edge. */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--kairos-radius-input);
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.kairos-record-open:hover .kairos-record-open-label {
+  text-decoration: underline;
+}
+
+.kairos-record-open:focus-visible {
+  outline: 2px solid var(--kairos-focus);
+  outline-offset: 2px;
+}
+
+.kairos-record-card:hover {
+  background: var(--kairos-row-hover);
+}
+
+.kairos-record-card-top,
+.kairos-record-card-bottom {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.kairos-record-card-bottom {
+  align-items: center;
+}
+
+/* A row of state chips wraps instead of pushing the card sideways. */
+/* A figure and its state chip on one line inside a cell. */
+.kairos-inline-pair {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.kairos-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kairos-record-card-identifier {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kairos-record-card-figure {
+  flex: 0 0 auto;
+  font-size: 1.02rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+/* One line of context, truncated rather than wrapped. A second line here is
+   how a condensed card grows back into a full one. */
+.kairos-record-card-meta {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--kairos-text-muted);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kairos-select-card {
+  min-height: var(--kairos-control-h-touch);
+  border: 1px solid var(--kairos-border);
+  background: var(--kairos-surface);
+  display: grid;
+  grid-template-columns: var(--kairos-control-h-touch) minmax(0, 1fr);
+  align-items: stretch;
+  cursor: pointer;
+}
+
+.kairos-select-card:hover,
+.kairos-select-card--selected {
+  background: var(--kairos-row-hover);
+}
+
+.kairos-select-card--selected {
+  border-color: var(--kairos-border);
+  box-shadow: inset 4px 0 0 var(--kairos-accent);
+}
+
+.kairos-select-card > input {
+  align-self: center;
+  justify-self: center;
+}
+
+.kairos-select-card-body {
+  min-width: 0;
+  border-left: 1px solid var(--kairos-border-subtle);
+  padding: 8px 10px;
+  display: grid;
+  gap: 6px;
+}
+
+.kairos-metric {
+  background: var(--kairos-surface);
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  padding: 16px;
+}
+
+/* A figure is data, not display type. Bebas has no lowercase and tight
+   counters, which makes it slow to read in bulk and caps it at the page title
+   in software; a dashboard of four stats would otherwise be four more. */
+.kairos-metric-value {
+  font-family: var(--kairos-body);
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Motion primitives. ease-out only, entrances at or below 700ms, no spring. */
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.kairos-motion-fade-up { animation: fadeUp 450ms ease-out both; }
+
+.kairos-motion-fade-in { animation: fadeIn 300ms ease-out both; }
+
+.kairos-motion-slide-in-right { animation: slideInRight 450ms ease-out both; }
+
+@media (pointer: coarse) {
+  .kairos-button,
+    .kairos-nav-link,
+    .kairos-record-open,
+    .kairos-segmented-option,
+    .kairos-tab,
+    .kairos-icon-action,
+    .kairos-overflow-trigger,
+    /* An overflow menu is where every row action past the identifier lives, so
+       its items are among the most-tapped controls in the app. */
+    .kairos-overflow-item,
+    /* The only theme control on the public and sign-in screens, which have no
+       nav and no settings screen to put one in. */
+    .kairos-theme-toggle,
+    /* The label is the target here, and a 21px label is under half the minimum.
+       `.kairos-choice-row` is left alone: it carries explanatory copy and already
+       measures past 44px. */
+    .kairos-checkbox-row,
+    .kairos-inline-action {
+      min-height: 44px;
+    }
+  
+  .kairos-icon-action,
+    .kairos-overflow-trigger {
+      min-width: 44px;
+      width: 44px;
+      height: 44px;
+    }
+  
+  .kairos-input-field,
+    .kairos-select {
+      min-height: 44px;
+    }
+}
+
+@media (max-width: 980px) {
+  .kairos-login-grid {
+      grid-template-columns: 1fr !important;
+    }
+}
+
+@media (max-width: 767px) {
+  /* The top bar already identifies the active business. Repeating it as the
+       page kicker costs a full line before every mobile workflow. A kicker that
+       is the way back to the parent screen is navigation, not chrome, and a
+       phone is where it is needed most. */
+    .kairos-kicker {
+      display: none;
+    }
+  
+  .kairos-kicker-link {
+      display: inline-flex;
+    }
+  
+  .kairos-page-header {
+      align-items: stretch !important;
+    }
+  
+  .kairos-page-header-actions {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr);
+      width: 100%;
+    }
+  
+  .kairos-page-header-actions > .kairos-button {
+      width: 100%;
+    }
+  
+  .kairos-page-header-primary {
+      order: -1;
+    }
+  
+  .payments-page-actions {
+      display: grid !important;
+      grid-template-columns: minmax(0, 1fr);
+    }
+  
+  .payments-page-actions > .kairos-button {
+      width: 100%;
+    }
+  
+  .kairos-desktop-table {
+      display: none;
+    }
+  
+  .kairos-record-list {
+      display: grid;
+      gap: 10px;
+    }
+  
+  .kairos-record-list-sort {
+      display: block;
+    }
+}
+
+@media (min-width: 768px) {
+  .kairos-main {
+      padding: 28px 28px calc(104px + env(safe-area-inset-bottom, 0px));
+    }
+  
+  .kairos-bottom-nav-link {
+      font-size: 0.7rem;
+    }
+}
+
+@media (min-width: 900px) {
+  .kairos-sidebar {
+      display: flex;
+    }
+  
+  .kairos-bottom-nav,
+    .kairos-nav-sheet {
+      display: none;
+    }
+  
+  .kairos-shell-body {
+      height: 100vh;
+      height: 100dvh;
+    }
+  
+  .kairos-main {
+      padding: 36px 40px 48px;
+      overflow-y: auto;
+    }
+  
+  .kairos-topbar {
+      padding: 12px 20px;
+    }
+  
+  .kairos-topbar:not(.kairos-topbar--switcher) {
+      display: none;
+    }
+  
+  .kairos-topbar-brand {
+      display: none;
+    }
+}
+
+@media (max-width: 899px) {
+  .kairos-desktop-only {
+      display: none;
+    }
+}
+
+@media (min-width: 900px) {
+  .kairos-mobile-only {
+      display: none;
+    }
+}
+
+@media (min-width: 1200px) {
+  .kairos-main {
+      padding: 40px 42px 56px;
+    }
+}
+
+/* Grouped destination sheet ---------------------------------------------- */
+/* Two of the three navigation prototypes reach the tail of the destination
+   list through a sheet rather than a screen. The sheet covers the shell, keeps
+   its own scroll, and stops above the safe area so the last row is not under
+   the home indicator. */
+
+.kairos-nav-sheet {
+  position: fixed;
+  inset: 0;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  background: var(--kairos-surface);
+  border-top: 2px solid var(--kairos-border);
+}
+
+.kairos-nav-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 2px solid var(--kairos-border);
+}
+
+.kairos-nav-sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 8px calc(16px + env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+}
+
+.kairos-nav-sheet-row {
+  width: 100%;
+  justify-content: space-between;
+  text-align: left;
+  cursor: pointer;
+}
+
+.kairos-nav-sheet-row-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.kairos-nav-sheet-row[aria-current='page'] {
+  background: var(--kairos-accent);
+  border-color: var(--kairos-border);
+  color: var(--kairos-accent-text);
+}
+
+/* ==========================================================================
+   Print — where a Paykit screen stops being a screen.
+
+   The browser already produces a real tagged PDF; what it prints is whatever
+   this file leaves on the page. Everything below is about that: the chrome a
+   document has no use for, the palette it has to be readable in, the paper
+   width that is not a phone, and the masthead that says what the sheet is once
+   it is out of the app.
+
+   Page numbers and the date are the browser's own header and footer. Chrome
+   does not implement `@page` margin boxes, so CSS cannot draw them.
+   ========================================================================== */
+
+/* Rendered on paper only. `PrintDocumentHeader` writes this. */
+.kairos-print-only {
+  display: none;
+}
+
+@media print {
+  .kairos-app-shell,
+    .kairos-shell-body,
+    .kairos-main {
+      display: block !important;
+      min-height: auto !important;
+      padding: 0 !important;
+      background: white !important;
+    }
+  
+  /* `fadeUp` retains its final keyframe, so a transform sits on the element
+       permanently. On paper that offsets the first block of every page. */
+    .kairos-motion-fade-up {
+      animation: none !important;
+      transform: none !important;
+      opacity: 1 !important;
+    }
+  
+  .kairos-print-only {
+      display: block !important;
+    }
+  
+  /* The masthead. A print is read by an accountant, a bank, or the owner in six
+       months, none of whom can see which screen it came off. */
+    .kairos-print-header {
+      margin: 0 0 16px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--kairos-border);
+    }
+  
+  .kairos-print-header-business {
+      margin: 0;
+      font-family: var(--kairos-display);
+      font-size: 26px;
+      letter-spacing: 0.04em;
+      line-height: 1;
+      text-transform: uppercase;
+    }
+  
+  .kairos-print-header-title {
+      margin: 6px 0 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+  
+  .kairos-print-header-meta {
+      margin: 4px 0 0;
+      color: var(--kairos-text-2);
+      font-size: 11.5px;
+    }
+  
+  /* A table that runs past one page repeats its headings, rather than leaving
+       the second page a wall of unlabelled figures. */
+    thead {
+      display: table-header-group;
+    }
+  
+  tr,
+    .kairos-record-row {
+      break-inside: avoid;
+    }
+  
+  .kairos-panel {
+      break-inside: avoid;
+      box-shadow: none !important;
+    }
+  
+  /* On screen this scrolls sideways. On paper there is nowhere to scroll to. */
+    .kairos-table-panel {
+      overflow: visible !important;
+    }
+  
+  /* A state chip carries the fact, not decoration, so its tint has to survive
+       the browser dropping backgrounds by default. */
+    .kairos-state-chip {
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+}
+
+/* ==========================================================================
+   Merged and added components.
+
+   Everything above this line is a mechanical port of Paykit's component layer
+   (see scripts/extract-from-paykit.mjs). The rules below needed a judgement
+   call, either because two apps named one role differently or because the role
+   exists in Uptime or Mailkit and not in Paykit at all.
+   ========================================================================== */
+
+/* --- Lockup theme switch -------------------------------------------------
+   The CDN wordmark ships in a light and a dark variant and the ground picks
+   which one shows. These rules are scoped by theme rather than by component,
+   which is the one place a component legitimately reads the theme selector:
+   the two files are different artwork, not one artwork in two colours. */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .kairos-lockup--light {
+    display: none;
+  }
+
+  :root:not([data-theme='light']) .kairos-lockup--dark {
+    display: block;
+  }
+}
+
+[data-theme='dark'] .kairos-lockup--light {
+  display: none;
+}
+
+[data-theme='dark'] .kairos-lockup--dark {
+  display: block;
+}
+
+/* --- Banner --------------------------------------------------------------
+   One page-level notice per screen. Merged from Paykit's `kairos-callout`
+   (the bordered box, kept as the base) and its `kairos-notice` (the inline
+   left-rule note, now the `--inline` modifier), against the `kairos-banner`
+   name Mailkit and Uptime already use.
+
+   Variants take the State Palette rather than Mailkit's `currentColor`, so a
+   banner and a state chip describing the same condition are the same colour.
+   There is deliberately no accent variant: amber is the action colour, and a
+   banner is not an action. */
+
+.kairos-banner {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  font-size: 0.86rem;
+}
+
+.kairos-banner--danger {
+  border-width: 2px;
+  border-color: var(--kairos-state-overdue);
+  background: var(--kairos-state-overdue-tint);
+  color: var(--kairos-state-overdue);
+}
+
+.kairos-banner--warning {
+  border-color: var(--kairos-state-awaiting);
+  background: var(--kairos-state-awaiting-tint);
+  color: var(--kairos-state-awaiting);
+}
+
+.kairos-banner--success {
+  border-color: var(--kairos-state-settled);
+  background: var(--kairos-state-settled-tint);
+  color: var(--kairos-state-settled);
+}
+
+/* The inline form: a note beside content rather than a box above it. It drops
+   the box entirely instead of layering a left rule onto one, which is what a
+   mechanical rename of the two Paykit classes would have produced. */
+.kairos-banner--inline {
+  display: block;
+  padding: 0 0 0 12px;
+  border: 0;
+  border-left: 4px solid var(--kairos-accent);
+  border-radius: 0;
+  background: none;
+}
+
+.kairos-banner--inline.kairos-banner--danger {
+  border-left-color: var(--kairos-state-overdue);
+}
+
+.kairos-banner--inline.kairos-banner--warning {
+  border-left-color: var(--kairos-state-awaiting);
+}
+
+.kairos-banner--inline.kairos-banner--success {
+  border-left-color: var(--kairos-state-settled);
+}
+
+/* --- Empty state ---------------------------------------------------------
+   One plain sentence plus the screen's primary action. Ported from Mailkit,
+   which reaches its panel radius through a token where Uptime's copy hardcodes
+   8px. Paykit has no empty-state component at all.
+
+   An empty list is not an error: it takes no state colour and no banner. */
+
+.kairos-empty-state {
+  padding: 32px 20px;
+  border: 1px solid var(--kairos-border);
+  border-radius: var(--kairos-radius-panel);
+  background: var(--kairos-surface);
+  text-align: center;
+}
+
+.kairos-empty-state p {
+  margin: 0 0 12px;
+  color: var(--kairos-text-muted);
+}
+
+/* --- Toast ---------------------------------------------------------------
+   Transient confirmation that something completed. Ported from Uptime, the
+   only app that has one.
+
+   The region is fixed and the toast inside it is not, so a screen reader
+   announcement region can sit in one place in the DOM while toasts come and
+   go. Above the mobile bottom nav on small screens, or it lands on top of it. */
+
+.kairos-toast-region {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.kairos-toast {
+  max-width: 360px;
+  padding: 12px 14px;
+  border: 2px solid var(--kairos-accent);
+  background: var(--kairos-invert-bg);
+  box-shadow: var(--kairos-shadow);
+  color: var(--kairos-invert-fg);
+  font-size: 0.8125rem;
+}
+
+@media (max-width: 767px) {
+  .kairos-toast-region {
+    right: 20px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    left: 20px;
+    justify-items: stretch;
+  }
+
+  .kairos-toast {
+    max-width: none;
+  }
+}
+
+/* --- Submit error --------------------------------------------------------
+   Restores the two declarations this rule shared with Paykit's
+   `kairos-submit-offline`, which is Paykit's own offline queue and did not
+   come across. */
+
+.kairos-submit-error {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
