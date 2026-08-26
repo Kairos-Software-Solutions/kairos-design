@@ -12,59 +12,54 @@ today, and where the two disagree, this repo wins.
 | Artifact | Reaches | Contents |
 | --- | --- | --- |
 | `dist/tokens.css` | every surface | The `--kairos-*` custom properties, light and dark. The only file with raw hex in it. |
-| `dist/kairos.css` | every surface | The `kairos-*` class vocabulary. Consumes tokens only, no framework. |
-| `packages/ui` | React apps | Thin React components emitting the classes above. |
-| `packages/format` | any JS runtime | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
-| `registry/` | external apps | shadcn-compatible JSON for `npx shadcn add`. |
-| `docs/kairos-ui.md` | agents and people | The canonical component manifest. |
+| `dist/kairos.css` | every surface | The `kairos-*` class vocabulary, 220 classes. Consumes tokens only, no framework. |
+| `dist/base.css` | opt-in | Element-level defaults. Separate because a library that restyles a host app's bare `table` and `input` is invasive. |
+| `bin/kairos-design.mjs` | every surface | The CLI that vendors the above into an app and checks it has not drifted. |
+| `docs/kairos-ui.md` | agents and people | The canonical component manifest. Read it before building UI. |
+| `docs/preview.html` | review | Every component, both themes, verified at 320px. |
 
 CSS first, React second, on purpose. Of the five Kairos surfaces, two run React
-(Paykit, Mailkit) and three do not (Uptime ships hand-written CSS with no
-bundler, Card is a single static HTML file, Mailclient is a Roundcube skin). A
+(Paykit, Mailkit) and three do not: Uptime ships hand-written CSS with no
+bundler, Card is a single static HTML file, Mailclient is a Roundcube skin. A
 React package would reach two of five. The CSS reaches all five.
 
 ## Consuming it
 
-### Tokens are vendored, not linked
+Everything is vendored by copying. Nothing is resolved at build time.
 
 ```sh
-npx kairos-design sync --app ./deploy/apps/paykit
+git clone git@github.com:Kairos-Software-Solutions/kairos-design.git   # once, beside your apps
+cd ../paykit && kairos-design sync
 ```
 
-This writes `tokens.css` into the app and records the version in
-`kairos.lock`. It is deliberately not a CDN `<link>`: tokens have to apply
-before first paint, and a third-party request in that path buys a flash of the
-wrong theme in exchange for saving a file copy. CI runs `kairos-design check`,
-which fails if a vendored copy has drifted from its pinned tag.
+`sync` copies each artifact to the path the app's `kairos-design.json` names
+and records a hash in `kairos-design.lock.json`. `check` fails if a copy was
+edited in place or has fallen behind, and belongs in CI. See
+[docs/adoption.md](docs/adoption.md) for the config each surface needs.
 
-### React components are a dependency
+### Why copies rather than a package
 
-```json
-{ "dependencies": { "@kairos/ui": "github:Kairos-Software-Solutions/kairos-design#v0.1.0" } }
-```
+Two reasons, and both are load-bearing.
 
-A git URL rather than GitHub Packages: the GitHub npm registry requires a token
-even to install a public package, which defeats the point of publishing one.
+**Tokens have to apply before first paint.** A stylesheet fetched from a CDN in
+the critical path buys a flash of the wrong theme in exchange for saving a file
+copy.
 
-### Apps outside this org
+**Paykit and Mailkit build with `build: .` and `COPY . .`**, so the Docker
+build context is the app directory and `npm ci` runs with no GitHub
+credentials. Anything resolved at build time would need BuildKit SSH forwarding
+or a build secret in every Dockerfile. Copies need nothing, which is also what
+lets this repo stay private: a developer clones it once over SSH, and no build
+anywhere has to authenticate.
 
-```sh
-npx shadcn@latest add https://kairos-software-solutions.github.io/kairos-design/r/button.json
-```
+The cost of copying is that a copy goes stale silently. That is what `check`
+is for, and why it should run in CI rather than on someone's laptop.
 
-Components are copied into the consuming repo rather than linked, which is also
-the right shape for an agent building a new Kairos app: it can read the source
-it just installed.
+## Why this is a separate repo
 
-## Why the Docker note matters
-
-Paykit and Mailkit both build with `build: .` and `COPY . .`, so the Docker
-build context is the app directory. A workspace package elsewhere in the
-monorepo is not reachable from inside those builds without rewriting the
-compose contexts and Dockerfiles. That constraint is the reason tokens are
-vendored by a sync script rather than resolved through a package manager, and
-the reason this repo is separate rather than a `packages/` folder inside
-`internal-tools`.
+`internal-tools` is private and holds deploy config, and npm cannot install a
+subdirectory of a git repo, so a `packages/kairos-design` folder inside it
+could not be consumed by an app in another repo even within the organisation.
 
 ## Contributing a component
 

@@ -1,0 +1,26 @@
+{
+  "name": "kairos-design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The shared Kairos design system: tokens, component vocabulary, and the CLI that vendors them into an app.",
+  "type": "module",
+  "bin": {
+    "kairos-design": "bin/kairos-design.mjs"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "docs/kairos-ui.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Kairos-Software-Solutions/kairos-design.git"
+  },
+  "license": "UNLICENSED"
+}
