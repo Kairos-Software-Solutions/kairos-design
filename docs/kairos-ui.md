@@ -8,10 +8,13 @@ the same change: a component that is not in the manifest does not exist for the
 next agent.
 
 ```
-Tokens      dist/tokens.css      --kairos-*, light and dark
-Base        dist/base.css        element defaults, optional
-Components  dist/kairos.css      the kairos-* class vocabulary
-Preview     docs/preview.html    every component, both themes
+Tokens      dist/tokens.css        --kairos-*, light and dark
+Base        dist/base.css          element defaults, optional
+Components  dist/kairos.css        the kairos-* class vocabulary
+Money       dist/format/money.ts   TTD 8,500.00
+Dates       dist/format/dates.ts   24 Aug 2026
+Preview     docs/preview.html      every component, both themes
+Vendoring   kairos-design sync     copies the above into an app
 ```
 
 Import order is tokens, base, components. Tokens have to apply before first
@@ -106,12 +109,27 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| `@kairos/ui` React package | Paykit and Mailkit, so the two React apps stop hand-rolling wrappers |
-| `@kairos/format` | `TTD 8,500.00` and `24 Aug 2026`. Only Paykit has these today, which is why Mailkit's Logs screen prints raw ISO timestamps |
-| `kairos-design sync` CLI | Vendoring tokens into each app with a lockfile, plus the CI drift check |
-| `registry/*.json` | shadcn-compatible entries so apps outside this org can install components |
+| React components | Paykit and Mailkit, so the two React apps stop hand-rolling wrappers. Vendored like everything else, not published as a package. |
 | `kairos-confirm-dialog` | A named composite over `kairos-dialog-*`; today the destructive gate is assembled by hand at each call site |
-| 320px visual check | The port inherits Paykit's responsive rules but has not been measured at 320px in this repo |
+| `kairos-collapsible-card` markup contract | The CSS is here, but the disclosure behaviour and its `aria-expanded` wiring are still per-app |
+| Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
+
+## Formatters
+
+| Module | Exports | Use for |
+| --- | --- | --- |
+| `format/money.ts` | `formatMoney`, `formatMinor`, `toMinor`, `fromMinor`, `toMinorOrNull`, `parseAmountFilter` | Every amount a person reads or a form accepts |
+| `format/dates.ts` | `formatDate`, `formatDateTime`, `formatTime`, `formatDateRange`, `dateInputHint`, `fromSeconds` | Every date a person reads |
+
+Exact amounts live in integer minor units, never a float. Dates name their
+month, because `08/01/2026` is 8 January to a T&T reader and 1 August to a US
+one. Both refuse rather than guess: `toMinorOrNull` returns null so a boundary
+can turn it into a sentence, and the date formatters return null rather than a
+plausible wrong date.
+
+A raw timestamp reaching a screen is a defect. Mailkit's Logs screen printing
+`2026-08-26T16:57:10.635982+00:00` to an operator in Trinidad is the case this
+module exists to close.
 
 ## Deviations
 
