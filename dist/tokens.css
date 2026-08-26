@@ -1,0 +1,226 @@
+/* ==========================================================================
+   Kairos Design Tokens
+   ==========================================================================
+   The only file in the Kairos system where a raw hex value appears.
+
+   Every colour carries a light and a dark value, so a token swap is the whole
+   of dark mode and no component ever branches on theme.
+
+   Selector shape is the host app's business. This file ships `[data-theme]`
+   because all five Kairos surfaces already use it. A `.dark` class or a
+   `prefers-color-scheme` media query is an equally valid host choice; the
+   token names and both value sets are not.
+
+   Source of truth: kairos-branding skill, references/visual-spec.md.
+   Do not edit a vendored copy of this file. Edit it here and re-sync.
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- Ground ----------------------------------------------------------- */
+  --kairos-bg: #fff8eb;
+  --kairos-surface: #ffffff;
+  --kairos-elevated: #f5e7c9;
+  --kairos-sidebar: #f5e7c9;
+
+  /* --- Line ------------------------------------------------------------- */
+  --kairos-border: #16110b;
+  --kairos-border-subtle: #d2be90;
+
+  /* --- Text ------------------------------------------------------------- */
+  --kairos-text: #16110b;
+  --kairos-text-2: #473728;
+  --kairos-text-muted: #79624a;
+  --kairos-text-on-dark: #fff7e8;
+
+  /* --- Accent ----------------------------------------------------------- */
+  /* Full-saturation amber is a fill, never a text colour: it measures 1.52:1
+     on cream. `--kairos-accent-on-light` is the amber-toned text and icon
+     value, and it inverts to bare amber on the dark base where amber clears
+     3:1 on its own. */
+  --kairos-accent: #ffc247;
+  --kairos-accent-hover: #e6a92d;
+  --kairos-accent-dim: rgba(255, 194, 71, 0.2);
+  --kairos-accent-text: #16110b;
+  --kairos-accent-on-light: #96690e;
+
+  /* --- Inverted surface ------------------------------------------------- */
+  /* Ink-filled buttons, the sidebar brand block, active wizard steps. A pair
+     rather than a reuse of `--kairos-text`, because it inverts: text-primary
+     as a background is ink-on-bone in light and bone-on-bone in dark, which
+     is to say invisible. */
+  --kairos-invert-bg: #16110b;
+  --kairos-invert-fg: #fff7e8;
+
+  /* --- Focus ------------------------------------------------------------ */
+  /* A 2px ink outline with a 2px amber inner ring at a 2px offset. The ink
+     ring carries the contrast for WCAG 2.2 SC 1.4.11; the amber says which
+     brand drew it. The pair inverts on dark. */
+  --kairos-focus: #16110b;
+  --kairos-focus-inner: #ffc247;
+
+  /* --- State Palette ---------------------------------------------------- */
+  /* Four states, warm and desaturated, every tint within 1.2:1 of the page so
+     a row still reads as paper. Never `--kairos-accent`: amber is the action
+     colour. Map new statuses onto these four rather than adding a fifth. */
+  --kairos-state-settled: #2f5d3f;
+  --kairos-state-settled-tint: #e4efe6;
+  --kairos-state-overdue: #9c3b21;
+  --kairos-state-overdue-tint: #f8e3dc;
+  --kairos-state-awaiting: #8a5f0c;
+  --kairos-state-awaiting-tint: #fbebcb;
+  --kairos-state-draft: #473728;
+  --kairos-state-draft-tint: #f5e7c9;
+
+  /* --- Destructive ------------------------------------------------------ */
+  /* The filled treatment for the confirm button of a confirmation dialog and
+     nothing else. That button is the one that commits, and rank 1 in amber
+     would say "this is the safe way forward" about the irreversible option. */
+  --kairos-danger-solid: #9c3b21;
+  --kairos-danger-solid-fg: #fff7e8;
+  --kairos-danger-solid-hover: #7e2f1a;
+
+  /* --- Rows ------------------------------------------------------------- */
+  --kairos-row-hover: #fffcf3;
+  --kairos-row-selected: #f8ebd2;
+  --kairos-row-stripe: #fbf2e0;
+
+  /* --- Loading and overlay ---------------------------------------------- */
+  --kairos-skeleton-bg: #f1e5cf;
+  --kairos-skeleton-fg: #ead9b8;
+  --kairos-overlay: rgba(22, 17, 11, 0.46);
+
+  /* --- Stamp ------------------------------------------------------------ */
+  /* Flat, offset bottom-right, zero blur, zero spread. The stamp inverts to
+     linen on dark: an ink shadow on a #1A1410 page is invisible, and the
+     offset is the whole point of the mark. */
+  --kairos-shadow-color: #16110b;
+  --kairos-shadow: 4px 4px 0 var(--kairos-shadow-color);
+  --kairos-shadow-card: 6px 6px 0 var(--kairos-shadow-color);
+  --kairos-shadow-lg: 8px 8px 0 var(--kairos-shadow-color);
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --kairos-bg: #1a1410;
+  --kairos-surface: #231e18;
+  --kairos-elevated: #2e2720;
+  --kairos-sidebar: #2e2720;
+
+  --kairos-border: #f5f1e8;
+  --kairos-border-subtle: #6e6152;
+
+  --kairos-text: #f5f1e8;
+  --kairos-text-2: #e0d7c8;
+  --kairos-text-muted: #b9ae9c;
+  --kairos-text-on-dark: #fff7e8;
+
+  /* Amber is 11.67:1 on ink and needs no dark variant. Only the text-safe
+     value moves, because on the dark base amber clears 3:1 unaided. */
+  --kairos-accent: #ffc247;
+  --kairos-accent-hover: #e6a92d;
+  --kairos-accent-dim: rgba(255, 194, 71, 0.16);
+  --kairos-accent-text: #16110b;
+  --kairos-accent-on-light: #ffc247;
+
+  --kairos-invert-bg: #f5f1e8;
+  --kairos-invert-fg: #16110b;
+
+  --kairos-focus: #ffc247;
+  --kairos-focus-inner: #16110b;
+
+  --kairos-state-settled: #8fcba1;
+  --kairos-state-settled-tint: #1e2c22;
+  --kairos-state-overdue: #e9a08a;
+  --kairos-state-overdue-tint: #33201a;
+  --kairos-state-awaiting: #e5be71;
+  --kairos-state-awaiting-tint: #2e2415;
+  --kairos-state-draft: #e0d7c8;
+  --kairos-state-draft-tint: #2e2720;
+
+  --kairos-danger-solid: #e9a08a;
+  --kairos-danger-solid-fg: #16110b;
+  --kairos-danger-solid-hover: #f2b9a6;
+
+  --kairos-row-hover: #2a231c;
+  --kairos-row-selected: #3a2f1e;
+  --kairos-row-stripe: #221c16;
+
+  --kairos-skeleton-bg: #2e2720;
+  --kairos-skeleton-fg: #3a322a;
+  --kairos-overlay: rgba(0, 0, 0, 0.64);
+
+  --kairos-shadow-color: #f5f1e8;
+}
+
+/* ==========================================================================
+   Type, geometry, and motion.
+   Theme-independent, so they sit outside both blocks above.
+   ========================================================================== */
+
+:root {
+  /* --- Typefaces --------------------------------------------------------
+     The host app loads the families — next/font, a Google Fonts link, or
+     self-hosted files. These tokens only name the stack. Never a third
+     typeface. */
+  --kairos-display: 'Bebas Neue', Impact, sans-serif;
+  --kairos-body: 'Epilogue', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --kairos-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+
+  /* --- Product Scale geometry -------------------------------------------
+     Apps, dashboards, portals, internal tools. Brand Scale surfaces
+     (websites, decks, documents, email) override these; see brand.css.
+
+     These are tokens rather than values written into each component because
+     they are exactly what drifted between the four apps: an 8px panel radius
+     against 10px, a 1px input border against 2px, 0.12em button tracking
+     against 0.14em. As tokens, that drift is a one-line diff instead of an
+     audit finding. */
+  --kairos-row-h: 44px;
+  --kairos-nav-row-h: 36px;
+  --kairos-control-h: 36px;
+  --kairos-control-h-touch: 40px;
+  --kairos-table-header-h: 32px;
+  --kairos-page-header-h: 56px;
+  --kairos-filter-bar-h: 40px;
+  --kairos-sidebar-w: 220px;
+  --kairos-sidebar-rail-w: 56px;
+
+  --kairos-panel-pad: 16px;
+  --kairos-section-pad: 24px;
+  --kairos-gap: 24px;
+
+  /* Sharp by default. Softer radii belong to the named Brand Scale card
+     families only, never to generic UI. */
+  --kairos-radius-button: 0;
+  --kairos-radius-chip: 2px;
+  --kairos-radius-input: 4px;
+  --kairos-radius-panel: 10px;
+
+  --kairos-border-w: 1px;
+  --kairos-border-w-strong: 2px;
+
+  /* Product Scale type. Bebas is the page title and nothing else, at 24px,
+     with a 20px floor and a hard limit of two per screen. */
+  --kairos-text-body: 0.875rem;
+  --kairos-text-body-lh: 1.5;
+  --kairos-text-title: 24px;
+  --kairos-text-label: 0.75rem;
+  --kairos-text-chip: 11px;
+  --kairos-text-button: 0.78rem;
+
+  /* Product Scale tracking. The visual spec tabulates Brand Scale values
+     (0.18em-0.20em); these are the tighter software equivalents named in
+     Component Defaults. */
+  --kairos-track-button: 0.14em;
+  --kairos-track-label: 0.08em;
+  --kairos-track-display: 0.02em;
+
+  /* --- Motion -----------------------------------------------------------
+     ease-out, at or under 700ms. Honoured against prefers-reduced-motion in
+     kairos.css. */
+  --kairos-ease: cubic-bezier(0, 0, 0.2, 1);
+  --kairos-duration: 250ms;
+}
