@@ -74,6 +74,23 @@ Each app keeps its old names as deprecated aliases through one release, the way
 Paykit's `Badge.tsx` already does, so no call site has to change in the same
 commit that changes the CSS.
 
+## Button ranks
+
+The variants lived in Paykit's React `Button` as inline `style={{}}` objects
+setting `--button-*` properties. That is why `kairos.css` shipped a button with
+no ranks at all, and why Uptime had to invent `--secondary`, `--tertiary`, and
+`--destructive` of its own. They are modifiers now, so the three apps with no
+React get the same six.
+
+| Canonical | Paykit | Uptime | Note |
+| --- | --- | --- | --- |
+| `--primary` | `primary` | (base) | Amber, stamped. One per screen. |
+| `--secondary` | `ghost` | `--secondary` | The outline. Paykit's `ghost` was this, not a borderless button. |
+| `--tertiary` | — | `--tertiary` | Borderless, underlined |
+| `--ghost` | — | — | Borderless, not underlined. New; the skill's canonical set names it. |
+| `--danger` | `danger` | `--destructive` | The outline form |
+| `--danger-solid` | `dangerSolid` | — | Confirm button of a confirmation dialog and nothing else |
+
 ## Typography and geometry
 
 Values where the apps disagreed and the registry settles it:

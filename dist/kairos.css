@@ -1237,8 +1237,8 @@ h6 {
   justify-content: center;
   gap: 6px;
   width: fit-content;
-  height: var(--button-height);
-  min-height: var(--button-height);
+  height: var(--button-height, var(--kairos-control-h));
+  min-height: var(--button-height, var(--kairos-control-h));
   padding: 0 14px;
   border: var(--button-border-width, 2px) solid var(--button-border, var(--kairos-border));
   border-radius: 0;
@@ -1246,9 +1246,9 @@ h6 {
   box-shadow: var(--button-shadow, none);
   color: var(--button-color, var(--kairos-text));
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: var(--kairos-text-button);
   font-weight: 900;
-  letter-spacing: 0.18em;
+  letter-spacing: var(--kairos-track-button);
   line-height: 1;
   text-transform: uppercase;
   transition:
@@ -1286,8 +1286,8 @@ h6 {
 }
 
 .kairos-button--sm {
-  height: var(--button-height-sm);
-  min-height: var(--button-height-sm);
+  height: var(--button-height-sm, var(--kairos-control-h-sm));
+  min-height: var(--button-height-sm, var(--kairos-control-h-sm));
   padding: 0 10px;
   font-size: 0.7rem;
   letter-spacing: 0.14em;
@@ -2917,3 +2917,92 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   font-size: 0.78rem;
 }
 
+
+/* --- Button ranks ---------------------------------------------------------
+   Rank is carried by fill, border, and stamp, never by size. These were inline
+   `style={{}}` objects inside Paykit's React `Button`, which is why the CSS
+   shipped a button with no variants and Uptime had to invent `--secondary`,
+   `--tertiary`, and `--destructive` of its own. As modifiers they reach the
+   three apps that have no React at all.
+
+   Names follow the skill's canonical set. Paykit's `ghost` was the outline
+   button, which is `--secondary` here; `--ghost` is the borderless one.
+
+   Emphasis is a budget: one `--primary` per screen. */
+
+.kairos-button--primary {
+  --button-bg: var(--kairos-accent);
+  --button-hover-bg: var(--kairos-accent-hover);
+  --button-color: var(--kairos-accent-text);
+  --button-border: var(--kairos-border);
+  --button-shadow: var(--kairos-shadow);
+  --button-shadow-hover: var(--kairos-shadow-card);
+  --button-shadow-active: 2px 2px 0 var(--kairos-shadow-color);
+}
+
+/* The default appearance, named so a call site can say which rank it means
+   rather than relying on the bare class. */
+.kairos-button--secondary {
+  --button-bg: var(--kairos-surface);
+  --button-hover-bg: var(--kairos-elevated);
+  --button-color: var(--kairos-text);
+  --button-border: var(--kairos-border);
+}
+
+/* A hover-only stamp on rank 2 would make the two ranks identical for anyone
+   on touch, where hover does not exist. Rank 2 stays flat in every state. */
+.kairos-button--secondary,
+.kairos-button--tertiary,
+.kairos-button--ghost,
+.kairos-button--danger {
+  --button-shadow: none;
+  --button-shadow-hover: none;
+  --button-shadow-active: none;
+}
+
+.kairos-button--tertiary {
+  --button-bg: transparent;
+  --button-hover-bg: transparent;
+  --button-color: var(--kairos-accent-on-light);
+  --button-border-width: 0;
+  padding-inline: 4px;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.kairos-button--ghost {
+  --button-bg: transparent;
+  --button-hover-bg: var(--kairos-elevated);
+  --button-color: var(--kairos-text);
+  --button-border-width: 0;
+}
+
+.kairos-button--tertiary:hover:not(:disabled),
+.kairos-button--ghost:hover:not(:disabled) {
+  /* Nothing to lift: a borderless button has no stamp, so translating it just
+     makes the label jump under the pointer. */
+  transform: none;
+}
+
+/* Destructive, rank 2: the outline form, for a delete that still has a
+   confirmation ahead of it. */
+.kairos-button--danger {
+  --button-bg: var(--kairos-surface);
+  --button-hover-bg: var(--kairos-state-overdue-tint);
+  --button-color: var(--kairos-state-overdue);
+  --button-border: var(--kairos-state-overdue);
+}
+
+/* Destructive, rank 1. The confirm button of a confirmation dialog and nothing
+   else. It needs rank-1 weight because it is the button that commits, and rank
+   1 in amber would tell the user the irreversible option is the safe way
+   forward. */
+.kairos-button--danger-solid {
+  --button-bg: var(--kairos-danger-solid);
+  --button-hover-bg: var(--kairos-danger-solid-hover);
+  --button-color: var(--kairos-danger-solid-fg);
+  --button-border: var(--kairos-border);
+  --button-shadow: var(--kairos-shadow);
+  --button-shadow-hover: var(--kairos-shadow-card);
+  --button-shadow-active: 2px 2px 0 var(--kairos-shadow-color);
+}

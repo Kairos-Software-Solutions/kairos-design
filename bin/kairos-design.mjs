@@ -34,6 +34,19 @@ const ARTIFACTS = [
   'kairos.css',
   'format/money.ts',
   'format/dates.ts',
+  'react/index.ts',
+  'react/Button.tsx',
+  'react/StateChip.tsx',
+  'react/Segmented.tsx',
+  'react/Field.tsx',
+  'react/Banner.tsx',
+  'react/EmptyState.tsx',
+  'react/SortHeader.tsx',
+  'react/Dialog.tsx',
+  'react/ConfirmDialog.tsx',
+  'react/Toast.tsx',
+  'react/Panel.tsx',
+  'react/theme.tsx',
 ];
 
 /* A block comment, because it has to be valid in both CSS and TypeScript. */
@@ -146,6 +159,30 @@ function readConfig(appDir) {
       );
     }
   }
+
+  /* The React components import each other by relative path — ConfirmDialog
+     imports ./Dialog and ./Button — so splitting them across directories
+     produces a module-not-found at build time, a long way from the config that
+     caused it. Catch it here, where the reason is still in view. */
+  const reactDirs = new Map();
+  for (const t of config.targets) {
+    if (!t.artifact.startsWith('react/')) continue;
+    const dir = dirname(t.path);
+    if (!reactDirs.has(dir)) reactDirs.set(dir, []);
+    reactDirs.get(dir).push(t.artifact);
+  }
+  if (reactDirs.size > 1) {
+    const listed = [...reactDirs]
+      .map(([dir, artifacts]) => `  ${dir || '.'}  ${artifacts.join(', ')}`)
+      .join('\n');
+    throw new Fail(
+      `${CONFIG} spreads the React components across ${reactDirs.size} directories:\n\n` +
+        listed +
+        '\n\nThey import each other by relative path, so they all have to land in one\n' +
+        'directory. Point every react/ target at the same one.'
+    );
+  }
+
   return config;
 }
 

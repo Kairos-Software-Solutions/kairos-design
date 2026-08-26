@@ -30,7 +30,7 @@
   <header class="kairos-page-header">
     <h1 class="kairos-page-title">Registry preview</h1>
     <div class="kairos-page-header-actions">
-      <button class="kairos-button kairos-page-header-primary" type="button">New invoice</button>
+      <button class="kairos-button kairos-button--primary" type="button">New invoice</button>
       <button class="kairos-button" type="button" onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">Toggle theme</button>
     </div>
   </header>
@@ -65,12 +65,16 @@
   </section>
 
   <section>
-    <h2>Buttons</h2>
+    <h2>Buttons — six ranks, one primary per screen</h2>
     <div class="kairos-action-row">
-      <button class="kairos-button kairos-page-header-primary" type="button">Primary</button>
-      <button class="kairos-button" type="button">Secondary</button>
-      <button class="kairos-button kairos-button--sm" type="button">Small</button>
-      <button class="kairos-button" type="button" disabled>Disabled</button>
+      <button class="kairos-button kairos-button--primary" type="button">Primary</button>
+      <button class="kairos-button kairos-button--secondary" type="button">Secondary</button>
+      <button class="kairos-button kairos-button--tertiary" type="button">Tertiary</button>
+      <button class="kairos-button kairos-button--ghost" type="button">Ghost</button>
+      <button class="kairos-button kairos-button--danger" type="button">Danger</button>
+      <button class="kairos-button kairos-button--danger-solid" type="button">Delete company</button>
+      <button class="kairos-button kairos-button--sm kairos-button--secondary" type="button">Small</button>
+      <button class="kairos-button kairos-button--secondary" type="button" disabled>Disabled</button>
     </div>
   </section>
 
@@ -166,7 +170,7 @@
     <div class="kairos-grid-auto">
       <div class="kairos-empty-state">
         <p>No invoices yet.</p>
-        <button class="kairos-button kairos-page-header-primary" type="button">New invoice</button>
+        <button class="kairos-button kairos-button--primary" type="button">New invoice</button>
       </div>
       <div class="kairos-panel kairos-pad">
         <div class="kairos-metric-row">

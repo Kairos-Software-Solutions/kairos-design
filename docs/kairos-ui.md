@@ -13,6 +13,7 @@ Base        dist/base.css          element defaults, optional
 Components  dist/kairos.css        the kairos-* class vocabulary
 Money       dist/format/money.ts   TTD 8,500.00
 Dates       dist/format/dates.ts   24 Aug 2026
+React       dist/react/            components emitting the classes above
 Preview     docs/preview.html      every component, both themes
 Vendoring   kairos-design sync     copies the above into an app
 ```
@@ -109,9 +110,9 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| React components | Paykit and Mailkit, so the two React apps stop hand-rolling wrappers. Vendored like everything else, not published as a package. |
-| `kairos-confirm-dialog` | A named composite over `kairos-dialog-*`; today the destructive gate is assembled by hand at each call site |
-| `kairos-collapsible-card` markup contract | The CSS is here, but the disclosure behaviour and its `aria-expanded` wiring are still per-app |
+| `OverflowMenu` | The React wrapper. The CSS is here; the roving-focus and dismissal behaviour is still per-app, and it is where every destructive row action is supposed to live. |
+| `DataTable` | A composite over `kairos-table` that owns sorting and the record-card swap, so each app stops re-deriving both |
+| `CollapsibleCard` | The CSS is here, but the disclosure behaviour and its `aria-expanded` wiring are still per-app |
 | Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
 
 ## Formatters
@@ -130,6 +131,37 @@ plausible wrong date.
 A raw timestamp reaching a screen is a defect. Mailkit's Logs screen printing
 `2026-08-26T16:57:10.635982+00:00` to an operator in Trinidad is the case this
 module exists to close.
+
+## React
+
+`dist/react/`, vendored like everything else. The components emit the classes
+above and hold no styling decisions — a `style` prop carrying a colour or a
+pixel value into one means the value belongs in the token layer, and a test
+fails on it.
+
+| Export | Notes |
+| --- | --- |
+| `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. |
+| `StateChip` | The four states, plus every app's old spelling as a deprecated alias so adoption is not one enormous commit |
+| `Segmented` | Filters, wizard steps, the theme choice |
+| `InputField`, `Field` | Label, control, hint, and error as one unit, with the empty rows held |
+| `Banner` | `alert` for a failure, `status` otherwise |
+| `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
+| `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
+| `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |
+| `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
+| `Panel`, `PageHeader`, `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Layout and loading |
+| `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
+
+Radix is the one dependency, and only for the dialogs. A modal has to trap
+focus, restore it, close on Escape, and mark the rest of the page inert; hand
+rolling that in a shared component means every Kairos app inherits the same
+subtle keyboard trap. Everything else, including the three theme icons, is
+inline so that vendoring one component does not drag a package in with it.
+
+Call `setThemeStorageKey()` once at startup if the app already has a key in its
+users' browsers. Paykit's is `paykit.theme`, and changing it silently resets
+every existing preference to the device default.
 
 ## Deviations
 

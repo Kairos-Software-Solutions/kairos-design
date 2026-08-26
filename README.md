@@ -14,6 +14,8 @@ today, and where the two disagree, this repo wins.
 | `dist/tokens.css` | every surface | The `--kairos-*` custom properties, light and dark. The only file with raw hex in it. |
 | `dist/kairos.css` | every surface | The `kairos-*` class vocabulary, 220 classes. Consumes tokens only, no framework. |
 | `dist/base.css` | opt-in | Element-level defaults. Separate because a library that restyles a host app's bare `table` and `input` is invasive. |
+| `dist/format/` | any JS runtime | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
+| `dist/react/` | React apps | Components emitting the classes above. Peer dependency `@radix-ui/react-dialog`, for the dialogs only. |
 | `bin/kairos-design.mjs` | every surface | The CLI that vendors the above into an app and checks it has not drifted. |
 | `docs/kairos-ui.md` | agents and people | The canonical component manifest. Read it before building UI. |
 | `docs/preview.html` | review | Every component, both themes, verified at 320px. |

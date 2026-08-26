@@ -153,3 +153,34 @@ test('the registry refuses to sync into itself', () => {
   assert.equal(code, 1);
   assert.match(out, /cannot sync into itself/);
 });
+
+test('React components split across directories are refused', () => {
+  const dir = app({
+    targets: [
+      { artifact: 'react/Dialog.tsx', path: 'src/ui/Dialog.tsx' },
+      { artifact: 'react/ConfirmDialog.tsx', path: 'src/dialogs/ConfirmDialog.tsx' },
+    ],
+  });
+
+  const { code, out } = run(['sync'], dir);
+  assert.equal(code, 1);
+  assert.match(out, /relative path/);
+  // Otherwise this surfaces as a module-not-found at build time, a long way
+  // from the config that caused it.
+  assert.match(out, /src\/ui/);
+  assert.match(out, /src\/dialogs/);
+});
+
+test('React components in one directory are fine', () => {
+  const dir = app({
+    targets: [
+      { artifact: 'react/Dialog.tsx', path: 'src/ui/Dialog.tsx' },
+      { artifact: 'react/ConfirmDialog.tsx', path: 'src/ui/ConfirmDialog.tsx' },
+      { artifact: 'react/Button.tsx', path: 'src/ui/Button.tsx' },
+    ],
+  });
+
+  const { code } = run(['sync'], dir);
+  assert.equal(code, 0);
+  assert.match(readFileSync(join(dir, 'src/ui/ConfirmDialog.tsx'), 'utf8'), /from '\.\/Dialog'/);
+});
