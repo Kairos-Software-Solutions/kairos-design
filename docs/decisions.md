@@ -91,6 +91,23 @@ React get the same six.
 | `--danger` | `danger` | `--destructive` | The outline form |
 | `--danger-solid` | `dangerSolid` | — | Confirm button of a confirmation dialog and nothing else |
 
+## Sorting
+
+`sortRows` handles empty values before it applies the direction, rather than
+multiplying the comparator's result by `-1`.
+
+Paykit's `use-table-sort` does the multiplication, and its own comment says
+blanks should sort last in both directions. They do not: a descending sort on a
+column with blanks returns them first, so sorting an invoices table by Due
+descending puts a block of dashes at the top. The registry keeps the comment's
+intent and drops the shortcut that broke it.
+
+Paykit's three-state cycle is better than a two-state flip and is adopted here:
+ascending, descending, then back to the screen's own default. A user who sorted
+by mistake otherwise has no way back short of reloading. Its handling of a
+first press on the already-default column is adopted too — that press starts
+descending, or it appears to do nothing.
+
 ## Typography and geometry
 
 Values where the apps disagreed and the registry settles it:

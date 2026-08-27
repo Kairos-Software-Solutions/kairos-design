@@ -112,14 +112,30 @@ test('no raw hex outside the token layer', () => {
 
 test('components hold no styling decisions', () => {
   const offenders = [];
+
   for (const { name, source } of reactFiles) {
     const body = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
     // An icon's own geometry is markup, not styling, so the SVG is not counted.
     const stripped = body.replace(/<svg[\s\S]*?<\/svg>/g, '');
+
     if (/#[0-9a-fA-F]{3,8}\b/.test(stripped)) offenders.push(`${name}: raw hex`);
     if (/\b\d+px\b/.test(stripped)) offenders.push(`${name}: pixel value`);
-    if (/style=\{\{/.test(stripped)) offenders.push(`${name}: inline style object`);
+
+    /**
+     * An inline style is banned for carrying a design value, not for existing.
+     * `OverflowMenu` positions a portalled menu from live measurements, which
+     * no stylesheet can express; those values are expressions, not literals.
+     * So the rule is about what is inside the object.
+     */
+    for (const match of stripped.matchAll(/style=\{\{([\s\S]*?)\}\}/g)) {
+      const literals = match[1].match(/(['"])[^'"]*\1/g) ?? [];
+      const design = literals.filter((l) =>
+        /(^|[^a-z])(\d+(\.\d+)?(px|rem|em|%|vh|vw)|#[0-9a-fA-F]{3,8})/.test(l)
+      );
+      if (design.length) offenders.push(`${name}: design value in a style prop — ${design.join(', ')}`);
+    }
   }
+
   assert.deepEqual(offenders, [], 'these belong in the token or CSS layer');
 });
 

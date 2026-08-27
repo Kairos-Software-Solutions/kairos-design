@@ -30,6 +30,17 @@ export type { EmptyStateProps } from './EmptyState';
 export { default as SortHeader, SortAnnouncer } from './SortHeader';
 export type { SortHeaderProps, SortDirection } from './SortHeader';
 
+export { default as OverflowMenu } from './OverflowMenu';
+export type { OverflowMenuProps, OverflowItem } from './OverflowMenu';
+
+export { default as DataTable } from './DataTable';
+export { compare, sortRows, nextSort } from './sort';
+export type { SortState, Sortable } from './sort';
+export type { DataTableProps, Column, ColumnRole } from './DataTable';
+
+export { default as CollapsibleCard } from './CollapsibleCard';
+export type { CollapsibleCardProps } from './CollapsibleCard';
+
 export { default as Dialog } from './Dialog';
 export type { DialogProps } from './Dialog';
 

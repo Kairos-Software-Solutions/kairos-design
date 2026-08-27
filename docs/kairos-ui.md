@@ -110,9 +110,9 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| `OverflowMenu` | The React wrapper. The CSS is here; the roving-focus and dismissal behaviour is still per-app, and it is where every destructive row action is supposed to live. |
-| `DataTable` | A composite over `kairos-table` that owns sorting and the record-card swap, so each app stops re-deriving both |
-| `CollapsibleCard` | The CSS is here, but the disclosure behaviour and its `aria-expanded` wiring are still per-app |
+| `FilterBar` | The 40px segmented-plus-search row. The CSS is here; the debounce and the filter-state contract are still per-app. |
+| `Select`, `Textarea` | Field variants. `Field` takes them today via its render prop, but neither has a named wrapper. |
+| Rendered component tests | The contract tests are static. Nothing here has been rendered by a test runner, because the registry ships no build step — the first app to adopt it is what exercises the JSX. |
 | Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
 
 ## Formatters
@@ -148,6 +148,10 @@ fails on it.
 | `Banner` | `alert` for a failure, `status` otherwise |
 | `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
 | `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
+| `OverflowMenu` | The only other control a row carries. Portalled and positioned by hand, because a table panel is an overflow container and would clip it. |
+| `DataTable` | Table on desktop, record cards below 768px, sorting on the data. Columns declare a role and the card builds itself from it. |
+| `CollapsibleCard` | Built on `<details>`, so it works before hydration and prints expanded |
+| `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
 | `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
 | `Panel`, `PageHeader`, `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Layout and loading |
