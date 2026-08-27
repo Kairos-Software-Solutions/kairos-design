@@ -13,10 +13,21 @@ import { nextSort, sortRows, type Sortable } from './sort';
  * the table and the card are two renderings of one description.
  *
  *   identifier  the record's name, and the link that opens it. Exactly one.
- *   status      the state chip. At most one, and it sorts first on desktop.
+ *   status      the state chip. At most one.
  *   figure      money or a count. Right-aligned, tabular, never wrapped.
  *   meta        supporting detail: a reference, a date.
  *   actions     the overflow menu. Never a rail of buttons.
+ *
+ * The array's order is the table's order, and it runs down the hierarchy the
+ * user reads by: the identifier, then the secondary identifiers that separate
+ * two similar names, then dates and statuses, then figures, then actions. The
+ * left edge answers which record this is; the right edge answers what to do
+ * about it. Kairos tables used to lead with the status chip, which spends the
+ * strongest column on the one field the State Palette makes findable anywhere.
+ *
+ * Where that leaves the order open, ask rather than guess: a column belonging
+ * to no rung, or two tied on one rung with no leader. The default sort and the
+ * mobile card both follow the array, so the order is expensive to revisit.
  */
 export type ColumnRole = 'identifier' | 'status' | 'figure' | 'meta' | 'actions';
 

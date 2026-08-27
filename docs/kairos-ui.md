@@ -52,6 +52,13 @@ installed. Import order is tokens, base, components.
 | `kairos-skeleton` | Loading placeholder shaped like its content | Empty states | `--line` `--heading` `--label` `--row` `--control` `--summary` |
 | `kairos-figure` | Money and any figure that must not break across lines | Text | — |
 
+Columns run in the order the user reads a record by: the human-readable
+identifier, then the secondary identifiers that separate two similar names,
+then dates and statuses, then figures, then actions. `DataTable` takes the
+order from its `columns` array. Tables written before this rule lead with the
+status chip; that is the superseded order, not a local choice to preserve.
+Where the hierarchy leaves the order open, ask rather than guess.
+
 ## Actions
 
 | Class | Use for | Do not use for | Modifiers |
@@ -148,8 +155,8 @@ fails on it.
 | `Banner` | `alert` for a failure, `status` otherwise |
 | `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
 | `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
-| `OverflowMenu` | The only other control a row carries. Portalled and positioned by hand, because a table panel is an overflow container and would clip it. |
-| `DataTable` | Table on desktop, record cards below 768px, sorting on the data. Columns declare a role and the card builds itself from it. |
+| `OverflowMenu` | The only other control a row carries. Portalled to `<body>` and positioned by hand, because a table panel is an overflow container and would clip it. An app stylesheet re-declaring `.kairos-overflow-menu` as `position: absolute` puts the clipping back. |
+| `DataTable` | Table on desktop, record cards below 768px, sorting on the data. Columns declare a role, the card builds itself from it, and the array's order is the column order above. |
 | `CollapsibleCard` | Built on `<details>`, so it works before hydration and prints expanded |
 | `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
 | `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |
