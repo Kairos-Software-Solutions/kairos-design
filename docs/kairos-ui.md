@@ -15,11 +15,11 @@ Money       dist/format/money.ts   TTD 8,500.00
 Dates       dist/format/dates.ts   24 Aug 2026
 React       dist/react/            components emitting the classes above
 Preview     docs/preview.html      every component, both themes
-Vendoring   kairos-design sync     copies the above into an app
+Emit        kairos-design emit     writes the CSS into a surface with no bundler
 ```
 
-Import order is tokens, base, components. Tokens have to apply before first
-paint; see the sync note in the README.
+Everything above is reachable as `kairos-design/<name>` once the package is
+installed. Import order is tokens, base, components.
 
 ## Shell
 
@@ -134,7 +134,7 @@ module exists to close.
 
 ## React
 
-`dist/react/`, vendored like everything else. The components emit the classes
+`kairos-design/react`, TypeScript source like everything else. The components emit the classes
 above and hold no styling decisions — a `style` prop carrying a colour or a
 pixel value into one means the value belongs in the token layer, and a test
 fails on it.
@@ -161,7 +161,7 @@ Radix is the one dependency, and only for the dialogs. A modal has to trap
 focus, restore it, close on Escape, and mark the rest of the page inert; hand
 rolling that in a shared component means every Kairos app inherits the same
 subtle keyboard trap. Everything else, including the three theme icons, is
-inline so that vendoring one component does not drag a package in with it.
+inline so that importing one component does not drag a package in with it.
 
 Call `setThemeStorageKey()` once at startup if the app already has a key in its
 users' browsers. Paykit's is `paykit.theme`, and changing it silently resets

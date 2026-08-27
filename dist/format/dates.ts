@@ -42,7 +42,7 @@ export function fromSeconds(seconds: number): Date {
  * parsed as UTC and shifted to Port of Spain, `2027-02-13 00:00:00` renders as
  * the evening of 12 February, a day earlier than the schedule it describes.
  */
-const NAIVE = /^\d{4}-\d{2}-\d{2}([T ]\d{2}:\d{2}(:\d{2})?)?$/;
+const NAIVE = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 
 function toDate(value: DateInput): { date: Date; zoned: boolean } | null {
   if (value instanceof Date) {
@@ -53,10 +53,28 @@ function toDate(value: DateInput): { date: Date; zoned: boolean } | null {
   }
   const trimmed = value.trim();
   if (!trimmed) return null;
-  const naive = NAIVE.test(trimmed);
-  const parsed = new Date(naive ? trimmed.replace(' ', 'T') : trimmed);
+
+  // Built from its own components rather than handed to `new Date`, because
+  // that constructor reads the two naive forms in two different zones: a
+  // date-only `2026-08-01` is parsed as UTC per the spec, while
+  // `2026-08-01 00:00:00` is parsed as local. Formatting then applies the
+  // local zone to both, so west of UTC the date-only form came out a day
+  // early — `01 Aug 2026` printed as `31 Jul 2026`, and a due date on an
+  // invoice was off by one for every reader in Port of Spain. Parsed here as
+  // local, the two forms agree and the conversion genuinely cancels.
+  const naive = NAIVE.exec(trimmed);
+  if (naive) {
+    const [, y, mo, d, hh = '0', mm = '0', ss = '0'] = naive;
+    const date = new Date(+y, +mo - 1, +d, +hh, +mm, +ss);
+    // `new Date(99, ...)` means 1999. Four-digit years below 100 are not real
+    // here, but the constructor's remapping is silent, so it is closed off.
+    date.setFullYear(+y);
+    return Number.isNaN(date.getTime()) ? null : { date, zoned: false };
+  }
+
+  const parsed = new Date(trimmed);
   if (Number.isNaN(parsed.getTime())) return null;
-  return { date: parsed, zoned: !naive };
+  return { date: parsed, zoned: true };
 }
 
 function format(value: DateInput, options: Intl.DateTimeFormatOptions, timeZone: string): string | null {

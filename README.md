@@ -9,59 +9,98 @@ today, and where the two disagree, this repo wins.
 
 ## What is here
 
-| Artifact | Reaches | Contents |
+| Artifact | Specifier | Contents |
 | --- | --- | --- |
-| `dist/tokens.css` | every surface | The `--kairos-*` custom properties, light and dark. The only file with raw hex in it. |
-| `dist/kairos.css` | every surface | The `kairos-*` class vocabulary, 220 classes. Consumes tokens only, no framework. |
-| `dist/base.css` | opt-in | Element-level defaults. Separate because a library that restyles a host app's bare `table` and `input` is invasive. |
-| `dist/format/` | any JS runtime | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
-| `dist/react/` | React apps | Components emitting the classes above. Peer dependency `@radix-ui/react-dialog`, for the dialogs only. |
-| `bin/kairos-design.mjs` | every surface | The CLI that vendors the above into an app and checks it has not drifted. |
-| `docs/kairos-ui.md` | agents and people | The canonical component manifest. Read it before building UI. |
-| `docs/preview.html` | review | Every component, both themes, verified at 320px. |
+| Tokens | `kairos-design/tokens.css` | The `--kairos-*` custom properties, light and dark. The only file with raw hex in it. |
+| Vocabulary | `kairos-design/kairos.css` | The `kairos-*` class vocabulary, 220 classes. Consumes tokens only, no framework. |
+| Base | `kairos-design/base.css` | Element-level defaults. Opt-in, because a library that restyles a host app's bare `table` and `input` is invasive. |
+| Formatters | `kairos-design/format/money`, `/format/dates` | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
+| React | `kairos-design/react` | Components emitting the classes above. Peer dependency `@radix-ui/react-dialog`, for the dialogs only. |
+| Manifest | `docs/kairos-ui.md` | The canonical component list. Read it before building UI. |
+| Preview | `docs/preview.html` | Every component, both themes, verified at 320px. |
 
 CSS first, React second, on purpose. Of the five Kairos surfaces, two run React
 (Paykit, Mailkit) and three do not: Uptime ships hand-written CSS with no
 bundler, Card is a single static HTML file, Mailclient is a Roundcube skin. A
-React package would reach two of five. The CSS reaches all five.
+React-only package would reach two of five. The CSS reaches all five.
 
 ## Consuming it
 
-Everything is vendored by copying. Nothing is resolved at build time.
-
 ```sh
-git clone git@github.com:Kairos-Software-Solutions/kairos-design.git   # once, beside your apps
-cd ../paykit && kairos-design sync
+npm install kairos-design
 ```
 
-`sync` copies each artifact to the path the app's `kairos-design.json` names
-and records a hash in `kairos-design.lock.json`. `check` fails if a copy was
-edited in place or has fallen behind, and belongs in CI. See
-[docs/adoption.md](docs/adoption.md) for the config each surface needs.
+Then import what you need. A bundler inlines the CSS into the app's own
+stylesheet at build time, so the tokens are in the first paint with no network
+request:
 
-### Why copies rather than a package
+```css
+@import "kairos-design/tokens.css";
+@import "kairos-design/kairos.css";
+```
 
-Two reasons, and both are load-bearing.
+```tsx
+import { Button, DataTable } from 'kairos-design/react';
+import { formatMoney } from 'kairos-design/format/money';
+```
 
-**Tokens have to apply before first paint.** A stylesheet fetched from a CDN in
-the critical path buys a flash of the wrong theme in exchange for saving a file
-copy.
+The React components and the formatters ship as TypeScript source, because the
+package has no build step. Next apps need the package in `transpilePackages`:
 
-**Paykit and Mailkit build with `build: .` and `COPY . .`**, so the Docker
-build context is the app directory and `npm ci` runs with no GitHub
-credentials. Anything resolved at build time would need BuildKit SSH forwarding
-or a build secret in every Dockerfile. Copies need nothing, which is also what
-lets this repo stay private: a developer clones it once over SSH, and no build
-anywhere has to authenticate.
+```js
+// next.config.js
+export default { transpilePackages: ['kairos-design'] };
+```
 
-The cost of copying is that a copy goes stale silently. That is what `check`
-is for, and why it should run in CI rather than on someone's laptop.
+See [docs/adoption.md](docs/adoption.md) for what each surface needs.
 
-## Why this is a separate repo
+### Surfaces with no bundler
 
-`internal-tools` is private and holds deploy config, and npm cannot install a
-subdirectory of a git repo, so a `packages/kairos-design` folder inside it
-could not be consumed by an app in another repo even within the organisation.
+Uptime, Card, and Mailclient cannot import anything, so they run `kairos-design
+emit` from a build script and gitignore what it writes:
+
+```sh
+kairos-design emit
+```
+
+The output is a build artifact. It is not committed, which is why there is
+nothing to check for drift.
+
+## Why a package rather than copies
+
+Until `0.2.0` the artifacts were vendored: an app copied them in, committed the
+copies, and ran a `check` command in CI to catch a copy that had been edited or
+had fallen behind. That existed because the repo was private, and a private
+dependency cannot resolve in a Docker build that runs `npm ci` with no
+credentials — Paykit and Mailkit both build with `build: .` and `COPY . .`.
+
+Making the repo public removes the constraint that produced all of it. A public
+package resolves in those builds with no secret, no BuildKit SSH forwarding,
+and no deploy key in CI. Nothing about the design system was confidential: it is
+a colour palette, 220 class names, and a Button.
+
+What that bought, beyond deleting a CLI, a config file, a lockfile, and a
+drift checker:
+
+**An upgrade is a decision again.** A version in `package.json` moves when
+someone bumps it. The old `check` compared each app against whatever commit the
+registry checkout happened to be on, so merging anything to the registry's main
+branch turned every app's CI red at once, and the prescribed fix — re-run
+`sync` — pulled in whatever else had landed alongside it.
+
+**Drift stops being possible rather than being detected.** A file produced by a
+build, from a version fixed in `package.json`, cannot quietly disagree with its
+source. `check` was solving a problem that only existed because the copies were
+committed.
+
+**Copying was the wrong half of the shadcn model.** Copying components into an
+app works because you own and edit the copies. This repo copied them and then
+failed the build if you edited one, which took on the duplication without the
+ownership.
+
+The one thing genuinely lost is that tokens no longer reach a surface with no
+build step at all without running something. That is what `emit` is for, and it
+is three surfaces rather than five.
 
 ## Contributing a component
 
@@ -71,5 +110,10 @@ could not be consumed by an app in another repo even within the organisation.
    into a component is a token in the wrong place.
 3. Add the manifest row in the same change. A component that is not in the
    manifest does not exist for the next agent.
-4. If the change renames or retires a class, record it in
+4. Export it from `dist/react/index.ts`. A component that is not reachable
+   through the package entry point does not exist for a consuming app, and a
+   test says so.
+5. If the change renames or retires a class, record it in
    `docs/decisions.md` with the reasoning.
+
+`npm test` before every commit.

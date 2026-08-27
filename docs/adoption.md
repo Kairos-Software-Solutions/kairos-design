@@ -1,58 +1,43 @@
-# Adopting the registry
+# Adopting the design system
 
-One `kairos-design.json` per app, then `kairos-design sync`. The config names
-where each artifact lands; nothing else in the app changes until you start
-replacing hand-rolled classes with the vocabulary.
+```sh
+npm install kairos-design
+```
+
+Then import it. Nothing else in the app changes until you start replacing
+hand-rolled classes with the vocabulary.
 
 Adopt in this order. Each step is independently shippable.
 
-1. **Tokens only.** Sync `tokens.css`, add the `--k-*` or `--color-*` alias
+1. **Tokens only.** Import `tokens.css`, add the `--k-*` or `--color-*` alias
    block described in [decisions.md](decisions.md), and delete the app's own
    token definitions. Nothing renders differently; the app now has one source
    for colour.
-2. **The vocabulary.** Sync `kairos.css` and start deleting the app's local
+2. **The vocabulary.** Import `kairos.css` and start deleting the app's local
    copies of classes it now provides. Rename per the decisions table as you go.
-3. **Base.** Sync `base.css` last, once the app no longer depends on its own
+3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
-
-Run `kairos-design check` in CI from step 1.
 
 ## Paykit
 
-Next 16, Tailwind v4, imports through `globals.css`.
-
-```json
-{
-  "targets": [
-    { "artifact": "tokens.css", "path": "src/app/kairos-tokens.css" },
-    { "artifact": "kairos.css", "path": "src/app/kairos.css" }
-  ]
-}
-```
-
-Then in `globals.css`, above the `@theme inline` block:
+Next 16, Tailwind v4, imports through `globals.css`. Above the `@theme inline`
+block:
 
 ```css
-@import "./kairos-tokens.css";
-@import "./kairos.css";
+@import "kairos-design/tokens.css";
+@import "kairos-design/kairos.css";
 ```
 
 Keep the `@theme inline` block: it is what maps Tailwind's utilities onto the
 tokens, and it should point at `--kairos-*` instead of `--k-*`. Paykit's 420
 inline `style={{}}` blocks are a separate cleanup and are not blocked by this.
 
+For the React layer and the formatters, add the package to `transpilePackages`
+in `next.config.js` — they ship as TypeScript source.
+
 ## Mailkit
 
 Next 15, same shape as Paykit.
-
-```json
-{
-  "targets": [
-    { "artifact": "tokens.css", "path": "src/app/kairos-tokens.css" },
-    { "artifact": "kairos.css", "path": "src/app/kairos.css" }
-  ]
-}
-```
 
 Mailkit's `globals.css` is two design systems stacked — a pre-Kairos `@theme`
 layer for roughly 470 lines, then a Kairos block that overrides it with
@@ -63,7 +48,8 @@ one is a specificity bug worth finding.
 
 ## Uptime
 
-Cloudflare Workers, static `public/`, no bundler.
+Cloudflare Workers, static `public/`, no bundler. It cannot import, so it
+emits.
 
 ```json
 {
@@ -74,11 +60,25 @@ Cloudflare Workers, static `public/`, no bundler.
 }
 ```
 
+```jsonc
+// package.json
+"scripts": { "prebuild": "kairos-design emit" }
+```
+
+```gitignore
+public/kairos-tokens.css
+public/kairos.css
+```
+
 ```html
 <link rel="stylesheet" href="/kairos-tokens.css">
 <link rel="stylesheet" href="/kairos.css">
 <link rel="stylesheet" href="/styles.css">
 ```
+
+Gitignoring the output is the point, not a tidiness preference. A committed
+copy can be edited in place and can fall behind the version in `package.json`;
+one that only exists after a build cannot do either.
 
 Uptime already uses `--kairos-*`, so it needs no alias block — it is the
 cheapest of the four to move. Its remaining `styles.css` should shrink to the
@@ -107,30 +107,39 @@ Add both markers inside the existing `<style>` block, in order:
 </style>
 ```
 
-`sync` replaces only what sits between them and leaves the rest of the file
+`emit` replaces only what sits between them and leaves the rest of the file
 alone. Card is Brand Scale, so it takes the tokens and not `kairos.css`, which
 is Product Scale geometry.
 
+Card is the one surface where the emitted region lands in a committed file,
+because the file *is* the deployable. Re-run `emit` as a predeploy step so the
+markers are refilled from the installed version rather than edited by hand.
+
 ## Mailclient
 
-The Roundcube skin. Same shape as Uptime, into the skin's styles directory.
-Remember that an upgrade there is a tag bump **and** a skin rebuild.
+The Roundcube skin. Same shape as Uptime, into the skin's styles directory —
+the skin rebuild is the emit step. Remember that an upgrade there is a version
+bump **and** a skin rebuild.
+
+## Docker
+
+Paykit and Mailkit build with `build: .` and `COPY . .`, so `npm ci` runs
+inside the image with no GitHub credentials. A public package on npm resolves
+there with nothing added to the Dockerfile.
+
+Until the package is published, install it from the release tarball rather than
+a `github:` specifier:
+
+```json
+"kairos-design": "https://github.com/Kairos-Software-Solutions/kairos-design/archive/refs/tags/v0.2.0.tar.gz"
+```
+
+A `github:` specifier needs `git` in the image, and `node:22-alpine` does not
+ship it. The tarball URL needs only what npm already has, and pins a tag.
 
 ## CI
 
-```yaml
-- name: Check the design system has not drifted
-  run: |
-    git clone --depth 1 git@github.com:Kairos-Software-Solutions/kairos-design.git /tmp/kairos-design
-    node /tmp/kairos-design/bin/kairos-design.mjs check --registry /tmp/kairos-design
-```
-
-A private registry needs a deploy key or a PAT here, because `GITHUB_TOKEN` is
-scoped to the repository running the job. This is the one place the private
-choice costs something — and it costs it in CI, not in the Docker build, which
-is the trade worth making.
-
-`check` reports two failures differently on purpose. A vendored file edited in
-place is lost work waiting to happen: the next sync overwrites it and the
-change never reaches the other apps. A copy that has merely fallen behind is
-just a re-sync.
+There is nothing to check. The version is in `package.json`, the lockfile npm
+already writes pins the bytes, and anything emitted is rebuilt from that
+version rather than tracked. Upgrades arrive the way every other dependency's
+do — as a version bump in a pull request.

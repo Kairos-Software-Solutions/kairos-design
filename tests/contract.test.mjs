@@ -139,16 +139,32 @@ test('components hold no styling decisions', () => {
   assert.deepEqual(offenders, [], 'these belong in the token or CSS layer');
 });
 
-test('every component is vendorable by the CLI', () => {
-  const cli = readFileSync(join(ROOT, 'bin', 'kairos-design.mjs'), 'utf8');
-  const artifacts = new Set([...cli.matchAll(/'(react\/[A-Za-z]+\.tsx?)'/g)].map((m) => m[1]));
+test('every artifact is reachable through the package exports', () => {
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+  const exported = new Set(Object.values(pkg.exports).map((p) => p.replace(/^\.\//, '')));
 
-  const onDisk = readdirSync(join(ROOT, 'dist', 'react')).map((f) => `react/${f}`);
-  const unreachable = onDisk.filter((f) => !artifacts.has(f));
+  const entries = [
+    ...readdirSync(join(ROOT, 'dist'))
+      .filter((f) => f.endsWith('.css'))
+      .map((f) => `dist/${f}`),
+    ...readdirSync(join(ROOT, 'dist', 'format'))
+      .filter((f) => f.endsWith('.ts'))
+      .map((f) => `dist/format/${f}`),
+    'dist/react/index.ts',
+  ];
 
-  // A component the CLI cannot copy does not exist for a consuming app, which
-  // is the same failure as one missing from the manifest.
-  assert.deepEqual(unreachable, [], 'add these to ARTIFACTS in bin/kairos-design.mjs');
+  // An artifact missing from `exports` cannot be imported under any specifier,
+  // so it does not exist for a consuming app. This replaces the check on the
+  // old CLI's hardcoded artifact list: the failure is the same, but the list
+  // that can now be wrong is the one npm actually reads.
+  assert.deepEqual(
+    entries.filter((f) => !exported.has(f)),
+    [],
+    'add these to "exports" in package.json'
+  );
+
+  assert.ok(pkg.files.includes('dist'), 'dist ships in the published tarball');
+  assert.ok(!pkg.private, 'a private package cannot be installed by an app');
 });
 
 test('the index exports every component', () => {

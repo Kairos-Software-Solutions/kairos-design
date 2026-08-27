@@ -20,6 +20,48 @@ In order:
 3. Otherwise, the best-reasoned implementation wins, and the reasoning moves
    into this repo with the code.
 
+## Distribution
+
+**0.2.0 replaced vendoring with a published package, and the repo went
+public.** Recorded here rather than left to a commit message, because the
+reasoning against it is written down in `0.1.0`'s README and a later reader
+will otherwise reinstate it.
+
+`0.1.0` copied the artifacts into each app, committed the copies, and ran
+`kairos-design check` in CI to catch one that had been edited or had fallen
+behind. Its two stated reasons:
+
+**"Tokens have to apply before first paint."** This held against a CDN
+stylesheet in the critical path, but a CDN was never the alternative. An app
+that depends on the package and writes `@import "kairos-design/tokens.css"`
+gets those bytes inlined into its own stylesheet by the bundler, with no
+request and no flash — the same first paint the copy produced.
+
+**"`npm ci` runs with no GitHub credentials."** This one was real. Paykit and
+Mailkit build with `build: .` and `COPY . .`, so a private dependency cannot
+resolve inside the image without a build secret. But it was a consequence of
+the repo being private, and nothing here is confidential: a colour palette, 220
+class names, and a Button. Public, it resolves with nothing added to any
+Dockerfile.
+
+Three things were wrong with the vendored scheme beyond the cost of running it:
+
+- `check` compared each app against whatever commit the local registry checkout
+  was on, and the CI snippet cloned the default branch unpinned. Merging
+  anything to the registry turned every app's CI red at once, and the
+  prescribed fix — re-run `sync` — pulled in whatever else had landed.
+- `sync` warned but still wrote when the registry checkout was dirty, so an app
+  could commit bytes that existed in no commit of the registry anywhere.
+- Copying components into an app is the shadcn model, which works because the
+  app owns and edits the copies. This copied them and then failed the build if
+  you edited one — the duplication without the ownership.
+
+`sync` and `check` are gone. `emit` remains for Uptime, Card, and Mailclient,
+which have no bundler and so cannot import anything; what it writes is a build
+artifact and is gitignored, which is why nothing checks it. `ARTIFACTS` is
+derived from `dist/` rather than hand-listed, so adding a component no longer
+means editing the CLI.
+
 ## Tokens
 
 Canonical prefix is `--kairos-*`: it is what the visual spec's Shipping Tokens

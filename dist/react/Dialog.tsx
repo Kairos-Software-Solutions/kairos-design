@@ -64,7 +64,7 @@ export default function Dialog({ open, onClose, title, children }: DialogProps) 
               <button type="button" onClick={onClose} className="kairos-icon-action" aria-label="Close">
                 {/* An inline glyph rather than an icon package: this is the one
                     icon the registry needs, and a dependency for it would land
-                    in every app that vendors a single component. */}
+                    in every app that imports a single component. */}
                 <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
                   <path
                     d="M3 3l10 10M13 3L3 13"
