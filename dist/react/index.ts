@@ -53,6 +53,9 @@ export type { ToastProps } from './Toast';
 export { default as Panel, PageHeader, Metric, MetricRow, Skeleton, SkeletonStack } from './Panel';
 export type { PanelProps, PageHeaderProps, MetricProps } from './Panel';
 
+export { default as SectionTag } from './SectionTag';
+export type { SectionTagProps } from './SectionTag';
+
 export {
   default as ThemeToggle,
   ThemeSetting,

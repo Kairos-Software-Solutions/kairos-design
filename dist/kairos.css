@@ -2945,6 +2945,57 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   display: none;
 }
 
+/* --- Section tag ---------------------------------------------------------
+   A label, then a rule running to the edge of the block. The Brand Scale
+   section transition the skill names, and the one brand pattern none of the
+   four apps had a class for: Card drew it by hand in its own stylesheet and
+   the website draws it again on every page.
+
+   Not `.kairos-section-title`, which is the Epilogue heading inside a Product
+   Scale panel. This one opens a section on a public page and is the heavier
+   of the two. The names sit close together on purpose, because the skill
+   calls this the section tag and rule 1 in docs/decisions.md gives the skill
+   the name outright.
+
+   The block styles its own label rather than asking the call site for a type
+   class. A rule paired with the wrong type rank is the only way to get this
+   pattern visibly wrong, so the pairing is not a decision a screen gets to
+   make. `:first-child` carries the two classes of specificity it takes to
+   beat the app shell heading rule, so a heading element can be the label. */
+
+.kairos-section-tag {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: var(--kairos-gap) 0 12px;
+}
+
+.kairos-section-tag > :first-child {
+  margin: 0;
+  color: var(--kairos-text-2);
+  font-family: var(--kairos-body);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* The rule is drawn by the block, not by a border on the label, so it takes
+   the width the label leaves rather than a width the call site guesses. */
+.kairos-section-tag::after {
+  content: '';
+  flex: 1;
+  height: var(--kairos-border-w-strong);
+  background: var(--kairos-border);
+}
+
+/* Opening a panel or a card, the container's own padding is the space above. */
+.kairos-section-tag:first-child {
+  margin-top: 0;
+}
+
 /* --- Banner --------------------------------------------------------------
    One page-level notice per screen. Merged from Paykit's `kairos-callout`
    (the bordered box, kept as the base) and its `kairos-notice` (the inline

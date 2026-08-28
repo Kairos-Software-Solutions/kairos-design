@@ -95,6 +95,25 @@ drifted on the value: `--kairos-radius-panel`, `--kairos-border-w-strong`, and
 Paykit is missing `kairos-empty-state`, `kairos-banner`, and `kairos-toast`
 entirely. Those three come from Uptime and Mailkit.
 
+### Section tag, 0.2.7
+
+Card drew a label-plus-rule section opener in its own stylesheet, and the
+website draws the same pattern on every page. Neither Paykit, Mailkit, nor
+Uptime had a class for it, because it is Brand Scale and all three are tools.
+It is in the registry now as `kairos-section-tag`.
+
+The name collides visually with the `kairos-section` family, whose elements are
+`-lede`, `-glyph`, `-title`, `-body`, and `-meta`. Rule 1 settles it: the
+branding skill calls this the section tag, so the skill's name wins outright.
+The manifest's "Do not use for" cell carries the distinction, which is where an
+agent about to make the mistake is actually reading.
+
+The block styles its own label rather than taking a type class from the call
+site. A rule paired with the wrong type rank is the only way to get this
+pattern visibly wrong, and Card had already paired it with `kairos-label-caps`,
+which is the muted metadata rank rather than the section rank. Making the
+pairing a decision a screen gets to make is how that happens twice.
+
 ## State variants
 
 The same four record states carry three vocabularies today. Canonical names are

@@ -122,12 +122,19 @@ action.
 | --- | --- | --- | --- |
 | `kairos-lockup` | The CDN wordmark, theme-switched | A redrawn or recoloured logo | `--light` `--dark` |
 | `kairos-wordmark` | Text wordmark where the image will not fit | Replacing the lockup on a login screen | — |
+| `kairos-section-tag` | Opening a section on a Brand Scale page: a label, then a rule to the edge | A heading inside a panel; that is `kairos-section-title` | — |
 
 Logos are linked from `https://cdn.kairossolutionstt.com` by URL, never copied
 into a repo. Ship both variants, with the same `alt` on each, and let the
 ground pick. The ground is `[data-theme]` — the same signal the tokens read,
 and the only one, so the artwork cannot end up on a surface it was not drawn
 for.
+
+`kairos-section-tag` styles its own label, so the call site passes text and
+nothing else. The two close names are deliberate: the skill calls this pattern
+the section tag, and `kairos-section-title` is the Epilogue heading inside a
+`kairos-section` panel. Brand Scale and Product Scale, and they are never
+interchangeable.
 
 `kairos-sidebar-brand` is the exception worth knowing. It is an inverted
 plaque, ink under a light page and bone under a dark one, so the lockup on it
@@ -214,6 +221,7 @@ fails on it.
 | `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
 | `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
+| `SectionTag` | The Brand Scale section transition. `as` renders the label as a heading, so a screen reader's heading list can carry the page |
 | `Panel` | Border, ground, and `kairos-pad`. `flush` drops the padding for a table that supplies its own |
 | `PageHeader` | Title, one-line `description`, and one primary action |
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
