@@ -152,7 +152,7 @@ often enough that writing them again is the likely mistake.
 | `kairos-code` | An identifier read or copied character by character | Body text | — |
 | `kairos-code-block` | Machine output shown to an operator: a response body, a log line | Prose; it is capped and scrollable | — |
 | `kairos-muted` | Secondary text | The data itself; the heaviest ink is the record | — |
-| `kairos-chip-row` | A wrapping row of chips or short facts | Buttons; that is `kairos-action-row` | — |
+| `kairos-chip-row` | A wrapping row of chips. `--lg` for bare facts, which have no borders to separate them | Buttons; that is `kairos-action-row` | `--lg` |
 | `kairos-checkbox-row` | A checkbox with its label on one line | A field with a hint | — |
 | `kairos-choice-row` | A radio or checkbox with a label and supporting copy | A plain checkbox | — |
 | `kairos-visually-hidden` | Text for a screen reader only | Hiding something from everyone; use `hidden` | — |

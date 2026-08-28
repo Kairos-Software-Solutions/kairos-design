@@ -331,3 +331,34 @@ test('base.css sets the page so an app does not have to', () => {
   assert.match(base, /font:\s*var\(--kairos-text-body\)/, 'body type is set once');
   assert.match(base, /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/, 'hidden beats a components display');
 });
+
+/**
+ * A modifier and its block are both one class, so at equal specificity the one
+ * written later wins. `.kairos-action-row--equal { display: grid }` placed
+ * above `.kairos-action-row { display: flex }` set grid-template-columns on a
+ * flex container: valid CSS, inert, and invisible until someone counts the
+ * buttons on a sign-in form.
+ */
+test('a modifier that changes display comes after the block it modifies', () => {
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const rules = [...withoutComments.matchAll(/(?:^|\n)\s*\.(kairos-[a-z0-9-]+)\s*\{([^}]*)\}/g)];
+
+  const firstIndex = new Map();
+  for (const rule of rules) {
+    if (!firstIndex.has(rule[1])) firstIndex.set(rule[1], rule.index);
+  }
+
+  const misordered = [];
+  for (const [, name, body] of rules) {
+    const split = name.indexOf('--');
+    if (split === -1 || !/display\s*:/.test(body)) continue;
+
+    const block = name.slice(0, split);
+    const blockAt = firstIndex.get(block);
+    if (blockAt !== undefined && blockAt > firstIndex.get(name)) {
+      misordered.push(`.${name} is declared before .${block}`);
+    }
+  }
+
+  assert.deepEqual(misordered, [], 'the block will override the modifier');
+});

@@ -518,36 +518,6 @@ h6 {
   gap: 14px;
 }
 
-/* Buttons in a group share one width. Two ranks side by side at their natural
-   label widths read as one big button and one small one, which is emphasis the
-   ranks are already carrying. */
-.kairos-action-row--equal {
-  display: grid;
-  grid-template-columns: repeat(var(--action-columns, 2), minmax(0, 1fr));
-}
-
-.kairos-action-row--equal > .kairos-button {
-  width: 100%;
-}
-
-/* Two equal columns stop being equal-looking once each is too narrow for its
-   label. Below this the ranks stack, which is the order they read in anyway. */
-@media (max-width: 640px) {
-  .kairos-action-row--equal {
-    --action-columns: 1;
-  }
-}
-
-/* The inline toggle is the last thing in an auth panel, and the primary button
-   above it stamps a shadow down and to the right onto it. */
-.kairos-auth .kairos-theme-toggle--inline {
-  margin-top: 20px;
-}
-
-.kairos-action-row--end {
-  justify-content: flex-end;
-}
-
 .kairos-split--lg { --split-gap: 18px; }
 
 .kairos-mb-lg {
@@ -651,6 +621,37 @@ h6 {
 .kairos-action-row--top {
   align-items: flex-start;
 }
+
+.kairos-action-row--end {
+  justify-content: flex-end;
+}
+
+/* Buttons in a group share one width. Two ranks side by side at their natural
+   label widths read as one big button and one small one, which is emphasis the
+   ranks are already carrying. */
+.kairos-action-row--equal {
+  display: grid;
+  grid-template-columns: repeat(var(--action-columns, 2), minmax(0, 1fr));
+}
+
+.kairos-action-row--equal > .kairos-button {
+  width: 100%;
+}
+
+/* Two equal columns stop being equal-looking once each is too narrow for its
+   label. Below this the ranks stack, which is the order they read in anyway. */
+@media (max-width: 640px) {
+  .kairos-action-row--equal {
+    --action-columns: 1;
+  }
+}
+
+/* The inline toggle is the last thing in an auth panel, and the primary button
+   above it stamps a shadow down and to the right onto it. */
+.kairos-auth .kairos-theme-toggle--inline {
+  margin-top: 20px;
+}
+
 
 /* Two things at opposite ends of a row, wrapping rather than overflowing. */
 .kairos-split {
@@ -2461,6 +2462,14 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+}
+
+/* The same row carrying a record's facts rather than chips: a status, a
+   figure, a timestamp. Chips have their own borders to separate them and 6px
+   is enough; bare facts do not, and at 6px "44 ms" and "text/html" read as one
+   value. */
+.kairos-chip-row--lg {
+  gap: 8px 16px;
 }
 
 .kairos-record-card-identifier {
