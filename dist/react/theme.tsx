@@ -11,6 +11,8 @@ import Segmented from './Segmented';
 const THEMES = ['system', 'light', 'dark'] as const;
 export type ThemePreference = (typeof THEMES)[number];
 
+const SYSTEM_THEME_QUERY = '(prefers-color-scheme: dark)';
+
 /**
  * Where the preference is remembered.
  *
@@ -64,13 +66,17 @@ function readStored(): ThemePreference {
 /**
  * Apply a preference to the document.
  *
- * `data-theme` is removed rather than set to a value for `system` — the media
- * query already answers that question, and a stale attribute would freeze
- * someone into whichever theme they last had when their device changed.
+ * The token layer reads `data-theme` as its only signal, so `system` resolves
+ * the device preference into that same attribute. Keeping one signal also
+ * keeps the page ground and the theme-specific lockup on the same theme.
  */
 export function applyTheme(theme: ThemePreference): void {
-  if (theme === 'system') delete document.documentElement.dataset.theme;
-  else document.documentElement.dataset.theme = theme;
+  document.documentElement.dataset.theme =
+    theme === 'system'
+      ? window.matchMedia(SYSTEM_THEME_QUERY).matches
+        ? 'dark'
+        : 'light'
+      : theme;
 }
 
 /**
@@ -82,7 +88,7 @@ export function applyTheme(theme: ThemePreference): void {
  * dark. A function rather than a constant because it closes over the key.
  */
 export function themeInitScript(): string {
-  return `try{var t=localStorage.getItem(${JSON.stringify(storageKey)});if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}`;
+  return `(function(){var q=window.matchMedia(${JSON.stringify(SYSTEM_THEME_QUERY)});function r(){try{return localStorage.getItem(${JSON.stringify(storageKey)})}catch(e){return null}}function a(){var t=r();document.documentElement.dataset.theme=t==='light'||t==='dark'?t:q.matches?'dark':'light'}a();q.addEventListener('change',a);window.addEventListener('storage',a)})()`;
 }
 
 /**
@@ -95,13 +101,37 @@ export function themeInitScript(): string {
  */
 const listeners = new Set<() => void>();
 
+function notifyListeners(): void {
+  for (const listener of listeners) listener();
+}
+
+let systemMediaQuery: MediaQueryList | undefined;
+
+function handleStorageChange(event: StorageEvent): void {
+  if (event.key !== null && event.key !== storageKey) return;
+  applyTheme(readStored());
+  notifyListeners();
+}
+
+function handleSystemThemeChange(): void {
+  if (readStored() === 'system') applyTheme('system');
+}
+
 function subscribe(onChange: () => void): () => void {
   listeners.add(onChange);
-  // Another tab of the same app is the same person, so its choice is theirs.
-  window.addEventListener('storage', onChange);
+  if (listeners.size === 1) {
+    // Another tab of the same app is the same person, so its choice is theirs.
+    window.addEventListener('storage', handleStorageChange);
+    systemMediaQuery = window.matchMedia(SYSTEM_THEME_QUERY);
+    systemMediaQuery.addEventListener('change', handleSystemThemeChange);
+  }
+
   return () => {
     listeners.delete(onChange);
-    window.removeEventListener('storage', onChange);
+    if (listeners.size === 0) {
+      window.removeEventListener('storage', handleStorageChange);
+      systemMediaQuery?.removeEventListener('change', handleSystemThemeChange);
+    }
   };
 }
 
@@ -120,7 +150,7 @@ export function useThemePreference(): [ThemePreference, (next: ThemePreference) 
     } catch {
       // The theme still changes for this visit; it just is not remembered.
     }
-    for (const listener of listeners) listener();
+    notifyListeners();
   }
 
   return [theme, choose];
