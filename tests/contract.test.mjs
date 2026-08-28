@@ -316,3 +316,18 @@ test('no rule forces display on both lockup variants at once', () => {
 
   assert.deepEqual(offenders, [], 'these outrank the variant selectors and show both lockups');
 });
+
+/**
+ * If base.css does not set the page, every app writes the same four
+ * declarations against the same four tokens, and the one that gets a token
+ * name wrong renders a white page under a dark theme.
+ */
+test('base.css sets the page so an app does not have to', () => {
+  const base = readFileSync(join(ROOT, 'dist', 'base.css'), 'utf8');
+
+  assert.match(base, /background:\s*var\(--kairos-bg\)/, 'the ground comes from the token');
+  assert.match(base, /color:\s*var\(--kairos-text\)/, 'and so does the ink');
+  assert.match(base, /min-width:\s*320px/, 'the 320px floor is the systems own');
+  assert.match(base, /font:\s*var\(--kairos-text-body\)/, 'body type is set once');
+  assert.match(base, /\[hidden\]\s*\{[^}]*display:\s*none\s*!important/, 'hidden beats a components display');
+});

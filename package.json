@@ -1,6 +1,6 @@
 {
   "name": "kairos-design",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "The shared Kairos design system: tokens, component vocabulary, and formatters.",
   "type": "module",
   "license": "UNLICENSED",

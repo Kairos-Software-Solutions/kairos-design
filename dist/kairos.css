@@ -530,6 +530,20 @@ h6 {
   width: 100%;
 }
 
+/* Two equal columns stop being equal-looking once each is too narrow for its
+   label. Below this the ranks stack, which is the order they read in anyway. */
+@media (max-width: 640px) {
+  .kairos-action-row--equal {
+    --action-columns: 1;
+  }
+}
+
+/* The inline toggle is the last thing in an auth panel, and the primary button
+   above it stamps a shadow down and to the right onto it. */
+.kairos-auth .kairos-theme-toggle--inline {
+  margin-top: 20px;
+}
+
 .kairos-action-row--end {
   justify-content: flex-end;
 }
@@ -653,6 +667,11 @@ h6 {
 .kairos-split--md { --split-gap: 14px; }
 
 .kairos-split--end { align-items: flex-end; }
+
+/* Two stacked groups of different heights, tops aligned: a record's details
+   beside the actions on it. The flex default stretches both to the taller one,
+   which drops a one-line action row to the middle of a three-line summary. */
+.kairos-split--top { align-items: flex-start; }
 
 .kairos-plain-list {
   display: grid;

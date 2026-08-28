@@ -19,6 +19,29 @@
   box-sizing: border-box;
 }
 
+/* The page itself: ground, ink, and body type from the token layer.
+   Without this every app writes the same four declarations against the same
+   four tokens, and the one that mistypes `--kairos-bg` gets a white page under
+   a dark theme. `min-width` is the 320px floor the whole system is measured
+   against — below it the page scrolls sideways rather than reflowing. */
+html,
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--kairos-bg);
+  color: var(--kairos-text);
+}
+
+body {
+  font: var(--kairos-text-body)/var(--kairos-text-body-lh) var(--kairos-body);
+}
+
+/* `hidden` loses to any `display` a component sets, and components here set
+   `display` constantly. The attribute has to win or it means nothing. */
+[hidden] {
+  display: none !important;
+}
+
 a {
   color: inherit;
 }
@@ -48,6 +71,8 @@ input,
 select,
 textarea {
   font: inherit;
+  /* No 300ms tap delay on a control a user is trying to press twice. */
+  touch-action: manipulation;
 }
 
 ::-webkit-scrollbar {

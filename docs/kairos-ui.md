@@ -21,6 +21,10 @@ Emit        kairos-design emit     writes the CSS into a surface with no bundler
 Everything above is reachable as `kairos-design/<name>` once the package is
 installed. Import order is tokens, base, components.
 
+`base.css` sets the page: ground, ink, body type, the 320px floor, and the
+`[hidden]` reset. Import it and an app needs no stylesheet of its own to render
+a Kairos page — what stays in the app is composition wired to its own data.
+
 ## Shell
 
 | Class | Use for | Do not use for | Modifiers |
@@ -141,7 +145,7 @@ often enough that writing them again is the likely mistake.
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
 | `kairos-stack` | A vertical stack with one gap | Two blocks that want different gaps; nest instead | `--xs` `--sm` `--md` `--lg` `--xl` |
-| `kairos-split` | Two groups pushed to opposite ends of a row, wrapping | A grid of equal columns | `--sm` `--md` `--lg` `--baseline` `--end` |
+| `kairos-split` | Two groups pushed to opposite ends of a row, wrapping | A grid of equal columns | `--sm` `--md` `--lg` `--baseline` `--top` `--end` |
 | `kairos-form-stack` | The fields inside one form section | Spacing between panels | — |
 | `kairos-grow` | The flex child that takes the remaining width and can still shrink | A fixed column | — |
 | `kairos-measure` | Prose at a readable width | A table | `-sm` `-lg` |
