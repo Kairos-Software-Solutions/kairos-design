@@ -404,6 +404,14 @@ h6 {
   width: fit-content;
 }
 
+/* The flex child that takes what is left. `min-width: 0` is the half of this
+   everyone forgets: without it a long email or URL inside refuses to shrink
+   and pushes the row's other content off the edge. */
+.kairos-grow {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
 .kairos-bold {
   font-weight: 700;
 }
@@ -464,6 +472,22 @@ h6 {
   max-width: 58ch;
 }
 
+/* A Product Scale form. Wide enough for a two-up field row, short enough that
+   a label and its input stay in one eye movement. */
+.kairos-measure-lg {
+  max-width: 48rem;
+}
+
+/* The content column inside `kairos-main`. A tool on a wide display should not
+   run its table to the full width of the glass: the eye loses the row between
+   the identifier and the figure at the far end. Opt-in, because a dashboard
+   built out of tiles legitimately wants the whole width. */
+.kairos-view {
+  width: 100%;
+  max-width: 76rem;
+  margin-inline: auto;
+}
+
 /* An auto-fitting grid of panels or figures. */
 .kairos-grid-auto {
   display: grid;
@@ -492,6 +516,18 @@ h6 {
 .kairos-grid-auto--wide {
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
   gap: 14px;
+}
+
+/* Buttons in a group share one width. Two ranks side by side at their natural
+   label widths read as one big button and one small one, which is emphasis the
+   ranks are already carrying. */
+.kairos-action-row--equal {
+  display: grid;
+  grid-template-columns: repeat(var(--action-columns, 2), minmax(0, 1fr));
+}
+
+.kairos-action-row--equal > .kairos-button {
+  width: 100%;
 }
 
 .kairos-action-row--end {
@@ -532,6 +568,14 @@ h6 {
   margin: 0;
   font-size: 1.05rem;
   font-weight: 600;
+}
+
+/* The reset above drops the UA margin so the panel owns the spacing, and then
+   nothing supplied any — a headed panel sat its heading directly on its first
+   field. Scoped to a heading that has something to separate from: one that is
+   the panel's only child has nothing below it to push away. */
+.kairos-panel-heading:not(:last-child) {
+  margin-bottom: 12px;
 }
 
 /* Vertical stacks. The gap is a token choice, so it lives here rather than at
@@ -899,6 +943,39 @@ h6 {
   font-family: var(--kairos-mono, monospace);
 }
 
+/* An identifier the reader may have to copy or compare character by character:
+   a topic, a reference, an API key fragment. Inline, so it sits in a sentence.
+   `overflow-wrap: anywhere` because these have no spaces to break at and a
+   long one would otherwise widen the panel on a phone. */
+.kairos-code {
+  display: inline-block;
+  padding: 4px 8px;
+  border: 1px solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-elevated);
+  font-family: var(--kairos-mono, monospace);
+  font-size: var(--kairos-text-label);
+  overflow-wrap: anywhere;
+}
+
+/* A response body, a log line, a stack trace — machine output shown to an
+   operator. Capped and scrollable, because the whole point is that it can be
+   arbitrarily long and must not push the actions below it off the screen. */
+.kairos-code-block {
+  max-height: 18rem;
+  margin: 0;
+  padding: 12px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  border: 1px solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-elevated);
+  font-family: var(--kairos-mono, monospace);
+  font-size: var(--kairos-text-label);
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
 /* A native disclosure, restyled to the Kairos border language. The panel
    animates open with the same 200ms ease-out as every other disclosure, and
    the global reduced-motion rule collapses that to nothing. */
@@ -961,6 +1038,13 @@ h6 {
   position: sticky;
   top: 0;
   z-index: 3;
+}
+
+/* Size only. See the note on `.kairos-auth-header .kairos-lockup`. */
+.kairos-topbar-brand .kairos-lockup {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
 }
 
 .kairos-topbar-brand {
@@ -1130,6 +1214,15 @@ h6 {
   text-align: center;
 }
 
+/* Size only, never `display`. Which variant shows is the lockup's own
+   decision, and a rule here that set `display` would outrank it and paint
+   both — the bug that shipped in 0.2.2 against `.kairos-sidebar-brand img`. */
+.kairos-auth-header .kairos-lockup {
+  width: min(190px, 70%);
+  height: auto;
+  margin: 0 auto 18px;
+}
+
 .kairos-auth-header .kairos-page-title,
 .kairos-auth-header .kairos-body-muted {
   margin: 0;
@@ -1257,6 +1350,13 @@ h6 {
   padding: 0 14px;
   border: var(--button-border-width, 2px) solid var(--button-border, var(--kairos-border));
   border-radius: 0;
+  /* The class has to survive being put on an `<a>`. `Button` renders a
+     `<button>`, which the UA does not underline, but the manifest sends
+     navigation to a link — so every app ends up with an anchor wearing this
+     class, and inherits a UA underline straight through a primary action.
+     `--tertiary` is the one rank that wants the underline, and it sets it
+     back on itself. */
+  text-decoration: none;
   background: var(--button-bg, var(--kairos-surface));
   box-shadow: var(--button-shadow, none);
   color: var(--button-color, var(--kairos-text));

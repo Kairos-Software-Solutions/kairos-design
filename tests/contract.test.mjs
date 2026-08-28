@@ -198,3 +198,121 @@ test('the index exports every component', () => {
   const unexported = files.filter((f) => !index.includes(`'./${f}'`));
   assert.deepEqual(unexported, [], 'not reachable from the package entry point');
 });
+
+/**
+ * A bordered box whose content touches the border is the failure that shipped:
+ * `.kairos-panel` paints ground and border only, and the padding lives in
+ * `.kairos-pad`. The class-exists test above could not catch it, because both
+ * classes exist — the component simply emitted the wrong one, and an
+ * unpadded panel renders as a styled box rather than as an unstyled one.
+ */
+test('Panel carries padding by default and drops it when flush', () => {
+  const source = readFileSync(join(ROOT, 'dist', 'react', 'Panel.tsx'), 'utf8');
+  const section = source.match(/<section className=\{([^}]+)\}/)?.[1];
+
+  assert.ok(section, 'Panel still renders a <section> with a computed className');
+  assert.match(section, /kairos-pad/, 'Panel applies the padding class');
+  assert.match(section, /!flush && 'kairos-pad'/, 'flush is what removes it');
+  assert.doesNotMatch(
+    section,
+    /'kairos-flush'/,
+    "`kairos-flush` is a margin reset, not a padding one — flush must drop `kairos-pad`"
+  );
+});
+
+/**
+ * The manifest is the only list an app reads. A class that carries a rule but
+ * no row does not exist for the next agent, which is how four Uptime screens
+ * were built out of `<Panel>` with no padding on any of them.
+ */
+test('the padding utility is documented', () => {
+  const manifest = readFileSync(join(ROOT, 'docs', 'kairos-ui.md'), 'utf8');
+  assert.match(manifest, /\| `kairos-pad` \|/, 'kairos-pad has a manifest row');
+});
+
+/**
+ * The manifest sends page navigation to a link, and the only way to make a
+ * link look like a button is to put the button class on an `<a>`. If the
+ * class does not clear the UA underline, every navigation-primary in every
+ * Kairos app is underlined.
+ */
+test('kairos-button clears the user-agent underline', () => {
+  const rule = css.match(/\n\.kairos-button \{([\s\S]*?)\n\}/)?.[1];
+
+  assert.ok(rule, '.kairos-button has a base rule');
+  assert.match(rule, /text-decoration:\s*none/, 'a link wearing this class is not underlined');
+
+  // The one rank that wants it must still set it back on itself.
+  const tertiary = css.match(/\n\.kairos-button--tertiary \{([\s\S]*?)\n\}/)?.[1];
+  assert.match(tertiary ?? '', /text-decoration:\s*underline/, 'tertiary reads as a link');
+});
+
+/**
+ * `.kairos-panel-heading` resets the UA margin so the panel owns the spacing.
+ * For three versions nothing then owned it, and a headed panel rendered its
+ * title flush against its first field.
+ */
+test('a panel heading is separated from the content under it', () => {
+  const scoped = css.match(/\.kairos-panel-heading:not\(:last-child\) \{([\s\S]*?)\n\}/)?.[1];
+  assert.ok(scoped, '.kairos-panel-heading has a rule for when content follows');
+  assert.match(scoped, /margin-bottom:\s*\d/, 'it pushes that content away');
+});
+
+/**
+ * `kairos-page-header-description` sat in the stylesheet unrendered while every
+ * app grew its own subtitle class. A styled element the component layer cannot
+ * produce is an element that does not exist.
+ */
+test('PageHeader renders the description the stylesheet styles', () => {
+  const source = readFileSync(join(ROOT, 'dist', 'react', 'Panel.tsx'), 'utf8');
+  const header = source.slice(source.indexOf('export function PageHeader'));
+
+  assert.match(header, /kairos-page-header-body/, 'title and description share a body wrapper');
+  assert.match(header, /kairos-page-header-description/, 'the description element is rendered');
+  assert.match(header, /description \?/, 'and is omitted when there is nothing to say');
+});
+
+/**
+ * The manifest is the only list an app reads, so a class it does not name is a
+ * class the next app writes for itself. These are the ones Uptime had already
+ * forked as `.uptime-muted`, `.uptime-grow`, `.uptime-screen-stack` and friends
+ * before they were documented.
+ */
+test('the layout and utility vocabulary is documented', () => {
+  const manifest = readFileSync(join(ROOT, 'docs', 'kairos-ui.md'), 'utf8');
+
+  const undocumented = [
+    'kairos-stack', 'kairos-split', 'kairos-form-stack', 'kairos-grow',
+    'kairos-measure', 'kairos-code', 'kairos-code-block', 'kairos-muted',
+    'kairos-chip-row', 'kairos-checkbox-row', 'kairos-choice-row',
+    'kairos-visually-hidden', 'kairos-align-right', 'kairos-nowrap',
+    'kairos-view', 'kairos-action-row',
+  ].filter((name) => !manifest.includes(`\`${name}\``));
+
+  assert.deepEqual(undocumented, [], 'these carry a rule but no manifest row');
+});
+
+/**
+ * A rule that sets `display` on something matching BOTH lockup variants
+ * outranks their own light/dark selectors and paints the pair, one on the
+ * other's cream tile. `.kairos-sidebar-brand img { display: block }` is exactly
+ * that, and it shipped in 0.2.2. Rules that name a single variant are making a
+ * deliberate choice and are fine; container rules size the artwork only.
+ */
+test('no rule forces display on both lockup variants at once', () => {
+  const withoutComments = css.replace(/\/\*[\s\S]*?\*\//g, '');
+
+  const offenders = [...withoutComments.matchAll(/([^\n{}]+)\{([^}]*)\}/g)]
+    .filter(([, , body]) => /display\s*:/.test(body))
+    .map(([, selector]) => selector.trim())
+    // Only rules that can match a lockup at all.
+    .filter((selector) => /\.kairos-lockup|\.kairos-(sidebar-brand|auth-header|topbar-brand)[^,]*\bimg\b/.test(selector))
+    // A selector naming one variant is choosing, not clobbering.
+    .filter((selector) =>
+      selector.split(',').some((part) => !/--light|--dark/.test(part) && /\.kairos-lockup|\bimg\b/.test(part)))
+    // The base rule is the default the variant selectors are written against:
+    // same specificity, and they come after it. Anything heavier is the bug.
+    .filter((selector) => selector !== '.kairos-lockup');
+
+  assert.deepEqual(offenders, [], 'these outrank the variant selectors and show both lockups');
+});

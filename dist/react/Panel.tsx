@@ -10,10 +10,17 @@ export interface PanelProps {
 /**
  * A bordered container. No shadow: a shadow is a rank, and a panel that is
  * simply holding content is not raised above the page.
+ *
+ * The padding is `kairos-pad`, applied here rather than left to the call site.
+ * `.kairos-panel` carries the border and the ground only, so a panel written
+ * by hand needs both classes — and every app that reached for `<Panel>` alone
+ * got content sitting on the border, with a heading overlapping it. A
+ * component whose `flush` prop promises to remove padding has to have applied
+ * some.
  */
 export default function Panel({ heading, flush = false, children }: PanelProps) {
   return (
-    <section className={['kairos-panel', flush && 'kairos-flush'].filter(Boolean).join(' ')}>
+    <section className={['kairos-panel', !flush && 'kairos-pad'].filter(Boolean).join(' ')}>
       {/* Epilogue 600, not Bebas. Bebas is the page title and nothing else in
           a tool, and a panel heading in it reads as a second page title. */}
       {heading ? <h2 className="kairos-panel-heading">{heading}</h2> : null}
@@ -24,15 +31,28 @@ export default function Panel({ heading, flush = false, children }: PanelProps) 
 
 export interface PageHeaderProps {
   title: ReactNode;
+  /** One sentence under the title: what this screen is for, or what it counts. */
+  description?: ReactNode;
   /** One primary action. Emphasis is a budget. */
   actions?: ReactNode;
 }
 
-/** The page title row: title left, action group right. */
-export function PageHeader({ title, actions }: PageHeaderProps) {
+/**
+ * The page title row: title left, action group right, one line of supporting
+ * copy under the title.
+ *
+ * `kairos-page-header-description` has been in the stylesheet since the port
+ * and this component never rendered it, so every app grew its own subtitle
+ * class with its own measure and its own margin. It is one element; it belongs
+ * to the header that owns the spacing above and below it.
+ */
+export function PageHeader({ title, description, actions }: PageHeaderProps) {
   return (
     <header className="kairos-page-header">
-      <h1 className="kairos-page-title">{title}</h1>
+      <div className="kairos-page-header-body">
+        <h1 className="kairos-page-title">{title}</h1>
+        {description ? <p className="kairos-page-header-description">{description}</p> : null}
+      </div>
       {actions ? <div className="kairos-page-header-actions">{actions}</div> : null}
     </header>
   );

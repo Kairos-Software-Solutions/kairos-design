@@ -32,6 +32,8 @@ installed. Import order is tokens, base, components.
 | `kairos-topbar` | Mobile brand row | Desktop | `--switcher` |
 | `kairos-page-header` | 56px row: title left, actions right | A second header inside a panel | — |
 | `kairos-page-title` | The one Bebas element on the screen, 24px | Any other heading | — |
+| `kairos-page-header-description` | One line of supporting copy under the title. `PageHeader` renders it from its `description` prop | A paragraph; keep it to a sentence | — |
+| `kairos-view` | The centred content column inside `kairos-main` | A tile dashboard that wants the full width | — |
 | `kairos-filter-bar` | 40px row: segmented filter plus search | Sorting; the table header does that | — |
 | `kairos-theme-toggle` | System / Light / Dark | Any other setting | `--inline` |
 | `kairos-skip-link` | First focusable element on every page | — | — |
@@ -46,11 +48,19 @@ installed. Import order is tokens, base, components.
 | `kairos-record-card` | The same records below 768px | Desktop lists | `--inert` |
 | `kairos-collapsible-card` | Detail-heavy cards, collapsed by default | Cards of 3 fields or fewer | — |
 | `kairos-state-chip` | Status of a record | Counts, labels, categories | `--settled` `--overdue` `--awaiting` `--draft` `--neutral` |
-| `kairos-panel` | Bordered container, no shadow | A shadowed featured panel; that is Brand Scale | `--flush` |
+| `kairos-panel` | Bordered container, no shadow. Ground and border only — pair it with `kairos-pad` | A shadowed featured panel; that is Brand Scale | — |
+| `kairos-pad` | The padding inside a panel or card | Spacing between blocks; that is `kairos-stack` | `--xs` `--sm` `--lg` |
 | `kairos-empty-state` | A list or table with no records | Errors; use `kairos-banner` | — |
 | `kairos-metric` | A single figure with its label | A figure inside a table cell | — |
 | `kairos-skeleton` | Loading placeholder shaped like its content | Empty states | `--line` `--heading` `--label` `--row` `--control` `--summary` |
 | `kairos-figure` | Money and any figure that must not break across lines | Text | — |
+
+`kairos-panel` paints the border and the ground and nothing else; the padding
+is `kairos-pad`, a separate class. A panel written by hand takes both. The
+`Panel` component applies `kairos-pad` for you and drops it when you pass
+`flush`, so a table can supply its own — which is the whole meaning of that
+prop, and it was inert for as long as the component applied no padding to
+remove.
 
 Columns run in the order the user reads a record by: the human-readable
 identifier, then the secondary identifiers that separate two similar names,
@@ -63,8 +73,9 @@ Where the hierarchy leaves the order open, ask rather than guess.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-button` | Any action | Navigation between pages; use a link | `--sm` |
+| `kairos-button` | Any action, on a `<button>` or on an `<a>` that navigates | — | `--sm` |
 | `kairos-page-header-primary` | The one primary action on the screen | A second amber claim | — |
+| `kairos-action-row` | A row of buttons | A single button | `--equal` `--end` `--top` |
 | `kairos-overflow-menu` | Secondary and destructive row actions | The primary action | — |
 | `kairos-overflow-item` | One row inside the menu | — | `--destructive` `--divided` |
 | `kairos-dialog-content` | Modal surface | Page-level notices | — |
@@ -121,6 +132,34 @@ two images; the stylesheet flips them. Do not set `display` on a lockup from
 an app rule — a selector like `.my-brand img` outranks the lockup's own and
 renders both at once, one stacked on the other's cream tile.
 
+## Layout and utilities
+
+The stylesheet carries more than this manifest used to name, and an undocumented
+class is one the next agent reinvents. These are the ones an app reaches for
+often enough that writing them again is the likely mistake.
+
+| Class | Use for | Do not use for | Modifiers |
+| --- | --- | --- | --- |
+| `kairos-stack` | A vertical stack with one gap | Two blocks that want different gaps; nest instead | `--xs` `--sm` `--md` `--lg` `--xl` |
+| `kairos-split` | Two groups pushed to opposite ends of a row, wrapping | A grid of equal columns | `--sm` `--md` `--lg` `--baseline` `--end` |
+| `kairos-form-stack` | The fields inside one form section | Spacing between panels | — |
+| `kairos-grow` | The flex child that takes the remaining width and can still shrink | A fixed column | — |
+| `kairos-measure` | Prose at a readable width | A table | `-sm` `-lg` |
+| `kairos-code` | An identifier read or copied character by character | Body text | — |
+| `kairos-code-block` | Machine output shown to an operator: a response body, a log line | Prose; it is capped and scrollable | — |
+| `kairos-muted` | Secondary text | The data itself; the heaviest ink is the record | — |
+| `kairos-chip-row` | A wrapping row of chips or short facts | Buttons; that is `kairos-action-row` | — |
+| `kairos-checkbox-row` | A checkbox with its label on one line | A field with a hint | — |
+| `kairos-choice-row` | A radio or checkbox with a label and supporting copy | A plain checkbox | — |
+| `kairos-visually-hidden` | Text for a screen reader only | Hiding something from everyone; use `hidden` | — |
+| `kairos-align-right` | A figure column | Text | — |
+| `kairos-nowrap` | A value that must not break | A paragraph | — |
+
+An app that writes its own `.myapp-stack`, `.myapp-muted`, or `.myapp-grow` has
+forked one of these. Check this table before adding a class to an app
+stylesheet: what belongs to an app is composition wired to its own state, not
+spacing, measure, or muted text.
+
 ## Not yet built
 
 Claim one by building it. Add its row above in the same change.
@@ -171,7 +210,9 @@ fails on it.
 | `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
 | `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
-| `Panel`, `PageHeader`, `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Layout and loading |
+| `Panel` | Border, ground, and `kairos-pad`. `flush` drops the padding for a table that supplies its own |
+| `PageHeader` | Title, one-line `description`, and one primary action |
+| `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
 
 Radix is the one dependency, and only for the dialogs. A modal has to trap
