@@ -109,7 +109,17 @@ action.
 | `kairos-wordmark` | Text wordmark where the image will not fit | Replacing the lockup on a login screen | — |
 
 Logos are linked from `https://cdn.kairossolutionstt.com` by URL, never copied
-into a repo. Ship both variants and let the ground pick.
+into a repo. Ship both variants, with the same `alt` on each, and let the
+ground pick. The ground is `[data-theme]` — the same signal the tokens read,
+and the only one, so the artwork cannot end up on a surface it was not drawn
+for.
+
+`kairos-sidebar-brand` is the exception worth knowing. It is an inverted
+plaque, ink under a light page and bone under a dark one, so the lockup on it
+is whichever variant the rest of the page is hiding. The markup is the same
+two images; the stylesheet flips them. Do not set `display` on a lockup from
+an app rule — a selector like `.my-brand img` outranks the lockup's own and
+renders both at once, one stacked on the other's cream tile.
 
 ## Not yet built
 

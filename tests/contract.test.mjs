@@ -104,6 +104,28 @@ test('no custom property is referenced without a definition or a fallback', () =
   assert.deepEqual([...new Set(broken)], [], 'referenced with no definition and no fallback');
 });
 
+test('no bare element selector decides what a lockup shows', () => {
+  // How the double logo shipped: `.kairos-sidebar-brand img { display: block }`
+  // is (0,1,1) and `.kairos-lockup--dark { display: none }` is (0,1,0), so the
+  // sizing rule outranked the hide and both variants rendered, one stacked on
+  // the other's cream tile. The lockup pair is decided by single-class rules,
+  // which any `.kairos-thing img` rule beats without naming a lockup at all.
+  // So `display` on a bare element descendant is the shape to keep out.
+  const body = css.replace(/\/\*[\s\S]*?\*\//g, '');
+  const offenders = [];
+
+  for (const [, selector, declarations] of body.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    const rule = selector.trim();
+    if (rule.startsWith('@') || !rule.includes('.kairos-')) continue;
+    // Only the last compound matters: it is what the declaration lands on,
+    // and only an image can be a lockup.
+    if (!/(?:^|[\s>+~])(?:img|picture|svg)$/.test(rule)) continue;
+    if (/(?:^|[;{\s])display\s*:/.test(declarations)) offenders.push(rule);
+  }
+
+  assert.deepEqual(offenders, [], 'name the class, or the rule decides a lockup by accident');
+});
+
 test('no raw hex outside the token layer', () => {
   const body = css.slice(css.indexOf('*/') + 2);
   const hex = [...body.matchAll(/#[0-9a-fA-F]{3,8}\b/g)].map((m) => m[0]);

@@ -185,9 +185,16 @@ h6 {
 
 /* Brand lockup ------------------------------------------------------------
    Two files, one shown. Which one is a question about the surface under it,
-   and the surface follows `data-theme` as well as the device — so the choice
-   is made by the same selectors that pick the colour tokens, not by a
-   `<picture media>` that only ever hears the device. */
+   and the surface follows `data-theme` — so the choice is made by the same
+   selector that picks the colour tokens, not by a `<picture media>` that only
+   ever hears the device. Both variants are rendered and one is hidden, rather
+   than one being chosen: a media query answers what the device prefers, which
+   is not what the person picked in the theme toggle.
+
+   Ship both with the same `alt`. Which one is visible depends on the surface,
+   and on the sidebar plaque it is the one the rest of the page is hiding, so
+   marking either `aria-hidden` leaves the visible logo unnamed on half the
+   screens. */
 
 .kairos-lockup {
   display: block;
@@ -331,11 +338,19 @@ h6 {
   flex-direction: column;
   gap: 4px;
   padding: 12px 20px 10px;
-  background: var(--kairos-text);
+  /* The inverted pair, not `--kairos-text` over `--kairos-bg`. Those land
+     within a step of these today, but the pair is the one that names the
+     intent — this plaque runs against the page — and the token comment comes
+     out and says the sidebar brand block is what it is for. The lockup rules
+     below are written against that. */
+  background: var(--kairos-invert-bg);
 }
 
+/* Sizing only. `display` is the lockup's to set: this selector is (0,1,1) and
+   `.kairos-lockup--dark { display: none }` is (0,1,0), so a `display` here
+   outranks the hide and paints the light lockup on top of the dark one's
+   cream tile. */
 .kairos-sidebar-brand img {
-  display: block;
   width: 100%;
   max-width: 150px;
   max-height: 34px;
@@ -345,7 +360,7 @@ h6 {
 }
 
 .kairos-sidebar-product {
-  color: var(--kairos-bg);
+  color: var(--kairos-invert-fg);
   text-align: center;
   font-size: 0.68rem;
   font-weight: 700;
@@ -2762,17 +2777,15 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    The CDN wordmark ships in a light and a dark variant and the ground picks
    which one shows. These rules are scoped by theme rather than by component,
    which is the one place a component legitimately reads the theme selector:
-   the two files are different artwork, not one artwork in two colours. */
+   the two files are different artwork, not one artwork in two colours.
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) .kairos-lockup--light {
-    display: none;
-  }
-
-  :root:not([data-theme='light']) .kairos-lockup--dark {
-    display: block;
-  }
-}
+   The signal is `[data-theme]` alone, because that is the only signal the
+   token layer answers to. There used to be a `prefers-color-scheme` branch
+   here as well, and it disagreed with the ground in exactly one state: a
+   dark-preferring device with no attribute set got light tokens under a dark
+   lockup, so the black mark landed on an ink plaque and vanished. A lockup
+   that reads a signal its own background does not read is a lockup that will
+   sooner or later be the wrong one. */
 
 [data-theme='dark'] .kairos-lockup--light {
   display: none;
@@ -2780,6 +2793,28 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 
 [data-theme='dark'] .kairos-lockup--dark {
   display: block;
+}
+
+/* The sidebar brand block is the one surface that runs against the page. It
+   is an inverted plaque — ink under a light page, bone under a dark one — so
+   the lockup on it takes the variant the rest of the page is hiding. Two
+   classes rather than one, which is also what keeps any `.kairos-sidebar-brand
+   img` rule from deciding this. */
+
+.kairos-sidebar-brand .kairos-lockup--light {
+  display: none;
+}
+
+.kairos-sidebar-brand .kairos-lockup--dark {
+  display: block;
+}
+
+[data-theme='dark'] .kairos-sidebar-brand .kairos-lockup--light {
+  display: block;
+}
+
+[data-theme='dark'] .kairos-sidebar-brand .kairos-lockup--dark {
+  display: none;
 }
 
 /* --- Banner --------------------------------------------------------------
