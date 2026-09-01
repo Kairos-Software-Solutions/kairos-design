@@ -116,3 +116,40 @@ export const Empty: StoryObj = {
     />
   ),
 };
+
+/**
+ * Four meta columns, which is where the card's wrap-rather-than-truncate rule
+ * is actually tested. Two values fit a line and settle the easy case; four is
+ * how tall a card gets when every column insists on being kept, and it is the
+ * case that decides whether `hideOnCard` is advice or a requirement.
+ *
+ * Compare against `Invoices` at the same width.
+ */
+const fourMetaColumns: Array<Column<Invoice>> = [
+  {
+    key: 'reference',
+    label: 'Reference',
+    role: 'identifier',
+    cell: (row) => <a className="kairos-record-link" href="#">{row.reference}</a>,
+    sortValue: (row) => row.reference,
+  },
+  { key: 'customer', label: 'Customer', role: 'meta', cell: (row) => row.customer, sortValue: (row) => row.customer.toLowerCase() },
+  { key: 'issued', label: 'Issued', role: 'meta', cell: (row) => formatDate(row.issued), sortValue: (row) => row.issued },
+  { key: 'due', label: 'Due', role: 'meta', cell: (row) => formatDate(row.due), sortValue: (row) => row.due },
+  { key: 'terms', label: 'Terms', role: 'meta', cell: () => 'Net 30' },
+  { key: 'state', label: 'Status', role: 'status', cell: (row) => <StateChip variant={row.state}>{row.state}</StateChip>, sortValue: (row) => row.state },
+  { key: 'total', label: 'Total', role: 'figure', cell: (row) => formatMoney(row.total, 'TTD'), sortValue: (row) => row.total },
+];
+
+export const FourMetaColumns: StoryObj = {
+  render: () => (
+    <DataTable
+      label="Invoices"
+      rows={invoices}
+      columns={fourMetaColumns}
+      getKey={(row) => row.id}
+      defaultSort={{ key: 'due', direction: 'descending' }}
+      empty={<EmptyState message="No invoices yet." />}
+    />
+  ),
+};

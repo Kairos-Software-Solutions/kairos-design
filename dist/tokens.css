@@ -24,9 +24,23 @@
   --kairos-elevated: #f5e7c9;
   --kairos-sidebar: #f5e7c9;
 
-  /* --- Line ------------------------------------------------------------- */
+  /* --- Line -------------------------------------------------------------
+     `--kairos-border-subtle` draws the only boundary two live controls have —
+     `.kairos-overflow-trigger` and `.kairos-segmented-option` — so it is a
+     non-text contrast surface and owes 3:1, not a decorative tint. At #d2be90
+     it measured 1.73 on the page, 1.82 on surface and 1.49 on elevated, which
+     is a control with no findable edge at rest on any ground in the system.
+
+     Chosen as the lightest value on the existing hue and saturation that still
+     clears 3:1 against `--kairos-elevated`, the tightest of the three grounds:
+     42deg and 42% are unchanged, only lightness moved. Every table row
+     separator in every app reads through this token too, so the cost of going
+     darker than the floor is paid on every list screen — and the floor is what
+     is owed, not a target to beat.
+
+     3.52 on the page, 3.72 on surface, 3.04 on elevated. */
   --kairos-border: #16110b;
-  --kairos-border-subtle: #d2be90;
+  --kairos-border-subtle: #9d8140;
 
   /* --- Text ------------------------------------------------------------- */
   --kairos-text: #16110b;
@@ -42,6 +56,12 @@
   --kairos-accent: #ffc247;
   --kairos-accent-hover: #e6a92d;
   --kairos-accent-dim: rgba(255, 194, 71, 0.2);
+  /* The disabled primary's fill: amber carried 70% of the way to the page.
+     Rank 1 disabled has to stay ahead of rank 2 enabled, so this rank is the
+     one control that does not drop its ground — it desaturates instead. Still
+     amber, still the loudest thing in a disabled action row, and the ink label
+     reads at 13.17:1 on it. */
+  --kairos-accent-disabled: #ffd278;
   --kairos-accent-text: #16110b;
   --kairos-accent-on-light: #96690e;
 
@@ -116,7 +136,11 @@
   --kairos-sidebar: #2e2720;
 
   --kairos-border: #f5f1e8;
-  --kairos-border-subtle: #6e6152;
+  /* The same reasoning, the same way: hue 32deg and 15% saturation unchanged,
+     lightness lifted until the tightest ground clears. Dark was already closer
+     — 3.04 on the page but 2.75 on surface and 2.45 on elevated — so this moves
+     less far than light did. 3.77 / 3.41 / 3.04. */
+  --kairos-border-subtle: #7f6f5e;
 
   --kairos-text: #f5f1e8;
   --kairos-text-2: #e0d7c8;
@@ -128,6 +152,9 @@
   --kairos-accent: #ffc247;
   --kairos-accent-hover: #e6a92d;
   --kairos-accent-dim: rgba(255, 194, 71, 0.16);
+  /* The same 70%, carried toward the dark page instead, so the desaturation
+     reads as the same gesture in both themes. Ink label at 6.26:1. */
+  --kairos-accent-disabled: #ba8e36;
   --kairos-accent-text: #16110b;
   --kairos-accent-on-light: #ffc247;
 
@@ -212,6 +239,13 @@
   --kairos-section-pad: var(--kairos-space-xl);
   --kairos-page-pad: var(--kairos-space-lg);
   --kairos-screen-pad: var(--kairos-space-2xl);
+
+  /* Form density, which was the only spacing role in the system reaching the
+     scale directly from two rules instead of through a name. Both are read by
+     every form in every consuming app, so tightening a form is one edit here
+     rather than a hunt for two literals. */
+  --kairos-field-gap: var(--kairos-space-xs);
+  --kairos-form-gap: var(--kairos-space-lg);
 
   /* The gap between panels on a screen. Gaps below this are the space scale
      reached directly, or a `kairos-stack--*` modifier. A parallel set of
@@ -302,8 +336,9 @@
   --kairos-track-button: 0.14em;
 
   /* --- Motion -----------------------------------------------------------
-     ease-out, at or under 700ms. Honoured against prefers-reduced-motion in
-     kairos.css. */
+     ease-out, at or under 700ms. Honoured against prefers-reduced-motion by a
+     block at the foot of kairos.css, which collapses every duration here to
+     `--kairos-duration-none` and every loop to a single iteration. */
   --kairos-ease: cubic-bezier(0, 0, 0.2, 1);
   /* 200ms, because that is what six of the nine transitions in the stylesheet
      already ran at while the token said 250ms and nothing read it. Two ranks:
@@ -317,4 +352,10 @@
   --kairos-duration-enter: 450ms;
   /* The skeleton pulse, which is a loop rather than a transition. */
   --kairos-duration-pulse: 1.4s;
+  /* What every duration above collapses to under reduced motion. Not `0s`: a
+     zero-length animation does not reliably fire `animationend` or
+     `transitionend`, so code waiting on one to unmount a node or advance a step
+     waits forever. Reduced motion should take away the movement, not the event.
+     One millisecond lands on the final keyframe in the same frame it starts. */
+  --kairos-duration-none: 1ms;
 }

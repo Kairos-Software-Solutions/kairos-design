@@ -10,12 +10,25 @@ export interface FieldProps {
 }
 
 /**
- * Label, control, hint, and error as one unit.
+ * Label, control, and one message slot.
  *
- * The hint and error rows are always rendered, even when empty. Geometry comes
- * from the slot and not from the content in it: a field that grows a row when
- * validation fails moves every control below it, which on a phone moves the
- * submit button out from under the thumb that is reaching for it.
+ * Both `<p>` elements are always in the DOM, because `aria-describedby` needs
+ * something stable to point at, but they share a single row. The hint holds it
+ * whether or not it carries content, and an error replaces the hint rather than
+ * stacking below it.
+ *
+ * Geometry comes from the slot and not from the content in it: a field that
+ * grows a row when validation fails moves every control below it, which on a
+ * phone moves the submit button out from under the thumb that is reaching for
+ * it. Reserving a second row bought that guarantee and cost 24px on every field
+ * in the system, most of them showing nothing.
+ *
+ * The hint holds the slot rather than the error because the hint is the row
+ * that exists more often. Hand the error the slot instead and a field with no
+ * hint grows the moment validation fails, which is the thing being prevented.
+ *
+ * A call site needing the hint visible alongside an error composes both into
+ * the error content. There is no arrangement where they stack.
  */
 export function Field({ label, hint, error, children }: FieldProps) {
   const id = useId();

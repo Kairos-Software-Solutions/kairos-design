@@ -42,7 +42,26 @@ export interface Column<Row> {
    * value is the bug this prevents.
    */
   sortValue?: (row: Row) => Sortable;
-  /** Hidden on the mobile card. The table still shows it. */
+  /**
+   * Hidden on the mobile card. The table still shows it.
+   *
+   * This is the only way a column leaves a card. The card wraps every meta
+   * value it is given and never drops one on its own, because dropping means
+   * choosing which values matter, and the component cannot know — the guess is
+   * wrong exactly when the reader is looking for the value it dropped. Before
+   * `0.3.1` the card truncated instead, and on the Paykit list at 390px three
+   * of five cards lost their due date to the width of the customer name ahead
+   * of it.
+   *
+   * The cost is height. Two meta columns fit one line; four run to five or six
+   * lines and a card grows from 80px to 184px, so a phone screen holds four
+   * records instead of six. See `Components/DataTable/Four meta columns`.
+   *
+   * That is the intended failure mode. A card that has grown tall is visible in
+   * the workshop and fixed by one flag here; a card that has silently dropped
+   * its third and fourth values looks correct and is not. Reach for this when
+   * the card gets tall, and reach for it deliberately.
+   */
   hideOnCard?: boolean;
 }
 

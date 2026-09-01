@@ -98,6 +98,88 @@ export const InARow: Story = {
           <Button variant="secondary">Save and send</Button>
         </div>
       </Section>
+      <Section
+        title="Equal width, mixed ranks"
+        lede="The case the row above cannot show. A borderless rank in an equal track used to centre its label in a track it did not size, so the tertiary read as a link floating in the middle of an invisible full-width button. Every track is the same width and every label sits at the same offset inside it."
+      >
+        <div className="kairos-action-row kairos-action-row--equal">
+          <Button variant="primary">Send invoice</Button>
+          <Button variant="tertiary">Cancel</Button>
+        </div>
+      </Section>
+    </Page>
+  ),
+};
+
+const ALL_RANKS: ButtonVariant[] = ['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'dangerSolid'];
+
+/**
+ * The arrangement the Matrix could not make.
+ *
+ * The Matrix rendered all six ranks in every state for three versions and hid
+ * a broken left edge the whole time, because a grid of cells never puts two
+ * boxes' edges next to each other — each cell centres its own button and the
+ * comparison the defect lives in is never drawn. Rendering a component is
+ * necessary and not sufficient. The arrangement decides what a reviewer can
+ * see.
+ *
+ * Two arrangements here, each aimed at one defect:
+ *
+ * - **One column, left-aligned, against a guide.** Restore tertiary's
+ *   `padding-inline` or drop the transparent border off the borderless ranks
+ *   and the ragged edge is the first thing on the page.
+ * - **Each rank's two states, adjacent.** Put `opacity: 0.7` back as the only
+ *   disabled signal and the ghost row becomes one control printed twice.
+ */
+export const Edges: Story = {
+  render: () => (
+    <Page
+      title="Edges and states"
+      lede="Two comparisons the Matrix cannot draw, because a grid centres every cell and a defect in a shared edge only exists between two boxes."
+    >
+      <Section
+        title="One column, one edge"
+        lede="Every rank, left-aligned, against a guide. Rank is fill, border and shadow. Geometry carries nothing, so every box is 84×36 and every label starts at the same offset — including the two ranks that paint no border and reserve it transparently instead."
+      >
+        <div
+          className="kairos-panel kairos-pad kairos-stack kairos-stack--sm"
+          style={{ borderLeft: '2px dashed var(--kairos-accent-on-light)' }}
+        >
+          {ALL_RANKS.map((variant) => (
+            <Button key={variant} variant={variant}>
+              Action
+            </Button>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="Each rank, both states"
+        lede="Enabled beside disabled, rank by rank. A disabled control carries two signals — the ground drops to the page and the border drops to the subtle weight — so no rank reads as its own enabled state in lighter ink."
+      >
+        <div className="kairos-panel kairos-pad kairos-stack kairos-stack--sm">
+          {ALL_RANKS.map((variant) => (
+            <div key={variant} className="kairos-action-row">
+              <Button variant={variant}>Action</Button>
+              <Button variant={variant} disabled>
+                Action
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="Rank 1 disabled against rank 2 enabled"
+        lede="The pairing the flat opacity inverted. A primary that drops its ground to the page becomes a disabled secondary, so a screen with nothing available shows no primary at all — at the moment somebody is looking for the way forward. The primary is the one rank that desaturates instead of dropping."
+      >
+        <div className="kairos-panel kairos-pad kairos-action-row">
+          <Button variant="primary" disabled>
+            Send invoice
+          </Button>
+          <Button variant="secondary">Save as draft</Button>
+        </div>
+      </Section>
     </Page>
   ),
 };

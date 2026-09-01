@@ -8,9 +8,9 @@ import { Page, Section } from '../Specimen';
 /**
  * Label, control, hint, and error as one unit.
  *
- * A field holds its hint and error rows whether or not they carry content, so
+ * A field holds one message slot whether or not it carries content, so
  * validating a form does not move the layout under the cursor of the person
- * fixing it.
+ * fixing it. The hint holds the slot and an error replaces it.
  */
 const meta = {
   title: 'Components/Field',
@@ -27,11 +27,21 @@ export const Playground: Story = {};
 /** Every state a field can be in, stacked so the row heights line up or do not. */
 export const States: Story = {
   render: () => (
-    <Page title="Field states" lede="The hint row and the error row are always present. Type into the last one and watch nothing below it move.">
+    <Page title="Field states" lede="One message slot, held whether or not it is filled. The hint holds it, an error replaces it, and every field is the same height either way. Four shapes here: no message, hint only, error only, and both at once.">
       <div className="kairos-panel kairos-pad kairos-form-stack" style={{ maxWidth: '32rem' }}>
         <InputField label="Reference" defaultValue="INV-2026-0184" />
         <InputField label="Customer email" placeholder="name@company.com" hint="We send the invoice here and nowhere else." />
         <InputField label="Amount" defaultValue="8500.00" error="Enter an amount with at most two decimal places." />
+        {/* Both at once. The error takes the slot and the hint is hidden, which
+            is the case that decides whether the field grows on validation. No
+            story rendered it before 0.3.1, which is how the stacked rows
+            shipped. */}
+        <InputField
+          label="Tenant slug"
+          defaultValue="kairos solutions"
+          hint="Lowercase letters, numbers and hyphens."
+          error="Slugs cannot contain spaces. Try kairos-solutions."
+        />
         <InputField label="Tenant" defaultValue="kairossolutionstt" disabled />
         <Field label="Terms" hint="Shown at the foot of the invoice.">
           {({ id, describedBy }) => (

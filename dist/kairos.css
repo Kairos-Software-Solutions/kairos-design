@@ -625,27 +625,46 @@ h6 {
 /* A label and its field. */
 .kairos-field {
   display: grid;
-  gap: var(--kairos-space-xs);
+  gap: var(--kairos-field-gap);
 }
 
 .kairos-field-hint,
 .kairos-field-error {
-  /* The row is held whether or not it carries content, so validation does not
-     move the controls below it. Derived from the type rather than measured
-     once: at 11.5px and 1.45 somebody wrote 17px, and the row stopped matching
-     its own text the first time either value moved. */
-  min-height: calc(var(--kairos-text-sm) * 1.45);
   margin: 0;
   font-size: var(--kairos-text-sm);
   line-height: 1.45;
 }
 
 .kairos-field-hint {
+  /* The hint holds the message slot, whether or not it carries content, so
+     validation does not move the controls below it. The hint holds it rather
+     than the error because the hint is the row that exists more often: a field
+     with no hint would otherwise grow when an error arrived.
+
+     Derived from the type rather than measured once: at 11.5px and 1.45
+     somebody wrote 17px, and the row stopped matching its own text the first
+     time either value moved. */
+  min-height: calc(var(--kairos-text-sm) * 1.45);
   color: var(--kairos-text-muted);
 }
 
 .kairos-field-error {
   color: var(--kairos-state-overdue);
+}
+
+/* One slot, not two. An empty error leaves the grid entirely rather than
+   holding a second row, which is what put 40 of a field's 107 pixels into two
+   rows that were empty most of the time. */
+.kairos-field-error:empty {
+  display: none;
+}
+
+/* The error takes the slot the hint was holding. Stacking them puts the error
+   one row further from the control it describes than it is from the next
+   field's label, so the message ends up nearer the thing it is not about. A
+   call site needing both visible composes them into the error content. */
+.kairos-field:has(.kairos-field-error:not(:empty)) .kairos-field-hint {
+  display: none;
 }
 
 /* A row of actions. Never more than three bordered buttons in one group. */
@@ -781,7 +800,7 @@ h6 {
 
 .kairos-form-stack {
   display: grid;
-  gap: var(--kairos-space-lg);
+  gap: var(--kairos-form-gap);
 }
 
 .kairos-fit {
@@ -1503,23 +1522,46 @@ h6 {
   color: var(--kairos-state-overdue);
 }
 
-/* A disabled primary keeps its amber and is dimmed instead. Repainting it
-   cream made it identical to an enabled rank 2, so at the exact moment
-   somebody is looking for the way forward the screen showed two outlined
-   buttons and no primary.
+/* The same two signals `.kairos-input-field:disabled` uses, so "not available"
+   reads the same on a control that commits as on one that takes input: the
+   ground drops to the page so the button stops looking raised off it, and the
+   border drops to the subtle weight so it stops claiming the structural rank.
+   The comment on the input rule has claimed this parity since it was written
+   and it was not true until now.
 
-   Opacity dims a label against its own fill as much as it dims the fill
-   against the page, so at 0.45 the amber primary lost its label while the
-   outlined secondary beside it kept its ink border — the ranks inverted, both
-   disabled. At 0.7 the fill still says which one is the primary and its label
-   still reads. Dropping the stamp is what says "not pressable": Shadow Rank
-   already means "raised interactive layer", so removing it is a rank signal
-   rather than another colour one, and it costs no contrast. */
+   Opacity is no longer the mechanism. One flat `opacity: 0.7` across six ranks
+   was one signal, not two, and on the borderless ranks it was close to none —
+   a disabled ghost was the same control with slightly lighter text, on text
+   that was already muted. It also inverted the ranks: a washed-out amber
+   primary beside a solid ink-bordered secondary reads as the weaker of the
+   two, at the moment somebody is looking for the way forward.
+
+   The stamp and the transform stay off. Shadow Rank means "raised interactive
+   layer", so removing it is a rank signal rather than another colour one, and
+   it costs no contrast. */
 .kairos-button:disabled {
+  --button-bg: var(--kairos-bg);
+  --button-hover-bg: var(--kairos-bg);
+  --button-border: var(--kairos-border-subtle);
+  --button-color: var(--kairos-text-muted);
   cursor: not-allowed;
-  opacity: 0.7;
   box-shadow: none;
   transform: none;
+}
+
+/* The one rank that does not drop its ground. The branding skill requires a
+   disabled rank 1 to stay visibly ahead of an enabled rank 2, and dropping the
+   primary to the page makes it identical to a disabled secondary — so the
+   screen shows no primary at the moment somebody is looking for the way
+   forward. It desaturates instead and keeps its ink label, which reads at
+   13.17:1 on the light fill and 6.26:1 on the dark one.
+
+   Its border still drops to the subtle weight, so the second signal is the
+   same one every other rank gets. */
+.kairos-button--primary:disabled {
+  --button-bg: var(--kairos-accent-disabled);
+  --button-hover-bg: var(--kairos-accent-disabled);
+  --button-color: var(--kairos-accent-text);
 }
 
 /* Checkboxes and radios were shipping the browser default, which paints them
@@ -2590,15 +2632,44 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   text-align: right;
 }
 
-/* One line of context, truncated rather than wrapped. A second line here is
-   how a condensed card grows back into a full one. */
+/* Context, wrapped rather than truncated. This was one nowrap line with
+   `text-overflow: ellipsis`, which does not do what it looks like it does when
+   the line is several elements: the ellipsis lands at the end of the *box*, so
+   a long first value pushes every later value out of the card and the reader
+   loses the ones they can no longer see. On the Paykit list at 390px,
+   "Trinidad Systems Limited" needed 230px in a 172px box and took the due date
+   with it. Three of five cards lost their date.
+
+   Wrapping costs a second line on the cards that need one. Truncating costs
+   the value. */
 .kairos-record-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--kairos-space-xs);
   min-width: 0;
-  overflow: hidden;
   color: var(--kairos-text-muted);
   font-size: var(--kairos-text-md);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+}
+
+/* The separator between two values, drawn here rather than in `DataTable`.
+   Punctuation between values is a presentation decision: the card wants a
+   divider and the table wants none, from the same cell function. Putting it in
+   the component would mean the string carrying its own separator into every
+   surface that renders it, including the table.
+
+   It hangs off the end of the value before it rather than the start of the
+   value after it. Both read identically on one line and differently on two: as
+   `::before` on the later value, a wrap puts the divider at the start of the
+   new line and the card reads as a bullet list. Trailing, it stays with the
+   value it follows and a wrapped line begins with its own value.
+
+   `:not(:last-child)`, so a card with one meta value shows no divider. */
+.kairos-record-card-meta > *:not(:last-child)::after {
+  content: '·';
+  margin-inline-start: var(--kairos-space-xs);
+  color: var(--kairos-border-subtle);
 }
 
 .kairos-select-card {
@@ -2908,6 +2979,39 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    Page numbers and the date are the browser's own header and footer. Chrome
    does not implement `@page` margin boxes, so CSS cannot draw them.
    ========================================================================== */
+
+/* Reduced motion ---------------------------------------------------------
+   `tokens.css` has said the motion tokens are "honoured against
+   prefers-reduced-motion in kairos.css" since they were written, and no such
+   rule existed. Six animations shipped unguarded, two of them infinite: a
+   skeleton pulsed and a spinner turned for as long as the screen was open, on
+   a machine whose owner had asked the operating system for none of it. A loop
+   is the one that matters, because it is the one that runs long enough to.
+
+   Scoped to this package's own elements rather than `*`. A design system is a
+   guest on somebody else's page: the reader's preference is about our motion,
+   and an app's own animation is the app's to guard. Every animation and
+   transition in this stylesheet is on a `kairos-` class, so the attribute
+   selector covers exactly our surface.
+
+   `--kairos-duration-none` rather than `0s`, for the reason recorded on the
+   token: a zero-length animation does not reliably fire `animationend` or
+   `transitionend`, and code waiting on one to unmount a node or advance a step
+   then waits forever. Reduced motion should take away the movement, not the
+   event.
+
+   `scroll-behavior` is a guard rather than a fix: nothing here sets `smooth`
+   today, and this is where it would have to be handled if something did. */
+@media (prefers-reduced-motion: reduce) {
+  [class*='kairos-'],
+  [class*='kairos-']::before,
+  [class*='kairos-']::after {
+    animation-duration: var(--kairos-duration-none) !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: var(--kairos-duration-none) !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* Rendered on paper only. `PrintDocumentHeader` writes this. */
 .kairos-print-only {
@@ -3280,8 +3384,11 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-bg: transparent;
   --button-hover-bg: transparent;
   --button-color: var(--kairos-accent-on-light);
-  --button-border-width: 0;
-  padding-inline: var(--kairos-space-2xs);
+  /* Transparent, not absent. The border keeps its width so this rank measures
+     the same box as a bordered one; painting nothing is what made it 20px
+     narrower than every other rank and started its label 10px inside theirs.
+     Rank is fill, border and shadow. Never geometry. */
+  --button-border: transparent;
   text-decoration: underline;
   text-underline-offset: 0.2em;
 }
@@ -3290,7 +3397,7 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-bg: transparent;
   --button-hover-bg: var(--kairos-elevated);
   --button-color: var(--kairos-text);
-  --button-border-width: 0;
+  --button-border: transparent;
 }
 
 .kairos-button--tertiary:hover:not(:disabled),

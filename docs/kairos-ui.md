@@ -58,8 +58,15 @@ and gap in the system is one of these.
 Role tokens sit on top, so a call site names its decision rather than its size:
 `--kairos-panel-pad`, `--kairos-section-pad`, `--kairos-page-pad`,
 `--kairos-screen-pad`, `--kairos-pad-control`, `--kairos-pad-cell-x`,
-`--kairos-pad-cell-y`, `--kairos-gap`. Making cells tighter everywhere is one
-edit to `--kairos-pad-cell-y`, not a search for `12px`.
+`--kairos-pad-cell-y`, `--kairos-gap`, `--kairos-field-gap`,
+`--kairos-form-gap`. Making cells tighter everywhere is one edit to
+`--kairos-pad-cell-y`, not a search for `12px`.
+
+The last two are form density. `--kairos-field-gap` is the gap between a
+field's label, control and message; `--kairos-form-gap` is the gap between
+fields. They default to `xs` and `lg`, and they are what every form in every
+consuming app resolves through, so a tighter form is one edit rather than two
+literals in two rules.
 
 From an app, reach the scale through `kairos-stack--*` and `kairos-pad--*`
 rather than through the tokens. Those modifiers are the scale.

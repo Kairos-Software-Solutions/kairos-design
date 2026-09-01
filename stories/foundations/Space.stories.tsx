@@ -65,7 +65,7 @@ export const Scale: Story = {
         title="By role"
         lede="What a step is for, so a call site names its decision rather than its size. One edit when panels get roomier, instead of nine."
       >
-        <Values tokens={group(constant, '--kairos-pad-', '--kairos-panel-pad', '--kairos-section-pad', '--kairos-page-pad', '--kairos-screen-pad')} />
+        <Values tokens={group(constant, '--kairos-pad-', '--kairos-panel-pad', '--kairos-section-pad', '--kairos-page-pad', '--kairos-screen-pad', '--kairos-field-gap', '--kairos-form-gap')} />
       </Section>
 
       <Section title="Gaps" lede="From tightest to loosest: inside a control, between siblings, between blocks in a panel, between panels, between sections.">
