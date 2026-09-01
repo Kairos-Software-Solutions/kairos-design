@@ -130,6 +130,26 @@ The one thing genuinely lost is that tokens no longer reach a surface with no
 build step at all without running something. That is what `emit` is for, and it
 is three surfaces rather than five.
 
+## Working on this repo
+
+Planned work is managed by [OpenSpec](https://github.com/Fission-AI/OpenSpec).
+Four changes, 155 tasks:
+
+```sh
+openspec list                          # the changes and their task counts
+openspec show <change>                 # proposal, specs and deltas
+openspec validate --changes --strict   # before committing
+```
+
+Start at `openspec/changes/README.md` in the registered `kairos-plans` store.
+It says what each change is and which order they go in. Run `openspec context`
+from this repo to see the store's local path. The reasoning behind the changes
+is eight ADRs in [`docs/adr/`](docs/adr/); each change names the ones it
+implements.
+
+Neither directory ships, nor does `.claude/`. `files` is an allowlist of `dist`,
+`bin` and `docs/kairos-ui.md`, and a test fails if that stops being true.
+
 ## Contributing a component
 
 1. Read `docs/kairos-ui.md`. If the role is already there, extend it with a
