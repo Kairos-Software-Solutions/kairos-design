@@ -17,12 +17,40 @@ today, and where the two disagree, this repo wins.
 | Formatters | `kairos-design/format/money`, `/format/dates` | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
 | React | `kairos-design/react` | Components emitting the classes above. Peer dependency `@radix-ui/react-dialog`, for the dialogs only. |
 | Manifest | `docs/kairos-ui.md` | The canonical component list. Read it before building UI. |
-| Preview | `docs/preview.html` | Every component, both themes, verified at 320px. |
+| Workshop | `npm run storybook` | Every component and every screen, both themes, four viewports. |
 
 CSS first, React second, on purpose. Of the five Kairos surfaces, two run React
 (Paykit, Mailkit) and three do not: Uptime ships hand-written CSS with no
 bundler, Card is a single static HTML file, Mailclient is a Roundcube skin. A
 React-only package would reach two of five. The CSS reaches all five.
+
+## Seeing it
+
+```sh
+npm install
+npm run storybook
+```
+
+Foundations first: colour, space, type, and the stamp, all read out of
+`tokens.css` itself so a specimen page cannot drift from the file it documents.
+Then every component. Then **Screens**, which is the part that matters — the
+same record list rendered as Mailkit, as Uptime, and as Paykit, side by side.
+Two apps can pass every component story and still look nothing alike, because
+looking alike is a property of the composition.
+
+Everything below was found by rendering this package for the first time, and
+none of it was findable any other way:
+
+- `kairos-table-panel` painted no border, no ground, no radius, and no shadow,
+  so every table the registry rendered had no container.
+- Five heading classes rendered in Bebas on any surface outside the app shell.
+- A panel heading rendered at 13px inside the shell, because the default it was
+  overriding outranked it.
+- An app marking its current nav item with `aria-current="page"` got no active
+  state.
+- A disabled input looked exactly like one you can type in.
+
+The workshop is why those are past tense. See `docs/decisions.md`.
 
 ## Consuming it
 

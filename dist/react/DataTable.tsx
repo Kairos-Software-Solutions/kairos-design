@@ -102,7 +102,12 @@ export default function DataTable<Row>({
     <>
       <SortAnnouncer sort={sort} labels={labels} />
 
-      <div className="kairos-table-panel kairos-desktop-table">
+      {/* Three classes, not two. `kairos-panel` paints the border, the ground,
+          the radius, and the stamp; `kairos-table-panel` removes the padding
+          and clips the header band to the radius; `kairos-desktop-table` hides
+          the whole thing below 768px in favour of the cards. Dropping the
+          first is what left every table in the registry with no container. */}
+      <div className="kairos-panel kairos-table-panel kairos-desktop-table">
         <div className="kairos-table-wrap">
           <table className="kairos-table" aria-label={label}>
             <thead>

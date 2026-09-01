@@ -255,7 +255,7 @@ test('kairos-button clears the user-agent underline', () => {
 test('a panel heading is separated from the content under it', () => {
   const scoped = css.match(/\.kairos-panel-heading:not\(:last-child\) \{([\s\S]*?)\n\}/)?.[1];
   assert.ok(scoped, '.kairos-panel-heading has a rule for when content follows');
-  assert.match(scoped, /margin-bottom:\s*\d/, 'it pushes that content away');
+  assert.match(scoped, /margin-bottom:\s*var\(--kairos-space-/, 'it pushes that content away, by a step on the scale');
 });
 
 /**

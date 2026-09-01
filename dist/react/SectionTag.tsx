@@ -6,9 +6,11 @@ export interface SectionTagProps {
   /**
    * Render the label as a heading. A public page's sections are usually real
    * headings, and a screen reader's heading list is how a reader skips
-   * between them. Left off, the label is a `<span>` and names nothing.
+   * between them. Left off, the label is a `<span>` and names nothing, which
+   * is why `'span'` is in the union: the default has to be a value the prop
+   * accepts, or the component does not typecheck against its own signature.
    */
-  as?: 'h2' | 'h3' | 'h4';
+  as?: 'span' | 'h2' | 'h3' | 'h4';
 }
 
 /**

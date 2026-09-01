@@ -1,5 +1,6 @@
 'use client';
 
+import type { ReactElement } from 'react';
 import { useSyncExternalStore } from 'react';
 import Segmented from './Segmented';
 
@@ -156,7 +157,7 @@ export function useThemePreference(): [ThemePreference, (next: ThemePreference) 
   return [theme, choose];
 }
 
-const ICONS: Record<ThemePreference, JSX.Element> = {
+const ICONS: Record<ThemePreference, ReactElement> = {
   // Monitor, sun, and moon as inline paths. An icon package would be a
   // dependency every app inherits for three glyphs.
   system: (

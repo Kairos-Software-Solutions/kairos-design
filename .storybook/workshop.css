@@ -1,0 +1,65 @@
+/* Workshop chrome. Not part of the registry, and never imported by an app.
+   Everything here exists to frame a story; nothing here styles a component. */
+
+.workshop {
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--kairos-bg);
+  color: var(--kairos-text);
+  font-family: var(--kairos-body);
+  font-size: var(--kairos-text-body);
+  line-height: var(--kairos-text-body-lh);
+}
+
+/* A story that renders a whole app frame supplies its own ground. */
+.workshop:has(> .kairos-app-shell) {
+  padding: 0;
+}
+
+/* Specimen scaffolding for the Foundations pages: a labelled grid of swatches,
+   rules, and boxes. Deliberately plain, so nothing here can be mistaken for a
+   Kairos component by an agent reading the stories for patterns. */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.spec-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--kairos-text-muted);
+}
+
+.spec-name {
+  font-family: var(--kairos-mono);
+  font-size: 11px;
+  color: var(--kairos-text-2);
+  overflow-wrap: anywhere;
+}
+
+.spec-value {
+  font-family: var(--kairos-mono);
+  font-size: 11px;
+  color: var(--kairos-text-muted);
+}
+
+.spec-swatch {
+  height: 56px;
+  border: 1px solid var(--kairos-border-subtle);
+  border-radius: 2px;
+}
+
+.spec-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: baseline;
+  padding-block: 6px;
+  border-bottom: 1px solid var(--kairos-border-subtle);
+}
+
+.spec-row:last-child {
+  border-bottom: 0;
+}

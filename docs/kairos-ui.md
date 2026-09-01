@@ -25,6 +25,110 @@ installed. Import order is tokens, base, components.
 `[hidden]` reset. Import it and an app needs no stylesheet of its own to render
 a Kairos page — what stays in the app is composition wired to its own data.
 
+## Foundations
+
+Read this section before writing a value. Everything below it is composition;
+this is the part that decides whether two screens look like one system.
+
+A number written by hand is the mechanism by which two apps that both use this
+package end up looking nothing alike. An agent building a new screen has to
+pick a spacing, and with no scale to pick from it picks a new one. Before these
+scales existed, `kairos.css` shipped 38 distinct padding values, 13 gaps, 33
+font sizes, and 11 tracking values against 3 tracking tokens — and referenced
+none of the tokens that named them. `npm test` now fails on a literal where a
+token exists, so this is enforced rather than requested.
+
+### Space
+
+Nine steps, fine at the bottom and coarse at the top. Every padding, margin,
+and gap in the system is one of these.
+
+| Token | Value | Reach for it when |
+| --- | --- | --- |
+| `--kairos-space-3xs` | 2px | Two things that are one thing: a glyph and its chip label |
+| `--kairos-space-2xs` | 4px | Inside a control |
+| `--kairos-space-xs` | 6px | A label and the control under it |
+| `--kairos-space-sm` | 8px | Siblings in a row: chips, nav rows |
+| `--kairos-space-md` | 12px | Table cell padding, fields in a form |
+| `--kairos-space-lg` | 16px | Panel padding, and the gap between panels |
+| `--kairos-space-xl` | 24px | Between sections on a screen |
+| `--kairos-space-2xl` | 32px | A sign-in panel, a page that is one block |
+| `--kairos-space-3xl` | 48px | Brand Scale only |
+
+Role tokens sit on top, so a call site names its decision rather than its size:
+`--kairos-panel-pad`, `--kairos-section-pad`, `--kairos-page-pad`,
+`--kairos-screen-pad`, `--kairos-pad-control`, `--kairos-pad-cell-x`,
+`--kairos-pad-cell-y`, `--kairos-gap`. Making cells tighter everywhere is one
+edit to `--kairos-pad-cell-y`, not a search for `12px`.
+
+From an app, reach the scale through `kairos-stack--*` and `kairos-pad--*`
+rather than through the tokens. Those modifiers are the scale.
+
+### Type
+
+Eight steps. `--kairos-text-body` stays in `rem` so a reader's browser setting
+still moves it; the rest are `px`, because the ranks being removed were
+half-pixel ones.
+
+| Token | Value | Rank |
+| --- | --- | --- |
+| `--kairos-text-2xs` | 10px | A count on a nav row |
+| `--kairos-text-xs` | 11px | State chips, table headers |
+| `--kairos-text-sm` | 12px | Buttons, field labels, hints |
+| `--kairos-text-md` | 13px | Nav rows, secondary body |
+| `--kairos-text-body` | 0.875rem | Body, table cells |
+| `--kairos-text-lg` | 16px | Panel headings, and every text input |
+| `--kairos-text-xl` | 20px | A large figure |
+| `--kairos-text-title` | 24px | The page title, in Bebas, once per screen |
+
+Role aliases: `--kairos-text-heading`, `--kairos-text-label`,
+`--kairos-text-chip`, `--kairos-text-button`, `--kairos-text-meta`,
+`--kairos-text-input`. An input takes 16px because below that Safari zooms the
+page when the field is focused.
+
+### Tracking
+
+Four ranks, because nobody can tell 0.08em from 0.09em and the stylesheet was
+shipping both. `--kairos-track-display` (0.02em), `--kairos-track-heading`
+(0.06em), `--kairos-track-label` (0.08em), `--kairos-track-button` (0.14em).
+
+### Line, radius, and the stamp
+
+Two border weights and no third: `--kairos-border-w` draws a container and
+separates rows inside one, `--kairos-border-w-strong` marks a control that
+takes input and the rule under a table header. `--kairos-rule-w` is the 4px
+accent bar down the side of a banner, which is a marker rather than a border.
+The focus ring takes `--kairos-focus-w`.
+
+Radius is sharp by default: `--kairos-radius-button` is 0,
+`--kairos-radius-chip` 2px, `--kairos-radius-input` 4px, and
+`--kairos-radius-panel` 10px. Softer radii belong to the named Brand Scale card
+families and to nothing in a tool.
+
+The stamp is flat, offset bottom-right, zero blur, zero spread, and it inverts
+to linen on dark. It has four ranks and they mean something:
+
+| Token | Offset | On |
+| --- | --- | --- |
+| `--kairos-shadow-pressed` | 2px | A filled button while it is held |
+| `--kairos-shadow` | 4px | A filled button at rest, and a card |
+| `--kairos-shadow-card` | 6px | A panel, and a filled button under the cursor |
+| `--kairos-shadow-lg` | 8px | A dialog |
+
+**A top-level panel stamps; anything nested inside one is flat.** One rule, so
+nobody has to decide. Two stamps stacked read as a printing error rather than
+as depth, and `kairos.css` enforces it — `.kairos-panel .kairos-panel`,
+`.kairos-card`, and `.kairos-subpanel` all drop to `none`.
+
+Only the filled button ranks carry a stamp at all. An outline button is already
+drawing its own boundary, and a stamp under it reads as a second border.
+
+### Motion
+
+`--kairos-duration-fast` (120ms) for a control acknowledging a press,
+`--kairos-duration` (200ms) for a state change, `--kairos-duration-enter`
+(450ms) for something arriving on the page. `--kairos-ease` is the only easing.
+
 ## Shell
 
 | Class | Use for | Do not use for | Modifiers |
@@ -48,6 +152,7 @@ a Kairos page — what stays in the app is composition wired to its own data.
 | --- | --- | --- | --- |
 | `kairos-table` | Repeating records, desktop | Fewer than 3 records; heterogeneous summaries | — |
 | `kairos-table-wrap` | The scroll container around a table | A panel that should swap to cards instead | — |
+| `kairos-table-panel` | **A modifier on `kairos-panel`**, never a replacement. Removes the padding and clips the header band to the radius | Writing it alone: on its own it paints no border, no ground, no radius, and no stamp | — |
 | `kairos-sort-header` | Header-cell sort button, carries `aria-sort` | Headers with no natural order | — |
 | `kairos-record-card` | The same records below 768px | Desktop lists | `--inert` |
 | `kairos-collapsible-card` | Detail-heavy cards, collapsed by default | Cards of 3 fields or fewer | — |
@@ -59,8 +164,15 @@ a Kairos page — what stays in the app is composition wired to its own data.
 | `kairos-skeleton` | Loading placeholder shaped like its content | Empty states | `--line` `--heading` `--label` `--row` `--control` `--summary` |
 | `kairos-figure` | Money and any figure that must not break across lines | Text | — |
 
-`kairos-panel` paints the border and the ground and nothing else; the padding
-is `kairos-pad`, a separate class. A panel written by hand takes both. The
+A table panel takes three classes: `kairos-panel kairos-table-panel
+kairos-desktop-table`. Paykit's call sites always wrote all three; when that
+pattern moved into `DataTable` the first was dropped, and for three versions
+every table the registry rendered floated on the page with no container at all.
+`.kairos-table-panel:not(.kairos-panel)` now draws a dashed red outline so the
+mistake is unmissable rather than invisible, and a test fails on it.
+
+`kairos-panel` paints the border, the ground, the radius, and the stamp; the
+padding is `kairos-pad`, a separate class. A panel written by hand takes both. The
 `Panel` component applies `kairos-pad` for you and drops it when you pass
 `flush`, so a table can supply its own — which is the whole meaning of that
 prop, and it was inert for as long as the component applied no padding to

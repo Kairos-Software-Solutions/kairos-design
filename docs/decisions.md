@@ -196,3 +196,125 @@ border figure is incidental.
 Palette puts chips at `2px`. These are different objects: a badge is an eyebrow
 label or content tag, a state chip is a status marker. The registry keeps
 badges at `0` and state chips at `2px`, which is what Paykit already ships.
+
+
+## The workshop, 0.3.0
+
+Everything below was found by rendering the registry for the first time. None
+of it could have been found any other way, and all of it had shipped.
+
+`docs/preview.html` was 239 hand-written lines checked by hand, and this file's
+own "Not yet built" table said so: *"The preview is checked by hand. A
+screenshot diff per commit would catch what a reviewer will not."* The five
+Node test files parse CSS as text and grep TSX as strings. They are good tests
+and they caught real things, but a class that exists and paints nothing is
+invisible to all of them, because an unmatched class and an empty rule look the
+same to a parser and completely different to a person.
+
+`npm run storybook` is now the answer. Every component, every class, both
+themes, four viewports, and — the part that matters most — whole screens.
+
+### What rendering found
+
+**`kairos-table-panel` painted nothing.** No border, no ground, no radius, no
+shadow. `DataTable` used it as its only wrapper, so every table in every
+consuming app rendered with no container. Paykit's own call sites wrote
+`kairos-panel kairos-table-panel kairos-desktop-table`, three classes, and the
+extraction into `DataTable` kept two. This is the defect that started the
+review: Uptime, a well-behaved consumer with an 85-line stylesheet doing
+everything right, had a naked table on its Monitors screen and no way to see
+why.
+
+**Five heading classes rendered in Bebas outside the app shell.** The only rule
+dropping Bebas for `h2`–`h6` was scoped to `.kairos-app-shell`, so a dialog, a
+sign-in page, a hosted invoice, and a toast all drew uppercase condensed
+section headings. `.kairos-dialog-title` set `font-family` on itself, which is
+somebody hitting this once and patching one class; the other five were never
+found. Every named heading class sets its own family now.
+
+**The same rule outranked the classes it was a default for.**
+`.kairos-app-shell :is(h2…)` scores (0,1,1) and `.kairos-panel-heading` scores
+(0,1,0), so inside the shell — which is to say on every screen — a panel
+heading rendered at 13px while its own class asked for 1.05rem. `:where()`
+drops it to zero specificity. A default has to lose to the thing it is a
+default for.
+
+**`.kairos-nav-link` keyed off `.active` alone.** An app marking its current
+destination with `aria-current="page"`, which is what the rest of this
+stylesheet reads on `.kairos-view-toggle` and `.kairos-segmented`, got no
+active state at all. Uptime writes both and looked right. Both work now, and
+the attribute is the canonical one.
+
+**A disabled field was indistinguishable from an enabled one.** No rule
+existed. `.kairos-button:disabled` had its reasoning worked out three versions
+ago and the input never got the same treatment.
+
+### The token layer was documentary
+
+The headline finding, and the answer to why two apps that both use this package
+look different.
+
+Of the 29 geometry and type tokens, **17 were referenced zero times** by the
+stylesheet they were written for. `tokens.css` says the geometry values are
+tokens "because they are exactly what drifted between the four apps" — and then
+`--kairos-sidebar-w: 220px` and `.kairos-sidebar { width: 244px }` shipped in
+the same release, in the same package.
+
+Measured on `kairos.css` before this change:
+
+| | Distinct values | Tokens that named them | Times a token was read |
+| --- | --- | --- | --- |
+| `padding` | 38 | `panel-pad`, `section-pad` | 0 |
+| `gap` | 13 | `gap` | 1 |
+| `font-size` | 33 | 7 | 3 |
+| `letter-spacing` | 11 | 3 | 1 |
+| border width | 3 | 2 | 1 |
+| duration | 4 | 1 | 0 |
+
+The spacing values included `7px 11px`, `10px 10px 4px`, and gaps of 5, 7, and
+9px. The font sizes included 0.8, 0.8125, 0.82, 0.84, 0.85, and 0.86rem — six
+ranks inside one pixel of each other, which is six guesses at the same rank and
+six values a later screen can copy.
+
+Worst of all, `.kairos-stack--*` and `.kairos-pad--*` — the spacing classes an
+app writes on every screen — ran on a private scale of 6/10/14/18/20px through
+their own custom properties, so the most-used spacing utility in the system was
+the one place the tokens never reached.
+
+Nine space steps, eight type steps, four tracking ranks, four stamp ranks. 171
+declarations converted in the first pass, 48 border widths, 58 font sizes, and
+every utility scale after that.
+
+### The mechanism
+
+Documentation was doing a job only a test can do. `tests/scale.test.mjs` fails
+on:
+
+- a padding, margin, or gap that is not a step
+- a font size that is not a step
+- a hand-written tracking, radius, border width, duration, easing, or stamp
+- a geometry or type token that nothing reads
+- a `kairos-table-panel` with no `kairos-panel`
+- a heading class outside the Product Scale rank
+- the shell heading default carrying specificity
+
+The last three are regression guards for the specific defects above. The first
+four are what stop the next one.
+
+A token that nothing reads is a comment. That is the whole of it.
+
+### Two things to fix at the source
+
+**`dist/` holds hand-edited source.** The package has no build step and the
+export map points there, so a directory named `dist` contains the files a
+person edits. Vite's dev server does not watch it, which meant every stylesheet
+edit needed a server restart before it reached the browser — the workshop had
+to add a `node:fs.watch` plugin to work at all. This is the second thing the
+naming has broken and it will keep tripping tools that assume the conventional
+meaning. `src/` with an unchanged export map costs one commit.
+
+**`--kairos-elevated` and `--kairos-sidebar` hold the same value in both
+themes**, as do `--kairos-text-on-dark` and `--kairos-invert-fg` in light. Two
+names for one value is a value that will drift the first time somebody moves
+one of them on purpose. Either the roles are genuinely different, in which case
+say so in the token comment, or one of them goes.
