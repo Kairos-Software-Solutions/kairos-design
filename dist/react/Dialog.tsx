@@ -1,26 +1,39 @@
 'use client';
 
-import { type ReactNode, useEffect, useRef } from 'react';
-import * as RadixDialog from '@radix-ui/react-dialog';
+import { type ReactNode, type RefObject, useEffect, useRef } from 'react';
+import { Dialog as RadixDialog } from 'radix-ui';
 
 export interface DialogProps {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
+  /**
+   * Where focus goes when this closes, for the case the memory below cannot
+   * cover: a control that is already gone, or was never focused, by the time
+   * this mounts.
+   *
+   * The one that forced it is a dialog opened from an `OverflowMenu` item.
+   * The item holds focus at mount and the closing menu removes it; Radix's
+   * own restore to the menu's trigger is overridden by this dialog's focus
+   * scope, so the trigger never receives focus and there is nothing to
+   * remember. Measured before assuming: the focus sequence ran menu item,
+   * dialog close button, and no trigger at any point.
+   */
+  restoreFocusTo?: RefObject<HTMLElement | null>;
 }
 
 /**
  * A modal surface.
  *
- * Requires `@radix-ui/react-dialog` as a peer dependency. That is a deliberate
- * exception to this registry's no-dependency rule: a modal has to trap focus,
+ * Requires `radix-ui` as a peer dependency. That is a deliberate exception to
+ * this registry's no-dependency rule: a modal has to trap focus,
  * restore it, close on Escape, mark the rest of the page inert, and keep all
  * of that correct across React's concurrent rendering. Hand-rolling it in a
  * shared component means every Kairos app inherits the same subtle keyboard
  * trap.
  */
-export default function Dialog({ open, onClose, title, children }: DialogProps) {
+export default function Dialog({ open, onClose, title, children, restoreFocusTo }: DialogProps) {
   const restoreTo = useRef<HTMLElement | null>(null);
 
   // Radix returns focus to its own `Dialog.Trigger`. Kairos apps have none:
@@ -29,15 +42,28 @@ export default function Dialog({ open, onClose, title, children }: DialogProps) 
   // drops it on `<body>` — which puts a keyboard user back at the top of the
   // page every time they close something.
   //
-  // So the last thing to hold focus *outside* any dialog is remembered, and
-  // that is the control that opened this one. Anything inside a dialog is
+  // So the last thing to hold focus *outside* any overlay is remembered, and
+  // that is the control that opened this one. Anything inside an overlay is
   // deliberately not remembered: while this one closes, its own content still
   // holds focus, and restoring focus to a node that is being removed lands on
   // `<body>` just the same.
+  //
+  // A menu counts as an overlay, and it has to. `ActionSet` opens a
+  // `ConfirmDialog` from an `OverflowMenu` item, so at the moment this
+  // component mounts the focused element is that item — which the closing
+  // menu then removes from the document. Remembering it meant the node was
+  // disconnected by the time it was needed, and the restore below gave up.
+  //
+  // Skipping it is not on its own enough, which is why `restoreFocusTo`
+  // exists: nothing outside an overlay is focused at any point between the
+  // menu item and this dialog, so there is nothing left to remember. The skip
+  // is here because remembering a node that is on its way out is wrong
+  // whatever else is true.
   useEffect(() => {
     const remember = () => {
       const active = document.activeElement as HTMLElement | null;
-      if (!active || active === document.body || active.closest('[role="dialog"]')) return;
+      if (!active || active === document.body) return;
+      if (active.closest('[role="dialog"], [role="alertdialog"], [role="menu"]')) return;
       restoreTo.current = active;
     };
     remember();
@@ -52,7 +78,7 @@ export default function Dialog({ open, onClose, title, children }: DialogProps) 
         <RadixDialog.Content
           className="kairos-dialog-content"
           onCloseAutoFocus={(event) => {
-            const target = restoreTo.current;
+            const target = restoreFocusTo?.current ?? restoreTo.current;
             if (!target?.isConnected) return;
             event.preventDefault();
             target.focus();

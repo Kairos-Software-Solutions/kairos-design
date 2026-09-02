@@ -1984,11 +1984,22 @@ textarea.kairos-input-field {
   transition: background-color var(--kairos-duration) var(--kairos-ease), border-color var(--kairos-duration) var(--kairos-ease), color var(--kairos-duration) var(--kairos-ease);
 }
 
-.kairos-overflow-trigger:hover,
+.kairos-overflow-trigger:hover:not(:disabled),
 .kairos-overflow-trigger[aria-expanded='true'] {
   border-color: var(--kairos-border);
   background: var(--kairos-elevated);
   color: var(--kairos-text);
+}
+
+/* Every item in the menu disabled means no action can be taken on this record,
+   which is worth saying. The same two signals as every other disabled control
+   in the package: the ground drops to the page and the border drops to the
+   subtle weight, per ADR 0004. */
+.kairos-overflow-trigger:disabled {
+  border-color: var(--kairos-border-subtle);
+  background: var(--kairos-bg);
+  color: var(--kairos-text-muted);
+  cursor: not-allowed;
 }
 
 .kairos-overflow-trigger--header {
@@ -1998,15 +2009,29 @@ textarea.kairos-input-field {
 }
 
 .kairos-overflow-menu {
-  /* Rendered through a body-level portal by OverflowMenu. A fixed layer is
-     intentional: table panels use overflow-x:auto and must never clip or
-     scroll just because a row menu is open. */
-  position: fixed;
+  /* Placed by a wrapper element Radix owns and portals to the body, not here.
+     That is deliberate: this class declaring its own `position` is what used
+     to let an app stylesheet re-declare it as `absolute` and put the table
+     panel's clipping back.
+
+     The z-index stays, and stays here rather than in the component: Radix
+     reads the computed z-index off this element and copies it onto the
+     wrapper it positions, so a value written in JSX would be a geometry
+     decision hidden from this file. 1000 clears the dialog's 51, because a
+     menu opened from inside a dialog has to paint above it. Measured, not
+     assumed — the wrapper carries an inline `z-index` and a rule about the
+     wrapper's own attribute loses to it. */
   z-index: 1000;
   display: flex;
   min-width: 190px;
   max-width: min(260px, calc(100vw - 16px));
-  max-height: calc(100vh - 16px);
+  /* Radix measures the room between the trigger and the viewport edge and
+     publishes it here, so a menu opened low on a phone scrolls inside itself
+     instead of running off the bottom. The fallback is what this rule said
+     before and is not decoration: the variable is defined at runtime by a
+     dependency, and a var with no definition and no fallback takes the whole
+     declaration with it. */
+  max-height: var(--radix-dropdown-menu-content-available-height, calc(100vh - 16px));
   flex-direction: column;
   overflow-y: auto;
   border: var(--kairos-border-w) solid var(--kairos-border);
@@ -2034,8 +2059,22 @@ textarea.kairos-input-field {
   transition: background-color var(--kairos-duration) var(--kairos-ease);
 }
 
-.kairos-overflow-item:hover {
+.kairos-overflow-item:hover:not([data-disabled]) {
   background: var(--kairos-row-hover);
+}
+
+/* The two signals `.kairos-button:disabled` and `.kairos-input-field:disabled`
+   already use, so "not available" reads the same inside a menu as it does on a
+   control that commits: the ground drops to the page so the item stops sitting
+   on the raised menu surface, and the label drops to muted. Not opacity, per
+   ADR 0004 — one flat dim on a borderless item is one signal and barely that.
+   A disabled item used to be dropped from the menu entirely, which meant a
+   person could not tell an action they were looking for from one that was
+   never there. */
+.kairos-overflow-item[data-disabled] {
+  background: var(--kairos-bg);
+  color: var(--kairos-text-muted);
+  cursor: not-allowed;
 }
 
 /* A destructive action is separated from the routine ones by a rule and a gap
@@ -2051,8 +2090,205 @@ textarea.kairos-input-field {
   font-weight: 600;
 }
 
-.kairos-overflow-item--destructive:hover {
+.kairos-overflow-item--destructive:hover:not([data-disabled]) {
   background: var(--kairos-state-overdue-tint);
+}
+
+/* A disabled destructive item drops its red with everything else. Keeping the
+   colour would leave the one item in the menu that still shouts, for the one
+   action that cannot be taken. */
+.kairos-overflow-item--destructive[data-disabled] {
+  color: var(--kairos-text-muted);
+  font-weight: inherit;
+}
+
+/* Combobox, tooltip, popover.
+
+   Three surfaces that open over the page, all placed by a wrapper Radix owns
+   and portals to the body — so, exactly as `.kairos-overflow-menu` does, none
+   of them declares its own `position`. That declaration is what let an app
+   stylesheet re-declare a menu as `absolute` and put a scrolling panel's
+   clipping back, and it would do the same here.
+
+   The z-indexes stay in this file for the reason the menu's does: Radix reads
+   the computed value off the content element and copies it onto the wrapper it
+   positions, so a number written in JSX would be a geometry decision hidden
+   from the stylesheet. */
+
+/* The combobox trigger is the same box as the native select, because it is the
+   same control at a different length. It shares `.kairos-select` for the
+   geometry, the ground, the border, the hover, the disabled treatment and the
+   focus ring, and adds only what a button needs that a select does not: a
+   layout for the value and the caret, and a left-aligned label, since a button
+   centres its text and a select does not. */
+.kairos-combobox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--kairos-space-sm);
+  cursor: pointer;
+  text-align: left;
+}
+
+/* The value, which is the part that has to give way. A tenant name longer than
+   the field truncates; the caret does not move and the box does not grow. */
+.kairos-combobox-value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Nothing chosen yet. Muted rather than the text ink, so a placeholder is not
+   mistaken for a value at a glance down a form. */
+.kairos-combobox[data-placeholder] .kairos-combobox-value {
+  color: var(--kairos-text-muted);
+}
+
+/* Drawn rather than an image, following `--kairos-text-muted` through both
+   themes, which is the same caret `.kairos-select-wrap::after` draws. It is a
+   separate element here because the trigger is a button with children rather
+   than a select with a pseudo-element over it. */
+.kairos-combobox-caret {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  transform: translateY(-25%) rotate(45deg);
+  border-right: var(--kairos-border-w-strong) solid var(--kairos-text-muted);
+  border-bottom: var(--kairos-border-w-strong) solid var(--kairos-text-muted);
+}
+
+/* The list. The same surface as the menu — same border, same ground, same
+   stamp, same scroll-inside-itself when the room below runs out — because it
+   is the same surface. It is a separate class rather than a reuse of
+   `.kairos-overflow-menu` so that an app with an opinion about its action
+   menus does not silently restyle every form on the screen with it. */
+.kairos-combobox-menu {
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  /* Matches the trigger, so the list does not appear to be a different control
+     from the box that opened it. Radix publishes the trigger's width here. */
+  min-width: var(--radix-select-trigger-width, 190px);
+  max-height: var(--radix-select-content-available-height, calc(100vh - 16px));
+  overflow: hidden;
+  border: var(--kairos-border-w) solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  box-shadow: var(--kairos-shadow);
+  padding: var(--kairos-space-2xs);
+}
+
+/* The box that narrows the list. It sits above the options and stays put while
+   they scroll under it, because a filter that scrolls away is a filter you
+   cannot clear without scrolling back to it. */
+.kairos-combobox-filter {
+  flex: none;
+  width: 100%;
+  height: var(--kairos-control-h);
+  min-height: var(--kairos-control-h);
+  margin-bottom: var(--kairos-space-2xs);
+  padding: 0 var(--kairos-space-md);
+  border: 0;
+  border-bottom: var(--kairos-border-w) solid var(--kairos-border-subtle);
+  border-radius: 0;
+  background: transparent;
+  color: var(--kairos-text);
+  font: inherit;
+  /* 16px, for the reason `.kairos-select` names: Safari zooms the page when a
+     control under 16px takes focus, and this one takes focus on open. */
+  font-size: var(--kairos-text-input);
+}
+
+.kairos-combobox-filter:focus-visible {
+  outline: none;
+}
+
+/* The scrolling part, so the filter above it does not scroll with it. */
+.kairos-combobox-list {
+  overflow-y: auto;
+}
+
+/* An option. The menu item's box, plus room on the left for the tick, held
+   whether or not this option is the chosen one — otherwise every label shifts
+   sideways as the selection moves. */
+.kairos-combobox-item {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-sm);
+  width: 100%;
+  min-height: var(--kairos-control-h);
+  padding: var(--kairos-space-sm) var(--kairos-space-md);
+  border-radius: var(--kairos-radius-chip);
+  color: var(--kairos-text);
+  cursor: pointer;
+  font-size: var(--kairos-text-md);
+  outline: none;
+  transition: background-color var(--kairos-duration) var(--kairos-ease);
+}
+
+/* `[data-highlighted]` and not `:hover`, because the keyboard and the pointer
+   have to leave the same mark. Radix sets it for both. */
+.kairos-combobox-item[data-highlighted] {
+  background: var(--kairos-row-hover);
+}
+
+/* The two signals every disabled control in this package takes, per ADR 0004:
+   the ground drops to the page and the label drops to muted. */
+.kairos-combobox-item[data-disabled] {
+  background: var(--kairos-bg);
+  color: var(--kairos-text-muted);
+  cursor: not-allowed;
+}
+
+/* The chosen option is marked by a tick and by weight, not by colour alone
+   (WCAG 1.4.1) — and the tick is what survives a screenshot in greyscale. */
+.kairos-combobox-item[data-state='checked'] {
+  font-weight: 600;
+}
+
+.kairos-combobox-tick {
+  flex: none;
+  width: 14px;
+}
+
+/* What the filter found nothing for. A list that empties with no explanation
+   reads as a control that broke. */
+.kairos-combobox-empty {
+  padding: var(--kairos-space-sm) var(--kairos-space-md);
+  color: var(--kairos-text-muted);
+  font-size: var(--kairos-text-md);
+}
+
+/* The tooltip. Ink ground rather than the surface, because it is the one
+   overlay that is not a piece of the page: it sits over whatever it explains
+   and has to read as separate from it at a glance.
+
+   It never carries a control's only name. That rule is in the component, where
+   it can be enforced, rather than here, where it could only be written down. */
+.kairos-tooltip {
+  z-index: 1000;
+  max-width: 260px;
+  border-radius: var(--kairos-radius-chip);
+  background: var(--kairos-text);
+  color: var(--kairos-surface);
+  padding: var(--kairos-space-xs) var(--kairos-space-sm);
+  font-size: var(--kairos-text-sm);
+  line-height: 1.4;
+}
+
+/* The popover. A panel that happens to float, so it takes the panel's border,
+   ground and stamp and adds only what floating needs. */
+.kairos-popover {
+  z-index: 1000;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 16px));
+  max-height: var(--radix-popover-content-available-height, calc(100vh - 16px));
+  overflow-y: auto;
+  border: var(--kairos-border-w) solid var(--kairos-border);
+  border-radius: var(--kairos-radius-panel);
+  background: var(--kairos-surface);
+  box-shadow: var(--kairos-shadow-lg);
+  padding: var(--kairos-panel-pad);
 }
 
 /* Data table */

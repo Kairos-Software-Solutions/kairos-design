@@ -5,8 +5,9 @@
  * decisions of their own. If you find yourself passing a `style` prop with a
  * colour or a pixel value into one, the value belongs in the token layer.
  *
- * Peer dependencies: `react` everywhere, and `@radix-ui/react-dialog` for
- * `Dialog` and `ConfirmDialog` only.
+ * Peer dependencies: `react` everywhere, `radix-ui` for the components that
+ * open something over the page, and `@tanstack/react-table` for `DataTable`.
+ * Both are optional: a package importing `Button` installs neither.
  */
 
 export { default as Button } from './Button';
@@ -23,6 +24,15 @@ export { default as FilterBar } from './FilterBar';
 export type { InputFieldProps, FieldProps } from './Field';
 export type { FilterBarProps, FilterState, FilterSegment } from './FilterBar';
 
+export { default as Select, FILTER_THRESHOLD } from './Select';
+export type { SelectProps, SelectOption } from './Select';
+
+export { default as Tooltip } from './Tooltip';
+export type { TooltipProps } from './Tooltip';
+
+export { default as Popover } from './Popover';
+export type { PopoverProps } from './Popover';
+
 export { default as Banner } from './Banner';
 export type { BannerProps, BannerTone } from './Banner';
 
@@ -34,6 +44,19 @@ export type { SortHeaderProps, SortDirection } from './SortHeader';
 
 export { default as OverflowMenu } from './OverflowMenu';
 export type { OverflowMenuProps, OverflowItem } from './OverflowMenu';
+
+export { default as ActionSet } from './ActionSet';
+export type {
+  Action,
+  ActionContext,
+  ActionSetProps,
+  Destructive,
+  DestructiveAction,
+  LinkAction,
+  RankedAction,
+  RunAction,
+  SecondaryActions,
+} from './ActionSet';
 
 export { default as DataTable } from './DataTable';
 export { compare, sortRows, nextSort } from './sort';

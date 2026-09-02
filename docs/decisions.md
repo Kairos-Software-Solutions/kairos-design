@@ -920,3 +920,120 @@ from it.
 
 Paykit, Mailkit and Uptime were not migrated. Each pins a version and moves on
 its own schedule.
+
+## Action composition, 0.5.0
+
+[ADR 0008](adr/0008-compose-actions-through-a-component.md) is the authority
+for the component and the skill edit;
+[ADR 0007](adr/0007-take-menu-and-overlay-behaviour-from-radix.md) for the
+dependency, under [ADR 0005](adr/0005-buy-behaviour-and-build-appearance.md).
+
+### The dependency
+
+`radix-ui` replaces the single `@radix-ui/react-dialog` entry as an optional
+peer dependency. It is the one thing a consumer has to do by hand on the way to
+this version: install `radix-ui` and drop the old package. Nothing else in the
+upgrade needs a change at a call site.
+
+It now carries five components rather than one. `Dialog` and `ConfirmDialog`
+were already on it; `OverflowMenu` moved onto `DropdownMenu`, and `Select`,
+`Tooltip` and `Popover` arrive on their own primitives. Three of the five
+surfaces already had Radix installed for the dialog and had built nothing else
+with it, which is the gap this closes.
+
+### What was bought, and what it retired
+
+`OverflowMenu` went from 260 lines to 147. Deleted, not kept as a fallback: the
+portal, the `position: fixed`, the `getBoundingClientRect` on open and again on
+scroll and resize, and the flip when the space below ran short. Two positioning
+strategies in one component is how the wrong one ships.
+
+What that bought is behaviour the hand-rolled version never had — typeahead,
+arrow navigation that wraps, Home and End, and a trigger that opens on
+ArrowDown onto the first item.
+
+What it retired is a defect whose fix was a rule nobody could enforce.
+`.kairos-overflow-menu` no longer declares a `position`, so an app stylesheet
+re-declaring it as `absolute` styles the menu and cannot move it. The manifest
+row that warned about that rule, and the branding skill's paragraph instructing
+an agent to hand-roll the portal, both went with it.
+
+The z-index stayed on our class, and that was measured rather than reasoned
+about. Moving it onto Radix's wrapper computed as `z-index: auto`: Radix reads
+the value off the content element and writes it inline onto the wrapper, and an
+inline value beats a stylesheet rule about the wrapper. So the stylesheet stays
+entirely ours, with no Radix attribute selector in it.
+
+### What was kept
+
+**Every class, and every element under it.** `kairos-overflow-menu`,
+`kairos-overflow-trigger`, `kairos-overflow-item` and both `--destructive` and
+`--divided` all still appear in the rendered output. An item is still a
+`<button type="button" role="menuitem">`, or an `<a role="menuitem">` when it
+carries an `href`, which needed `asChild` rather than Radix's own `div` —
+`.kairos-overflow-item` sets `border: 0`, `background: transparent` and
+`font: inherit`, three declarations only a button needs and which a div would
+have made dead.
+
+**The native `<select>`.** `Select` does not replace it and is not meant to.
+Ten options or fewer, the native control stays: on a phone it opens the platform
+picker, it works before hydration, and it costs nothing. Ten is the boundary,
+exported as `FILTER_THRESHOLD` so the manifest and the component cannot drift.
+
+**`ConfirmDialog`.** `ActionSet` gates every destructive action through it
+rather than growing its own confirmation.
+
+### The component, and the rule it replaced
+
+`ActionSet` composes a screen's actions from named slots. The branding skill's
+Action Hierarchy kept its five ranks — they explain why, and reasoning is the
+thing an agent cannot recover from reading a type — and lost the eight rules
+under them, in this release rather than a later one. A component enforcing a
+rule and a document separately stating it are two sources of truth, and the
+document goes stale first, which is exactly what had happened to the row-menu
+paragraph.
+
+Three departures from ADR 0008's shape, each taken at review rather than
+assumed: a dialog footer has no menu and no destructive slot, an action can
+navigate as well as run, and a disabled action renders unavailable rather than
+vanishing.
+
+`destructive` is a property rather than a rank. Given a slot beside primary and
+secondary it produces a red Delete next to Save; carried on the action, it
+forces the action into the menu, sorts it below a rule, and gates it behind a
+confirmation. No ranked slot accepts one, in any context.
+
+### What the render found that the review had not
+
+**A set that can open a menu has to name what it acts on.** `OverflowMenu`
+takes a required `label` so that six identical triggers down a table are six
+controls a screen reader can tell apart. A component taking a screen's actions
+without one would have reintroduced that defect a layer up, so `label` is
+required on `page`, `row` and `card`.
+
+**A dialog opened from a menu item lost focus entirely.** Measured, not
+guessed: the focus sequence ran menu item, dialog close button, and the trigger
+at no point at all — Radix's own restore to the trigger loses to the dialog's
+focus scope, which mounts first. `Dialog` had nothing outside an overlay left to
+remember and returned focus to `<body>`, so a person who cancelled a deletion
+was put back at the top of the page. `Dialog` now takes an explicit
+`restoreFocusTo`, `ConfirmDialog` passes it through, and `ActionSet` fills it
+with the same ref it hands `OverflowMenu`'s new `triggerRef`.
+
+### Minor rather than major
+
+Checked against the two apps that depend on this package rather than assumed.
+Neither writes a stylesheet rule about `.kairos-overflow-menu`, and Uptime's one
+call site passes `label` and `items`, both of which are unchanged. Both pin
+`^0.2.x`, so neither is carried into this version by a range.
+
+No prop was removed, no class was removed, and no element under a class
+changed. The peer dependency swap is the only manual step, and it is one line in
+a `package.json`.
+
+### What did not happen here
+
+Paykit, Mailkit and Uptime were not migrated. That was a non-goal, and it stays
+one: a package that changes its consumers in the same release as itself has no
+way to tell which half broke something.
+

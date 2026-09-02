@@ -267,7 +267,7 @@ Where the hierarchy leaves the order open, ask rather than guess.
 | `kairos-page-header-primary` | The one primary action on the screen | A second amber claim | — |
 | `kairos-action-row` | A row of buttons | A single button | `--equal` `--end` `--top` |
 | `kairos-overflow-menu` | Secondary and destructive row actions | The primary action | — |
-| `kairos-overflow-item` | One row inside the menu | — | `--destructive` `--divided` |
+| `kairos-overflow-item` | One row inside the menu | — | `--destructive` `--divided`, and `[data-disabled]` for one that is unavailable |
 | `kairos-dialog-content` | Modal surface | Page-level notices | — |
 | `kairos-segmented` | Filters and wizard steps | Anything styled as a button row | `--links` |
 | `kairos-icon-action` | An icon-only control that has an `aria-label` naming its record | A rail of three per table row | `--accent` `--danger` |
@@ -276,13 +276,19 @@ Destructive actions live in `kairos-overflow-item--destructive` and are gated by
 a dialog that names the record. The confirm button takes the destructive
 treatment, never amber.
 
+In React, do not assemble these by hand. `ActionSet` takes the actions and
+decides the rank, the placement, the order and the confirmation; the one
+judgement it leaves you is which action is primary on the screen.
+
 ## Forms
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
 | `kairos-field` | Label, control, hint, and error as one unit | Read-only display of a value | — |
 | `kairos-input-field` | Text, number, textarea; 16px minimum | — | — |
-| `kairos-select` | Native select, styled; wrap in `kairos-select-wrap` for the caret | — | — |
+| `kairos-select` | Native select, styled; wrap in `kairos-select-wrap` for the caret. Also the combobox trigger, which is the same box | More than ten options — past that a person cannot see the list and needs to type, and this control cannot be typed into | — |
+| `kairos-combobox` | The combobox trigger, beside `kairos-select` — adds the value/caret layout a button needs and a select does not | Ten options or fewer, where the native select opens the platform picker on a phone | — |
+| `kairos-combobox-menu` | The list a combobox opens, with `-filter`, `-list`, `-item`, `-tick` and `-empty` inside it | Row actions; that is `kairos-overflow-menu` | — |
 | `kairos-input-label` | The field label, uppercase and tracked | A heading | — |
 | `kairos-field-hint` | What the field expects | Error text | — |
 | `kairos-field-error` | Plain language saying what to do next | A generic failure string | — |
@@ -291,6 +297,13 @@ treatment, never amber.
 A field holds its label, hint, and error rows whether or not they carry
 content, so validating a form does not move the layout.
 
+**Ten is the boundary between the two chooseers, and it is a number rather than
+a judgement.** Ten options or fewer: the native `<select>`, which opens the
+platform picker on a phone, works before hydration, and costs nothing. More
+than ten: `Select`, which puts a filter box above the list, because past that
+a person can no longer see whether what they want is in it. The same number
+decides whether that filter box appears, so there is one boundary and not two.
+
 ## Feedback
 
 | Class | Use for | Do not use for | Modifiers |
@@ -298,6 +311,8 @@ content, so validating a form does not move the layout.
 | `kairos-banner` | Page-level notice, one per screen | Field-level errors | `--danger` `--warning` `--success` `--inline` |
 | `kairos-toast` | Transient confirmation of a completed action | Anything the user must act on | — |
 | `kairos-toast-region` | The fixed container, `role="status"` | — | — |
+| `kairos-tooltip` | A short explanation attached to a control, on hover or focus | A control's only name or description — hover does not exist on touch and does not appear in a screenshot | — |
+| `kairos-popover` | A small panel of content or controls anchored to what opened it | A list of actions, which is `kairos-overflow-menu`; or anything you need an answer to, which is `kairos-dialog-content` | — |
 
 There is no accent banner. Amber is the action colour, and a banner is not an
 action.
@@ -363,7 +378,7 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| `Select`, `Textarea` | Field variants. `Field` takes them today via its render prop, but neither has a named wrapper. |
+| `Textarea` | A named wrapper. `kairos-input-field` already styles a `<textarea>` — its own height, padding and `resize: vertical` — and `Field` takes one today through its render prop, so what is missing is only the component. Left open deliberately: it is not an overlay, and claiming it here would mean this change grew a component for no reason beyond sharing a table row with one. |
 | Rendered component tests | The contract tests are static. Nothing here has been rendered by a test runner, because the registry ships no build step — the first app to adopt it is what exercises the JSX. |
 | Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
 
@@ -393,6 +408,10 @@ fails on it.
 
 | Export | Notes |
 | --- | --- |
+| `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, and cannot take a ranked slot at all. **Peer dependency: `radix-ui`.** |
+| `Select` | The chooser for a list too long for the native control. Past ten options it grows a box that narrows the list as you type, which Radix's own typeahead does not do — typeahead jumps to a match, and jumping inside two hundred tenants is not narrowing to the four that match. Ten or fewer, keep the native `<select>`. **Peer dependency: `radix-ui`.** |
+| `Tooltip` | A short explanation on hover or focus. Takes `name` for an icon-only trigger and puts it on the control as `aria-label`, so the control is named whether or not the tooltip ever opens. **Peer dependency: `radix-ui`.** |
+| `Popover` | A small panel of content or controls beside the page. Not a menu — nothing in it is a chosen item and using a control inside it does not close it. Not a dialog — it is dismissed by clicking anywhere else, so it is wrong for anything you need an answer to. **Peer dependency: `radix-ui`.** |
 | `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. |
 | `StateChip` | The four states, plus every app's old spelling as a deprecated alias so adoption is not one enormous commit |
 | `Segmented` | Filters, wizard steps, the theme choice |
@@ -400,20 +419,20 @@ fails on it.
 | `Banner` | `alert` for a failure, `status` otherwise |
 | `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
 | `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
-| `OverflowMenu` | The only other control a row carries. Portalled to `<body>` and positioned by hand, because a table panel is an overflow container and would clip it. An app stylesheet re-declaring `.kairos-overflow-menu` as `position: absolute` puts the clipping back. |
+| `OverflowMenu` | The only other control a row carries. Behaviour is Radix `DropdownMenu`: typeahead, arrow keys, Escape returning focus, and a menu that is never clipped by the table panel it opens inside. Placement lives on a wrapper Radix owns, so a rule your stylesheet writes about `.kairos-overflow-menu` styles the menu and cannot move it. A disabled item renders unavailable rather than vanishing; every item disabled renders the trigger unavailable. **Peer dependency: `radix-ui`.** |
 | `DataTable` | Table on desktop, record cards below 768px. Sorting, paging, row selection, search and column visibility, all off `columns` plus a prop each. A column declares its role once and that drives the table, the card, and the order. |
 | `FilterBar` | The row above a record list that narrows it: a debounced search box and any number of segmented filters, collected into one `FilterState` the screen reads. It narrows nothing itself — what `overdue` means is the screen's. Not for sorting; the table header does that. |
 | `CollapsibleCard` | Built on `<details>`, so it works before hydration and prints expanded |
 | `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
-| `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |
+| `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `radix-ui`.** |
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
 | `SectionTag` | The Brand Scale section transition. `as` renders the label as a heading, so a screen reader's heading list can carry the page |
 | `Panel` | Border, ground, and `kairos-pad`. `flush` drops the padding for a table that supplies its own |
-| `PageHeader` | Title, one-line `description`, and one primary action |
+| `PageHeader` | Title, one-line `description`, and an action group. Pass `ActionSet` to `actions`; `PageHeader` owns the `kairos-page-header-actions` wrapper, so the `page` context renders the controls and nothing around them |
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
 
-Radix is the one dependency, and only for the dialogs. A modal has to trap
+Radix is the one dependency, and only for what opens over the page. A modal has to trap
 focus, restore it, close on Escape, and mark the rest of the page inert; hand
 rolling that in a shared component means every Kairos app inherits the same
 subtle keyboard trap. Everything else, including the three theme icons, is

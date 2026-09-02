@@ -1,15 +1,7 @@
 'use client';
 
-import {
-  type KeyboardEvent as ReactKeyboardEvent,
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from 'react';
-import { createPortal } from 'react-dom';
+import { type RefObject } from 'react';
+import { DropdownMenu } from 'radix-ui';
 
 export interface OverflowItem {
   label: string;
@@ -17,6 +9,17 @@ export interface OverflowItem {
   href?: string;
   /** Opens in a new tab. Only meaningful with `href`. */
   external?: boolean;
+  /**
+   * Renders the item unavailable rather than omitting it, taking the same two
+   * signals every disabled control in this package takes: the ground drops to
+   * the page and the label drops to muted, per ADR 0004. An item that
+   * disappears when it cannot be used leaves a person hunting for something
+   * they remember being there, with no way to find out why it went.
+   *
+   * A disabled item that carries an `href` renders without one, because an
+   * anchor with no `href` is not focusable and not clickable — there is no
+   * `disabled` attribute on a link to do the job.
+   */
   disabled?: boolean;
   /**
    * Marks the item as destructive or irreversible. It is separated from the
@@ -35,7 +38,23 @@ export interface OverflowMenuProps {
   label: string;
   /** Gives a page-level menu the same visual weight as its adjacent button. */
   context?: 'row' | 'header';
+  /**
+   * The trigger element, for a caller that has to put focus back on it.
+   *
+   * Radix returns focus here on close by itself, so nothing needs this to
+   * open and close a menu. It exists for the one case where that restore does
+   * not land: a menu item that opens a dialog. The dialog's focus scope
+   * mounts first and wins, and the dialog then has nothing outside an overlay
+   * to hand focus back to when it closes — measured, and it left a person who
+   * had just cancelled a deletion at the top of the page. `ActionSet` passes
+   * the same ref to `ConfirmDialog`, which restores to it.
+   */
+  triggerRef?: RefObject<HTMLButtonElement | null>;
 }
+
+/** The gap between the trigger and the menu, and the menu and the viewport. */
+const SIDE_OFFSET = 6;
+const VIEWPORT_PADDING = 8;
 
 /**
  * The end-of-row action menu.
@@ -51,230 +70,119 @@ export interface OverflowMenuProps {
  * The trigger carries a visible border at rest rather than appearing on hover:
  * hover does not exist on touch, does not show up in a screenshot, and cannot
  * be described to a customer over the phone.
+ *
+ * Behaviour comes from Radix `DropdownMenu`; every element and every class is
+ * still this package's. What that bought, and what it retired, is in
+ * `docs/decisions.md`. The one thing to know when reading this file: the menu
+ * is placed by a wrapper element Radix owns, not by `.kairos-overflow-menu`,
+ * so an app stylesheet writing a rule about our class can no longer put the
+ * clipping back.
  */
-export default function OverflowMenu({ items, label, context = 'row' }: OverflowMenuProps) {
-  const [open, setOpen] = useState(false);
-  const menuId = useId();
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<Array<HTMLButtonElement | HTMLAnchorElement | null>>([]);
-  const [menuPosition, setMenuPosition] = useState<{ top: number; left: number } | null>(null);
-
-  const close = useCallback((returnFocus: boolean) => {
-    setOpen(false);
-    if (returnFocus) triggerRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    if (!open) return;
-    // Focus the first item, so the menu is operable without a pointer.
-    itemRefs.current.find(Boolean)?.focus();
-
-    function onPointerDown(event: MouseEvent | TouchEvent) {
-      const target = event.target as Node;
-      if (!wrapRef.current?.contains(target) && !menuRef.current?.contains(target)) close(false);
-    }
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') {
-        // Stop here rather than letting it reach a dialog behind the menu,
-        // which would close both on one press.
-        event.stopPropagation();
-        close(true);
-      }
-    }
-
-    document.addEventListener('mousedown', onPointerDown);
-    document.addEventListener('touchstart', onPointerDown);
-    document.addEventListener('keydown', onKeyDown);
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown);
-      document.removeEventListener('touchstart', onPointerDown);
-      document.removeEventListener('keydown', onKeyDown);
-    };
-  }, [open, close]);
-
-  /**
-   * The menu is portalled to the document body and positioned by hand.
-   *
-   * A table panel is a horizontal overflow container, so a menu rendered
-   * inside one becomes clipped by it — on a short table the menu is cut off
-   * a few pixels below the trigger. Keeping it in the document layer means
-   * nothing in the table can become its clipping parent.
-   *
-   * Recalculated on scroll as well as resize, so it stays anchored to its
-   * trigger while the page moves under it.
-   */
-  useLayoutEffect(() => {
-    if (!open) return;
-
-    function positionMenu() {
-      const trigger = triggerRef.current;
-      const menu = menuRef.current;
-      if (!trigger || !menu) return;
-
-      const triggerRect = trigger.getBoundingClientRect();
-      const menuRect = menu.getBoundingClientRect();
-      const gap = 6;
-      const viewportPadding = 8;
-
-      const left = Math.min(
-        Math.max(viewportPadding, triggerRect.right - menuRect.width),
-        Math.max(viewportPadding, window.innerWidth - menuRect.width - viewportPadding)
-      );
-
-      // Below by default, above when there is no room below and there is room
-      // above. A menu that opens off the bottom of a phone is unreachable.
-      const below = triggerRect.bottom + gap;
-      const above = triggerRect.top - menuRect.height - gap;
-      const top =
-        below + menuRect.height <= window.innerHeight - viewportPadding || above < viewportPadding
-          ? Math.min(below, window.innerHeight - menuRect.height - viewportPadding)
-          : above;
-
-      setMenuPosition({ top: Math.max(viewportPadding, top), left });
-    }
-
-    positionMenu();
-    window.addEventListener('resize', positionMenu);
-    window.addEventListener('scroll', positionMenu, true);
-    return () => {
-      window.removeEventListener('resize', positionMenu);
-      window.removeEventListener('scroll', positionMenu, true);
-    };
-  }, [open]);
-
-  function moveFocus(from: number, delta: number) {
-    const usable = itemRefs.current.filter(Boolean) as HTMLElement[];
-    if (usable.length === 0) return;
-    usable[(from + delta + usable.length) % usable.length]?.focus();
-  }
-
-  function onItemKeyDown(event: ReactKeyboardEvent, index: number) {
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      moveFocus(index, 1);
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      moveFocus(index, -1);
-    } else if (event.key === 'Home') {
-      event.preventDefault();
-      moveFocus(-1, 1);
-    } else if (event.key === 'End') {
-      event.preventDefault();
-      moveFocus(0, -1);
-    }
-  }
-
-  const usable = items.filter((item) => !item.disabled);
+export default function OverflowMenu({ items, label, context = 'row', triggerRef }: OverflowMenuProps) {
 
   // A trigger that opens an empty menu is a dead control. Render nothing.
-  if (usable.length === 0) return null;
+  if (items.length === 0) return null;
+
+  // Every item disabled is a different case, and it gets a different answer:
+  // the trigger renders unavailable rather than opening a menu in which
+  // nothing can be chosen. "No action can be taken on this record right now"
+  // is information, and a disabled control is how the rest of this package
+  // says it.
+  //
+  // It is also the only arrangement Radix cannot open with a mouse. Measured:
+  // with `modal={false}` and no item able to take focus, the menu opens on
+  // pointerdown and is dismissed again inside one frame, so a click appears to
+  // do nothing at all. Keyboard opening works. A control that responds to a
+  // keyboard and not to a click is worse than one that says it is unavailable.
+  const allDisabled = items.every((item) => item.disabled);
 
   // Destructive items sit last, behind a rule.
-  const ordered = [...usable.filter((i) => !i.destructive), ...usable.filter((i) => i.destructive)];
+  const ordered = [...items.filter((i) => !i.destructive), ...items.filter((i) => i.destructive)];
   const firstDestructive = ordered.findIndex((i) => i.destructive);
 
-  // Trim the ref array to this render's length. It is keyed by position, so a
-  // list that shrinks would otherwise leave detached nodes on the end and
-  // arrow-key navigation would step into them.
-  itemRefs.current.length = ordered.length;
-
   return (
-    <div className="kairos-overflow" ref={wrapRef}>
-      <button
-        ref={triggerRef}
-        type="button"
-        className={`kairos-overflow-trigger${context === 'header' ? ' kairos-overflow-trigger--header' : ''}`}
-        aria-label={`Actions for ${label}`}
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
-        onClick={() => {
-          // Clear the last position so the menu is not painted at the previous
-          // trigger's coordinates for one frame before it is measured.
-          setMenuPosition(null);
-          setOpen((value) => !value);
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
-          <circle cx="3" cy="8" r="1.4" fill="currentColor" />
-          <circle cx="8" cy="8" r="1.4" fill="currentColor" />
-          <circle cx="13" cy="8" r="1.4" fill="currentColor" />
-        </svg>
-      </button>
+    // Not modal. A row menu does not take over the page, and Radix's modal
+    // mode puts `pointer-events: none` on the body while it is open, which
+    // makes the click that dismissed the menu stop there instead of reaching
+    // what it landed on. Measured: with the default, a click on a control
+    // outside the menu closed it and never fired that control's handler.
+    <DropdownMenu.Root modal={false}>
+      <DropdownMenu.Trigger asChild>
+        <button
+          ref={triggerRef}
+          type="button"
+          className={`kairos-overflow-trigger${context === 'header' ? ' kairos-overflow-trigger--header' : ''}`}
+          aria-label={`Actions for ${label}`}
+          disabled={allDisabled}
+        >
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+            <circle cx="3" cy="8" r="1.4" fill="currentColor" />
+            <circle cx="8" cy="8" r="1.4" fill="currentColor" />
+            <circle cx="13" cy="8" r="1.4" fill="currentColor" />
+          </svg>
+        </button>
+      </DropdownMenu.Trigger>
 
-      {open &&
-        createPortal(
-          <div
-            ref={menuRef}
-            className="kairos-overflow-menu"
-            id={menuId}
-            role="menu"
-            aria-label={`Actions for ${label}`}
-            style={{
-              top: menuPosition?.top ?? 0,
-              left: menuPosition?.left ?? 0,
-              // Hidden until measured, so it never flashes at the top-left of
-              // the viewport on the frame before it is placed.
-              visibility: menuPosition ? 'visible' : 'hidden',
-            }}
-          >
-            {ordered.map((item, index) => {
-              const startsDestructive = firstDestructive > 0 && index === firstDestructive;
-              const className = [
-                'kairos-overflow-item',
-                item.destructive && 'kairos-overflow-item--destructive',
-                startsDestructive && 'kairos-overflow-item--divided',
-              ]
-                .filter(Boolean)
-                .join(' ');
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content
+          className="kairos-overflow-menu"
+          // The menu's right edge meets the trigger's, which is where it has
+          // always sat: the trigger is the last thing in the row.
+          align="end"
+          sideOffset={SIDE_OFFSET}
+          collisionPadding={VIEWPORT_PADDING}
+          // Wraps from the last item to the first, which the hand-rolled
+          // arrow-key handling this replaces also did.
+          loop
+          // A menu anchored to a trigger that has scrolled out of a panel is
+          // pointing at nothing. Closing it is the honest outcome.
+          hideWhenDetached
+        >
+          {ordered.map((item, index) => {
+            const startsDestructive = firstDestructive > 0 && index === firstDestructive;
+            const className = [
+              'kairos-overflow-item',
+              item.destructive && 'kairos-overflow-item--destructive',
+              startsDestructive && 'kairos-overflow-item--divided',
+            ]
+              .filter(Boolean)
+              .join(' ');
 
-              const shared = {
-                role: 'menuitem' as const,
-                className,
-                onKeyDown: (event: ReactKeyboardEvent) => onItemKeyDown(event, index),
-              };
-
-              if (item.href) {
-                return (
+            if (item.href) {
+              return (
+                <DropdownMenu.Item asChild key={item.label} disabled={item.disabled}>
                   <a
-                    {...shared}
-                    key={item.label}
-                    ref={(node) => {
-                      itemRefs.current[index] = node;
-                    }}
-                    href={item.href}
-                    target={item.external ? '_blank' : undefined}
-                    rel={item.external ? 'noreferrer' : undefined}
-                    // Navigating away, so there is nothing to return focus to.
-                    onClick={() => close(false)}
+                    className={className}
+                    href={item.disabled ? undefined : item.href}
+                    target={item.external && !item.disabled ? '_blank' : undefined}
+                    rel={item.external && !item.disabled ? 'noreferrer' : undefined}
                   >
                     {item.label}
                   </a>
-                );
-              }
+                </DropdownMenu.Item>
+              );
+            }
 
-              return (
-                <button
-                  {...shared}
-                  key={item.label}
-                  ref={(node) => {
-                    itemRefs.current[index] = node;
-                  }}
-                  type="button"
-                  onClick={() => {
-                    close(true);
-                    item.onSelect?.();
-                  }}
-                >
+            // `asChild` rather than letting Radix render its own `div`. The
+            // element is part of the contract: `.kairos-overflow-item` sets
+            // `border: 0`, `background: transparent` and `font: inherit`,
+            // which are declarations only a button needs. On a div they are
+            // three lines of stylesheet that do nothing.
+            return (
+              <DropdownMenu.Item
+                asChild
+                key={item.label}
+                disabled={item.disabled}
+                onSelect={() => item.onSelect?.()}
+              >
+                <button type="button" className={className} disabled={item.disabled}>
                   {item.label}
                 </button>
-              );
-            })}
-          </div>,
-          document.body
-        )}
-    </div>
+              </DropdownMenu.Item>
+            );
+          })}
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }
