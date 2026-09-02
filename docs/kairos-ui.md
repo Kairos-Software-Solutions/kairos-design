@@ -408,6 +408,7 @@ often enough that writing them again is the likely mistake.
 | `kairos-measure` | Prose at a readable width | A table | `-sm` `-lg` |
 | `kairos-code` | An identifier read or copied character by character | Body text | — |
 | `kairos-code-block` | Machine output shown to an operator: a response body, a log line | Prose; it is capped and scrollable | — |
+| `kairos-copy-field` | A technical value an operator pastes somewhere else: a DKIM record, an object key, a digest. `-value`, `-body` and `-status` inside it, and `CopyField` renders the lot | A form field. Nothing here is editable, and an `<input readonly>` invites typing into it | — |
 | `kairos-muted` | Secondary text | The data itself; the heaviest ink is the record | — |
 | `kairos-chip-row` | A wrapping row of chips. `--lg` for bare facts, which have no borders to separate them | Buttons; that is `kairos-action-row` | `--lg` |
 | `kairos-checkbox-row` | A checkbox with its label on one line | A field with a hint | — |
@@ -476,7 +477,7 @@ fails on it.
 
 | Export | Notes |
 | --- | --- |
-| `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, and cannot take a ranked slot at all. **Peer dependency: `radix-ui`.** |
+| `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, may add `typeToConfirm` and `requireReason` to strengthen the gate, and cannot take a ranked slot at all. A ranked action that runs can carry `pending` and `pendingLabel`; a menu item cannot, because choosing one closes the menu the state would live on. **Peer dependency: `radix-ui`.** |
 | `Select` | The chooser for a list too long for the native control. Past ten options it grows a box that narrows the list as you type, which Radix's own typeahead does not do — typeahead jumps to a match, and jumping inside two hundred tenants is not narrowing to the four that match. Ten or fewer, keep the native `<select>`. **Peer dependency: `radix-ui`.** |
 | `Tooltip` | A short explanation on hover or focus. Takes `name` for an icon-only trigger and puts it on the control as `aria-label`, so the control is named whether or not the tooltip ever opens. **Peer dependency: `radix-ui`.** |
 | `Popover` | A small panel of content or controls beside the page. Not a menu — nothing in it is a chosen item and using a control inside it does not close it. Not a dialog — it is dismissed by clicking anywhere else, so it is wrong for anything you need an answer to. **Peer dependency: `radix-ui`.** |
@@ -492,7 +493,9 @@ fails on it.
 | `FilterBar` | The row above a record list that narrows it: a debounced search box and any number of segmented filters, collected into one `FilterState` the screen reads. It narrows nothing itself — what `overdue` means is the screen's. Not for sorting; the table header does that. |
 | `CollapsibleCard` | Built on `<details>`, so it works before hydration and prints expanded |
 | `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
-| `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `radix-ui`.** |
+| `Dialog`, `ConfirmDialog` | The destructive gate, at three strengths. A confirmation asks the person to read; `typeToConfirm` asks them to type the record's name; `requireReason` asks them to write down why, and hands both to `onConfirm`. Reach past the first only where the consequence reaches past the screen — a public object deleted for every reader, a key every application is using. **Peer dependency: `radix-ui`.** |
+| `CopyField` | A read-only technical value with a copy control beside it. The control is a control at rest, not a hover affordance |
+| `confirmationMatches`, `confirmGateOpen` | What a typed confirmation accepts, and whether a gate is answered. Separately importable and separately tested, like `compare` |
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
 | `SectionTag` | The Brand Scale section transition. `as` renders the label as a heading, so a screen reader's heading list can carry the page |
 | `Panel` | Border, ground, and `kairos-pad`. `flush` drops the padding for a table that supplies its own |

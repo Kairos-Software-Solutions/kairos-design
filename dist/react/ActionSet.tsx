@@ -1,7 +1,8 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import ConfirmDialog from './ConfirmDialog';
+import { type ReactNode, useRef, useState } from 'react';
+import Button, { type ButtonVariant } from './Button';
+import ConfirmDialog, { type ConfirmDetails } from './ConfirmDialog';
 import OverflowMenu, { type OverflowItem } from './OverflowMenu';
 
 /**
@@ -68,6 +69,24 @@ export interface Destructive {
    * `Delete INV-0042?`. Set it where that reads badly.
    */
   title?: string;
+  /**
+   * The string the person has to type before this will run, for a consequence
+   * that reaches past the screen: a public object deleted for every reader, a
+   * key every application is using.
+   *
+   * Passed straight to `ConfirmDialog`, where the reasoning and the limits
+   * are written. Leave it out on an action whose consequence is one record on
+   * one screen — a gate that asks for typing on everything gets typed through
+   * on everything.
+   */
+  typeToConfirm?: string;
+  /**
+   * The action lands in an audit trail and the trail needs to say why. The
+   * written reason arrives at `onSelect`.
+   */
+  requireReason?: boolean;
+  /** What the reason is for, in the field's hint row. */
+  reasonHint?: string;
 }
 
 /**
@@ -82,6 +101,20 @@ export interface Destructive {
  */
 export interface RunAction extends ActionBase {
   onSelect: () => void;
+  /**
+   * The action is in flight.
+   *
+   * Only a ranked slot can show this, and that is the whole of the rule: a
+   * ranked action is a button, and a button that has been pressed shows that
+   * it was pressed. A menu item cannot, because choosing one closes the menu
+   * it was in, so there is nothing left on the screen to put the state on.
+   *
+   * Passing it at all — even `false` — reserves the room for the pending
+   * label, so the control is one width for its whole life. See `Button`.
+   */
+  pending?: boolean;
+  /** What it says while working: `Refreshing…`, `Sending invoice…`. Name the work. */
+  pendingLabel?: ReactNode;
   href?: never;
   external?: never;
   destructive?: never;
@@ -102,7 +135,12 @@ export interface RunAction extends ActionBase {
  * front of.
  */
 export interface DestructiveAction extends ActionBase {
-  onSelect: () => void;
+  /**
+   * Runs once the gate is satisfied, with whatever the gate collected. A
+   * handler ignoring the argument still assigns, so an action with no
+   * `typeToConfirm` and no `requireReason` is written exactly as before.
+   */
+  onSelect: (details: ConfirmDetails) => void;
   href?: never;
   external?: never;
   destructive: Destructive;
@@ -228,12 +266,6 @@ export type ActionSetProps =
 /** Ranked slots emit these, and nothing else. */
 type Rank = 'primary' | 'secondary' | 'tertiary';
 
-const RANK_CLASS: Record<Rank, string> = {
-  primary: 'kairos-button--primary',
-  secondary: 'kairos-button--secondary',
-  tertiary: 'kairos-button--tertiary',
-};
-
 /**
  * One ranked action as a control.
  *
@@ -243,10 +275,14 @@ const RANK_CLASS: Record<Rank, string> = {
  * destination in the status bar. `.kairos-button` is written to survive being
  * put on an anchor, which is why this can share the class rather than needing
  * a second one.
+ *
+ * The button branch renders `Button` rather than reassembling its markup. It
+ * used to write the classes itself against a rank-to-modifier map of its own,
+ * which is a fork of `Button` living inside `ActionSet` — and the cost showed
+ * up the moment a declared action needed a pending state, because the state
+ * was already built one file away and unreachable from here.
  */
 function Ranked({ action, rank }: { action: RankedAction; rank: Rank }) {
-  const className = `kairos-button ${RANK_CLASS[rank]}`;
-
   if (action.href !== undefined) {
     // No `href` when disabled, matching `OverflowMenu`: an anchor has no
     // `disabled` attribute, and one that keeps its href is still followable
@@ -254,7 +290,7 @@ function Ranked({ action, rank }: { action: RankedAction; rank: Rank }) {
     // state to assistive technology once the href is gone.
     return (
       <a
-        className={className}
+        className={`kairos-button kairos-button--${rank}`}
         href={action.disabled ? undefined : action.href}
         aria-disabled={action.disabled || undefined}
         target={action.external && !action.disabled ? '_blank' : undefined}
@@ -266,9 +302,18 @@ function Ranked({ action, rank }: { action: RankedAction; rank: Rank }) {
   }
 
   return (
-    <button type="button" className={className} disabled={action.disabled} onClick={action.onSelect}>
+    <Button
+      variant={rank satisfies ButtonVariant}
+      disabled={action.disabled}
+      // Named only when the action names it, so an action that cannot be in
+      // flight renders the markup it always did. See `Button`.
+      {...(action.pending !== undefined || action.pendingLabel !== undefined
+        ? { loading: action.pending ?? false, loadingLabel: action.pendingLabel }
+        : {})}
+      onClick={action.onSelect}
+    >
       {action.label}
-    </button>
+    </Button>
   );
 }
 
@@ -360,6 +405,9 @@ export default function ActionSet(props: ActionSetProps) {
       title={pending.destructive.title ?? `${pending.label} ${label}?`}
       message={pending.destructive.confirm}
       confirmLabel={pending.label}
+      typeToConfirm={pending.destructive.typeToConfirm}
+      requireReason={pending.destructive.requireReason}
+      reasonHint={pending.destructive.reasonHint}
       onConfirm={pending.onSelect}
       onClose={() => setPending(null)}
       restoreFocusTo={trigger}

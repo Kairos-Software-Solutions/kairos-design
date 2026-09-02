@@ -1037,3 +1037,148 @@ Paykit, Mailkit and Uptime were not migrated. That was a non-goal, and it stays
 one: a package that changes its consumers in the same release as itself has no
 way to tell which half broke something.
 
+
+## Stronger gates and the copy field, 0.7.0
+
+Two roles Mailkit had built for itself, taken into the registry as it adopted
+the package. Both were found the same way: not by reading Mailkit's stylesheet
+for drift, but by trying to replace a Mailkit screen with registry components
+and finding the screen could not be built.
+
+### A confirmation is one gate at three strengths
+
+`ConfirmDialog` asked for one click. Mailkit asked for three different things
+depending on what was about to happen, and it was right to: purging a public
+image, revoking a key every application is using, and releasing a usage
+reservation whose SMTP outcome is unknown are not one risk with one answer.
+
+So the gate grew two optional requirements rather than the registry growing a
+second dialog.
+
+| Prop | Asks the person to | Reach for it when |
+| --- | --- | --- |
+| — | read | The consequence is one record on this screen |
+| `typeToConfirm` | name the record | The consequence reaches past the screen |
+| `requireReason` | account for it | The action lands in an audit trail |
+
+The strengths are about what the person does, not how loudly the dialog is
+painted. A louder dialog asking for the same single click is a warning, and a
+warning is what people click through. Typing the record's own name is the one
+thing that is evidence the right row was read — which is the failure a list of
+near-identical records actually has, and the failure a second click cannot
+catch.
+
+The gate is deliberately not free. `typeToConfirm` on everything is
+`typeToConfirm` on nothing, because a person who types a name eight times a day
+is copying characters rather than reading a consequence. The manifest row and
+the prop's own docblock both say where the line is, because that is what an
+agent about to add the prop is reading.
+
+**Matched trimmed and case-insensitively.** The expected string is printed in
+the dialog's own label, so the person is copying it off the screen; a copy that
+fails on a trailing space, or on `PURGE` against `purge`, is a requirement the
+prompt never stated. Mailkit had already settled this and had a test for it.
+The test came with the logic.
+
+**`confirm.ts` sits beside the component, not inside it.** Same shape as
+`sort.ts` beside `DataTable`: it is the part of this component that decides
+whether something irreversible happens, and it is plain string logic, so it is
+testable without a renderer. `tests/confirm.test.mjs` is four assertions and
+covers the empty gate — which is what every existing call site passes, and what
+would have turned every plain confirmation in every app into one that can never
+be confirmed.
+
+**`onConfirm` grew an argument rather than a second callback.** A handler taking
+fewer parameters assigns to one taking more, so every existing `() => void`
+still type-checks and no call site changes.
+
+**Pending and unsatisfied are different states on one button.** This is the only
+component in the package that can be in either, and conflating them is the
+defect the button's `loading` state was built to prevent. Unsatisfied is
+unavailable and takes the two disabled signals; pending keeps the rank, the box
+and the tab stop, because `disabled` at the moment the answer arrives drops
+focus off the control the person just pressed Enter on. A contract test asserts
+that `disabled` never carries `pending` here.
+
+### The gate belongs to `ActionSet` too
+
+A destructive action's placement, ordering and confirmation are `ActionSet`'s
+decisions, so its gate has to be as well. Without the two props on
+`Destructive`, an app needing a typed confirmation on a row action had to go
+around `ActionSet` and assemble an `OverflowMenu` and a `ConfirmDialog` by
+hand — and a call site that has gone around that component is a call site none
+of its types reach, which is the standing risk its own docblock names.
+
+`DestructiveAction.onSelect` grew the same argument `onConfirm` did, and for
+the same reason: a handler taking fewer parameters assigns to one taking more.
+The type tests assert both — a handler ignoring the details, and one
+destructuring the reason out of them — because the claim being made is that no
+existing call site changes.
+
+### `CopyField`, because a read-only value is not a disabled input
+
+Every Kairos app that shows a technical value had built this. Mailkit's was
+`CopyableField`, 80 lines, with the geometry in a `style` prop and the copy
+button absolutely positioned over the top-right corner of the value.
+
+The overlay is the part worth recording, because it is the obvious
+implementation and it costs exactly the two things the pattern is for. It
+covers the end of a short value and the start of a scrolled one, and its target
+has to shrink to fit inside the box it is sitting on — Mailkit's was 24px
+against a 44px minimum. So the control takes its own grid column: the value
+keeps its full width and the button keeps a real target.
+
+Three smaller decisions:
+
+- **It scrolls sideways rather than wrapping.** A DKIM value rewrapped at the
+  panel's width cannot be compared character by character against the record in
+  the registrar's panel beside it, which is the one task this element exists
+  for. `multiline` switches to `kairos-code-block` for values with meaningful
+  line breaks.
+- **The scroller is focusable.** A region a mouse can scroll and a keyboard
+  cannot is WCAG 2.1.1, axe fails it by name, and the story suite caught it on
+  the first run. `tabIndex` is the whole fix; the global `:focus-visible` rule
+  supplies the ring.
+- **The copy is announced, not only drawn.** An icon changing to a tick is
+  nothing a screen reader reports, and the person who most needs telling is the
+  one who cannot see it. The status line holds its row either way, so
+  confirming a copy moves nothing. Where the clipboard is refused outright — an
+  insecure origin, a policy — it says so, because there is nothing to retry and
+  the value can still be selected by hand.
+
+The control is a control at rest. Hover does not exist on a phone, does not
+appear in the screenshot attached to a support ticket, and cannot be described
+to whoever is standing at the registrar's control panel.
+
+### Minor rather than major
+
+No prop was removed, no class was removed, no element under an existing class
+changed, and `onConfirm`'s new argument is optional to receive. `ConfirmDialog`
+gains the pending treatment on its confirm button, which is a behaviour change
+and a fix: it previously swapped the label to `Working…`, which measures its own
+content and grows the button under the pointer still on it.
+
+### What did not happen here
+
+Mailkit was not migrated in this release. It is the app that found both of
+these, and its adoption lands in its own repository against a published
+version, so there is still a way to tell which half broke something.
+
+### `Ranked` was a fork of `Button` living inside `ActionSet`
+
+`ActionSet` wrote the button classes itself, against a rank-to-modifier map of
+its own beside `Button`'s identical one. Two copies of one mapping is a defect
+waiting for a sixth rank, but it cost nothing visible until a declared action
+needed to say it was in flight — at which point the pending state was already
+built, one file away, and unreachable from the component every screen composes
+its actions through. An app hitting that goes around `ActionSet`, which is the
+one outcome its own docblock is written to prevent.
+
+So the button branch renders `Button`, and `RunAction` grew `pending` and
+`pendingLabel` to reach it. The emitted class strings are unchanged, which the
+`ActionSet` stories assert exactly rather than by pattern.
+
+**Only a ranked action can be pending, and the type says so.** A menu item
+cannot: choosing one closes the menu it was in, so there is nothing left on the
+screen to put the state on. That is a real constraint rather than a gap — an
+action whose progress the person needs to watch has earned a button.

@@ -488,3 +488,54 @@ test('every class has a manifest row, or a documented block', () => {
 
   assert.deepEqual(undocumented, [], 'these have a rule and no row; add one or name their block');
 });
+
+/**
+ * The gate is wired to the button that commits.
+ *
+ * A `typeToConfirm` prop that renders a field and does not gate the confirm is
+ * worse than no prop: it puts a box on the screen that looks like a lock and
+ * is not one, and the reviewer who sees the box stops looking.
+ */
+test('an unanswered confirmation gate holds the committing button', () => {
+  const source = readFileSync(join(ROOT, 'dist', 'react', 'ConfirmDialog.tsx'), 'utf8');
+  const body = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+  assert.match(body, /confirmGateOpen\(\{/, 'the gate is evaluated rather than reimplemented here');
+  assert.match(body, /disabled=\{!satisfied\}/, 'an unanswered gate renders the confirm unavailable');
+  assert.match(body, /if \(pending \|\| !satisfied\) return/, 'and refuses the press as well as painting it');
+
+  // Unavailable and busy are different states with different treatments, and
+  // this is the one component that can be in either. `disabled` while pending
+  // would drop focus off the control the person just pressed Enter on.
+  assert.doesNotMatch(body, /disabled=\{pending \|\|/, 'pending is carried by loading, not by disabled');
+  assert.match(body, /loading=\{pending\}/, 'pending keeps the rank and the box');
+
+  // A dialog reopened after a cancelled purge must not still hold the record
+  // name that was typed into it.
+  assert.match(body, /function clear\(\)/, 'the gate clears');
+  for (const setter of ['setTyped', 'setReason']) {
+    assert.match(body, new RegExp(`clear[\\s\\S]*?${setter}\\(''\\)`), `${setter} is cleared on the way out`);
+  }
+});
+
+/**
+ * A copy control that only appears on hover does not exist on a phone, in a
+ * screenshot attached to a support ticket, or in a sentence read down the
+ * phone to whoever is standing at the registrar's control panel.
+ */
+test('the copy control is a control at rest', () => {
+  const source = readFileSync(join(ROOT, 'dist', 'react', 'CopyField.tsx'), 'utf8');
+  const rule = css.match(/\n\.kairos-copy-field-body \{([\s\S]*?)\n\}/)?.[1];
+
+  assert.ok(rule, '.kairos-copy-field-body has a rule');
+  assert.match(rule, /grid-template-columns/, 'the value and the control each own a column');
+  assert.doesNotMatch(css, /\.kairos-copy-field[^{]*:hover[^{]*\{[^}]*(opacity|visibility|display)/,
+    'the control is not revealed by hover');
+
+  // Named by what it copies, so a column of these says which value each one
+  // belongs to rather than repeating "Copy" eight times.
+  assert.match(source, /aria-label=\{label \? `Copy \$\{label\}`/, 'the control names its value');
+
+  // The tick is not the confirmation; the tick is what a sighted reader gets.
+  assert.match(source, /role="status"/, 'a copy is announced, not only drawn');
+});

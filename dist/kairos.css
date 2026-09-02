@@ -1055,6 +1055,53 @@ h6 {
   white-space: pre-wrap;
 }
 
+/* A technical value an operator reads back or pastes somewhere else: a DKIM
+   record, an object key, a webhook URL, a digest.
+
+   The copy control sits beside the value in its own grid column rather than
+   floating over the corner of it. Overlaid, it covers the end of a short value
+   and the start of a scrolled one, and its 36px target has to be shrunk to fit
+   inside the box it is sitting on — so the two things that matter about this
+   pattern, the whole value and a target big enough to hit, are exactly what an
+   overlay costs. */
+.kairos-copy-field {
+  display: grid;
+  gap: var(--kairos-field-gap);
+  min-width: 0;
+}
+.kairos-copy-field-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--kairos-space-sm);
+}
+
+/* The single-line form. `kairos-code` is inline and belongs in a sentence;
+   this fills its column and scrolls sideways rather than wrapping, because a
+   DKIM value broken across three lines cannot be compared character by
+   character against the record in the registrar's panel beside it. */
+.kairos-copy-field-value {
+  min-width: 0;
+  min-height: var(--kairos-control-h);
+  padding: var(--kairos-space-sm) var(--kairos-space-md);
+  overflow-x: auto;
+  border: var(--kairos-border-w) solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-elevated);
+  color: var(--kairos-text);
+  font-family: var(--kairos-mono, monospace);
+  font-size: var(--kairos-text-label);
+  line-height: 1.45;
+  white-space: nowrap;
+}
+
+/* Held whether or not a copy has landed, so confirming one moves nothing. */
+.kairos-copy-field-status {
+  min-height: var(--kairos-space-lg);
+  color: var(--kairos-text-muted);
+  font-size: var(--kairos-text-sm);
+}
+
 /* A native disclosure, restyled to the Kairos border language. The panel
    animates open with the same duration and easing as every other disclosure, and
    the global reduced-motion rule collapses that to nothing. */

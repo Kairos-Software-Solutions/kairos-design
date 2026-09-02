@@ -236,3 +236,51 @@ export const dialogWithLabel: ActionSetProps = {
   label: 'Edit invoice',
   primary: act,
 };
+
+/* The stronger gates, 0.7.0. */
+
+// A handler that ignores what the gate collected still assigns, which is what
+// keeps every call site written before this release compiling unchanged.
+export const gatedIgnoringDetails: ActionSetProps = {
+  context: 'row',
+  label: 'kairos-logo.png',
+  more: [
+    {
+      label: 'Purge',
+      destructive: {
+        confirm: 'The public object is deleted permanently and four historical emails will show a broken image.',
+        typeToConfirm: 'PURGE kairos-logo.png',
+      },
+      onSelect: () => {},
+    },
+  ],
+};
+
+// And a handler that wants the reason receives it typed, rather than reaching
+// for it through a second callback the component does not have.
+export const gatedTakingReason: ActionSetProps = {
+  context: 'row',
+  label: 'Web App — Contact Form',
+  more: [
+    {
+      label: 'Revoke',
+      destructive: {
+        confirm: 'Applications using this secret lose access immediately.',
+        typeToConfirm: 'Web App — Contact Form',
+        requireReason: true,
+      },
+      onSelect: ({ reason }: { reason: string }) => {
+        void reason.trim();
+      },
+    },
+  ],
+};
+
+// The gate belongs to a destructive action. A ranked slot cannot hold one at
+// all, so there is no arrangement where a primary button carries a gate.
+export const gateOnRanked: ActionSetProps = {
+  context: 'page',
+  label: 'Invoices',
+  // @ts-expect-error a ranked slot never takes a destructive action, gated or not
+  primary: wipe,
+};
