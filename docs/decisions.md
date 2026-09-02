@@ -1163,3 +1163,22 @@ content and grows the button under the pointer still on it.
 Mailkit was not migrated in this release. It is the app that found both of
 these, and its adoption lands in its own repository against a published
 version, so there is still a way to tell which half broke something.
+
+### `Ranked` was a fork of `Button` living inside `ActionSet`
+
+`ActionSet` wrote the button classes itself, against a rank-to-modifier map of
+its own beside `Button`'s identical one. Two copies of one mapping is a defect
+waiting for a sixth rank, but it cost nothing visible until a declared action
+needed to say it was in flight — at which point the pending state was already
+built, one file away, and unreachable from the component every screen composes
+its actions through. An app hitting that goes around `ActionSet`, which is the
+one outcome its own docblock is written to prevent.
+
+So the button branch renders `Button`, and `RunAction` grew `pending` and
+`pendingLabel` to reach it. The emitted class strings are unchanged, which the
+`ActionSet` stories assert exactly rather than by pattern.
+
+**Only a ranked action can be pending, and the type says so.** A menu item
+cannot: choosing one closes the menu it was in, so there is nothing left on the
+screen to put the state on. That is a real constraint rather than a gap — an
+action whose progress the person needs to watch has earned a button.
