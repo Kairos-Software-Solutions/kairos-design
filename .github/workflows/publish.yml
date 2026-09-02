@@ -68,9 +68,26 @@ jobs:
             echo "tag=$package_tag" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Install
+        if: steps.release.outputs.publish == 'true'
+        run: npm ci
+
       - name: Test
         if: steps.release.outputs.publish == 'true'
         run: npm test
+
+      # The scale tests catch a literal where a token exists; the typecheck
+      # catches a component that does not compile against its own signature.
+      # Both shipped for three versions because neither ran.
+      - name: Typecheck
+        if: steps.release.outputs.publish == 'true'
+        run: npm run typecheck
+
+      # The workshop has to build, or a story that stopped rendering goes
+      # unnoticed until somebody opens it.
+      - name: Build the workshop
+        if: steps.release.outputs.publish == 'true'
+        run: npm run build-storybook
 
       - name: Create and push the version tag
         if: steps.release.outputs.create_tag == 'true'

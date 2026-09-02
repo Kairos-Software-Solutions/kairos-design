@@ -189,6 +189,38 @@ test('every artifact is reachable through the package exports', () => {
   assert.ok(!pkg.private, 'a private package cannot be installed by an app');
 });
 
+/**
+ * Planning material stays out of the tarball.
+ *
+ * `docs/adr/` and `openspec/` are written for whoever works on this repo, not
+ * for an app installing it. They are excluded today because `files` is an
+ * allowlist naming three entries, which is the strictest form and needs nothing
+ * else to hold. This test exists because that is a property of one line in
+ * `package.json`: widening `files` to `docs` to ship one more manifest page
+ * would quietly publish every proposal and every decision with it.
+ */
+test('planning material does not ship in the package', () => {
+  const pkg = JSON.parse(readFileSync(join(ROOT, 'package.json'), 'utf8'));
+
+  // An allowlist, not an ignore list. Anything not named here is already out.
+  assert.ok(Array.isArray(pkg.files) && pkg.files.length > 0, '"files" must be an allowlist');
+
+  const shipped = pkg.files.map((f) => f.replace(/^\.?\//, ''));
+  const withheld = ['docs/adr', 'openspec', 'stories', 'tests', '.storybook', '.claude'];
+
+  const leaked = withheld.filter((dir) =>
+    shipped.some((entry) => entry === dir || entry.startsWith(`${dir}/`) || dir.startsWith(`${entry}/`))
+  );
+
+  assert.deepEqual(leaked, [], 'these are for this repo, not for a consuming app');
+
+  // `docs` as a bare entry would sweep `docs/adr` in with the manifest.
+  assert.ok(
+    !shipped.includes('docs'),
+    'name docs/kairos-ui.md rather than docs, or the ADRs ship with it'
+  );
+});
+
 test('the index exports every component', () => {
   const index = readFileSync(join(ROOT, 'dist', 'react', 'index.ts'), 'utf8');
   const files = readdirSync(join(ROOT, 'dist', 'react'))
@@ -255,7 +287,7 @@ test('kairos-button clears the user-agent underline', () => {
 test('a panel heading is separated from the content under it', () => {
   const scoped = css.match(/\.kairos-panel-heading:not\(:last-child\) \{([\s\S]*?)\n\}/)?.[1];
   assert.ok(scoped, '.kairos-panel-heading has a rule for when content follows');
-  assert.match(scoped, /margin-bottom:\s*\d/, 'it pushes that content away');
+  assert.match(scoped, /margin-bottom:\s*var\(--kairos-space-/, 'it pushes that content away, by a step on the scale');
 });
 
 /**

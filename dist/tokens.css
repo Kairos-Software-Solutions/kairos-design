@@ -24,15 +24,28 @@
   --kairos-elevated: #f5e7c9;
   --kairos-sidebar: #f5e7c9;
 
-  /* --- Line ------------------------------------------------------------- */
+  /* --- Line -------------------------------------------------------------
+     `--kairos-border-subtle` draws the only boundary two live controls have —
+     `.kairos-overflow-trigger` and `.kairos-segmented-option` — so it is a
+     non-text contrast surface and owes 3:1, not a decorative tint. At #d2be90
+     it measured 1.73 on the page, 1.82 on surface and 1.49 on elevated, which
+     is a control with no findable edge at rest on any ground in the system.
+
+     Chosen as the lightest value on the existing hue and saturation that still
+     clears 3:1 against `--kairos-elevated`, the tightest of the three grounds:
+     42deg and 42% are unchanged, only lightness moved. Every table row
+     separator in every app reads through this token too, so the cost of going
+     darker than the floor is paid on every list screen — and the floor is what
+     is owed, not a target to beat.
+
+     3.52 on the page, 3.72 on surface, 3.04 on elevated. */
   --kairos-border: #16110b;
-  --kairos-border-subtle: #d2be90;
+  --kairos-border-subtle: #9d8140;
 
   /* --- Text ------------------------------------------------------------- */
   --kairos-text: #16110b;
   --kairos-text-2: #473728;
   --kairos-text-muted: #79624a;
-  --kairos-text-on-dark: #fff7e8;
 
   /* --- Accent ----------------------------------------------------------- */
   /* Full-saturation amber is a fill, never a text colour: it measures 1.52:1
@@ -41,9 +54,24 @@
      3:1 on its own. */
   --kairos-accent: #ffc247;
   --kairos-accent-hover: #e6a92d;
-  --kairos-accent-dim: rgba(255, 194, 71, 0.2);
+  /* The disabled primary's fill: amber carried 70% of the way to the page.
+     Rank 1 disabled has to stay ahead of rank 2 enabled, so this rank is the
+     one control that does not drop its ground — it desaturates instead. Still
+     amber, still the loudest thing in a disabled action row, and the ink label
+     reads at 13.17:1 on it. */
+  --kairos-accent-disabled: #ffd278;
   --kairos-accent-text: #16110b;
-  --kairos-accent-on-light: #96690e;
+  /* Text, so it owes 4.5:1 — and on the tightest ground it can sit on, not on
+     the page. `.kairos-button--tertiary` takes this for its label and
+     `.kairos-card` sets an elevated ground, so a tertiary button in a card is
+     a composition all three apps can build and no story does. At #96690e that
+     composition measured 3.97:1 while the page read 4.60 and surface 4.86,
+     which is a token that passes everywhere a reviewer would think to look.
+
+     Same method as `--kairos-border-subtle` above: 40deg and 83% unchanged,
+     lightness alone moved, and stopped at the lightest step that clears.
+     5.31 on the page, 5.61 on surface, 4.56 on elevated. */
+  --kairos-accent-on-light: #8a600d;
 
   /* --- Inverted surface ------------------------------------------------- */
   /* Ink-filled buttons, the sidebar brand block, active wizard steps. A pair
@@ -59,6 +87,7 @@
      brand drew it. The pair inverts on dark. */
   --kairos-focus: #16110b;
   --kairos-focus-inner: #ffc247;
+  --kairos-focus-w: 2px;
 
   /* --- State Palette ---------------------------------------------------- */
   /* Four states, warm and desaturated, every tint within 1.2:1 of the page so
@@ -84,7 +113,6 @@
   /* --- Rows ------------------------------------------------------------- */
   --kairos-row-hover: #fffcf3;
   --kairos-row-selected: #f8ebd2;
-  --kairos-row-stripe: #fbf2e0;
 
   /* --- Loading and overlay ---------------------------------------------- */
   --kairos-skeleton-bg: #f1e5cf;
@@ -96,6 +124,11 @@
      linen on dark: an ink shadow on a #1A1410 page is invisible, and the
      offset is the whole point of the mark. */
   --kairos-shadow-color: #16110b;
+  /* Four ranks. The pressed one is smaller than the resting one, so a press
+     reads as the control moving toward the page rather than as a new colour.
+     Only the filled button ranks carry a stamp at all: an outline button is
+     drawing its own boundary and a stamp under it reads as two borders. */
+  --kairos-shadow-pressed: 2px 2px 0 var(--kairos-shadow-color);
   --kairos-shadow: 4px 4px 0 var(--kairos-shadow-color);
   --kairos-shadow-card: 6px 6px 0 var(--kairos-shadow-color);
   --kairos-shadow-lg: 8px 8px 0 var(--kairos-shadow-color);
@@ -110,18 +143,23 @@
   --kairos-sidebar: #2e2720;
 
   --kairos-border: #f5f1e8;
-  --kairos-border-subtle: #6e6152;
+  /* The same reasoning, the same way: hue 32deg and 15% saturation unchanged,
+     lightness lifted until the tightest ground clears. Dark was already closer
+     — 3.04 on the page but 2.75 on surface and 2.45 on elevated — so this moves
+     less far than light did. 3.77 / 3.41 / 3.04. */
+  --kairos-border-subtle: #7f6f5e;
 
   --kairos-text: #f5f1e8;
   --kairos-text-2: #e0d7c8;
   --kairos-text-muted: #b9ae9c;
-  --kairos-text-on-dark: #fff7e8;
 
   /* Amber is 11.67:1 on ink and needs no dark variant. Only the text-safe
      value moves, because on the dark base amber clears 3:1 unaided. */
   --kairos-accent: #ffc247;
   --kairos-accent-hover: #e6a92d;
-  --kairos-accent-dim: rgba(255, 194, 71, 0.16);
+  /* The same 70%, carried toward the dark page instead, so the desaturation
+     reads as the same gesture in both themes. Ink label at 6.26:1. */
+  --kairos-accent-disabled: #ba8e36;
   --kairos-accent-text: #16110b;
   --kairos-accent-on-light: #ffc247;
 
@@ -146,7 +184,6 @@
 
   --kairos-row-hover: #2a231c;
   --kairos-row-selected: #3a2f1e;
-  --kairos-row-stripe: #221c16;
 
   --kairos-skeleton-bg: #2e2720;
   --kairos-skeleton-fg: #3a322a;
@@ -156,7 +193,7 @@
 }
 
 /* ==========================================================================
-   Type, geometry, and motion.
+   Type, geometry, space, and motion.
    Theme-independent, so they sit outside both blocks above.
    ========================================================================== */
 
@@ -169,6 +206,58 @@
   --kairos-body: 'Epilogue', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --kairos-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
 
+  /* --- Space ------------------------------------------------------------
+     Nine steps, fine at the bottom and coarse at the top, because that is
+     how a dense tool actually spends space: 2px decisions inside a control,
+     24px decisions between sections, and nothing that needs to tell 20px
+     from 22px.
+
+     Before this scale existed `kairos.css` held 38 distinct padding values
+     and 13 distinct gaps, including `7px 11px`, `10px 10px 4px`, and gaps of
+     5px, 7px, and 9px. That is not a system with some drift in it; it is 51
+     separate decisions, none of them repeatable, and it is the mechanism by
+     which two apps that both "use the design system" end up looking nothing
+     alike. An agent building a new screen has to pick a number, and with no
+     scale to pick from it picks a new one.
+
+     Every padding, gap, and margin in the stylesheet resolves to one of
+     these. A test fails on one that does not. */
+  --kairos-space-3xs: 2px;
+  --kairos-space-2xs: 4px;
+  --kairos-space-xs: 6px;
+  --kairos-space-sm: 8px;
+  --kairos-space-md: 12px;
+  --kairos-space-lg: 16px;
+  --kairos-space-xl: 24px;
+  --kairos-space-2xl: 32px;
+  --kairos-space-3xl: 48px;
+
+  /* --- Space, by role ---------------------------------------------------
+     What a step is for, so a call site names its decision rather than its
+     size. `--kairos-panel-pad` is one edit when panels get roomier;
+     `16px` written into nine rules is nine. */
+  --kairos-pad-control: var(--kairos-space-md);
+  --kairos-pad-cell-x: var(--kairos-space-md);
+  --kairos-pad-cell-y: var(--kairos-space-xs);
+  --kairos-panel-pad: var(--kairos-space-lg);
+  --kairos-section-pad: var(--kairos-space-xl);
+  --kairos-page-pad: var(--kairos-space-lg);
+  --kairos-screen-pad: var(--kairos-space-2xl);
+
+  /* Form density, which was the only spacing role in the system reaching the
+     scale directly from two rules instead of through a name. Both are read by
+     every form in every consuming app, so tightening a form is one edit here
+     rather than a hunt for two literals. */
+  --kairos-field-gap: var(--kairos-space-xs);
+  --kairos-form-gap: var(--kairos-space-lg);
+
+  /* The gap between panels on a screen. Gaps below this are the space scale
+     reached directly, or a `kairos-stack--*` modifier. A parallel set of
+     `--kairos-gap-tight`/`-block`/`-section` aliases existed for one commit
+     and was removed: a second vocabulary for the same nine numbers is how
+     drift starts, not how it stops. */
+  --kairos-gap: var(--kairos-space-lg);
+
   /* --- Product Scale geometry -------------------------------------------
      Apps, dashboards, portals, internal tools. Brand Scale surfaces
      (websites, decks, documents, email) override these; see brand.css.
@@ -177,21 +266,18 @@
      they are exactly what drifted between the four apps: an 8px panel radius
      against 10px, a 1px input border against 2px, 0.12em button tracking
      against 0.14em. As tokens, that drift is a one-line diff instead of an
-     audit finding. */
+     audit finding — but only while the stylesheet actually reads them. Every
+     one of these was defined and then ignored at least once, which is how
+     `--kairos-sidebar-w: 220px` and `.kairos-sidebar { width: 244px }` came
+     to ship in the same release. */
   --kairos-row-h: 44px;
   --kairos-nav-row-h: 36px;
   --kairos-control-h: 36px;
   --kairos-control-h-sm: 32px;
-  --kairos-control-h-touch: 40px;
+  --kairos-control-h-touch: 44px;
   --kairos-table-header-h: 32px;
   --kairos-page-header-h: 56px;
-  --kairos-filter-bar-h: 40px;
-  --kairos-sidebar-w: 220px;
-  --kairos-sidebar-rail-w: 56px;
-
-  --kairos-panel-pad: 16px;
-  --kairos-section-pad: 24px;
-  --kairos-gap: 24px;
+  --kairos-sidebar-w: 244px;
 
   /* Sharp by default. Softer radii belong to the named Brand Scale card
      families only, never to generic UI. */
@@ -200,28 +286,130 @@
   --kairos-radius-input: 4px;
   --kairos-radius-panel: 10px;
 
+  /* The accent rule down the side of a banner and a quoted block. Wide enough
+     to read as a marker rather than as a heavier border, which is why it is
+     not one of the two border weights. */
+  --kairos-rule-w: 4px;
+
+  /* Three weights and no fourth. A hairline separates rows inside a
+     container; a full border draws the container; a strong border says a
+     control takes input or a header ends. */
   --kairos-border-w: 1px;
   --kairos-border-w-strong: 2px;
 
-  /* Product Scale type. Bebas is the page title and nothing else, at 24px,
-     with a 20px floor and a hard limit of two per screen. */
+  /* --- Type scale --------------------------------------------------------
+     Eight steps. The stylesheet was using 33 distinct font sizes, mixing rem
+     and px, and six of them — 0.8, 0.8125, 0.82, 0.84, 0.85, and 0.86rem —
+     sat inside one pixel of each other. Nobody can see the difference between
+     12.8px and 13.1px, so it was never a decision; it was six guesses at the
+     same rank, and each one is a rank a later screen can copy.
+
+     px rather than rem, because the whole scale is one root size and a
+     half-pixel rank is the thing being removed. The body size stays in rem so
+     a reader's browser setting still moves it. */
+  --kairos-text-2xs: 10px;
+  --kairos-text-xs: 11px;
+  --kairos-text-sm: 12px;
+  --kairos-text-md: 13px;
   --kairos-text-body: 0.875rem;
+  --kairos-text-lg: 16px;
+  --kairos-text-xl: 20px;
+
+  /* --- Type, by role ----------------------------------------------------
+     Bebas is the page title and nothing else, at 24px, with a hard limit of
+     two per screen. */
   --kairos-text-body-lh: 1.5;
   --kairos-text-title: 24px;
-  --kairos-text-label: 0.75rem;
-  --kairos-text-chip: 11px;
-  --kairos-text-button: 0.78rem;
+  --kairos-text-heading: var(--kairos-text-lg);
+  --kairos-text-label: var(--kairos-text-sm);
+  --kairos-text-chip: var(--kairos-text-xs);
+  --kairos-text-button: var(--kairos-text-sm);
+  --kairos-text-meta: var(--kairos-text-md);
+  /* The iOS zoom threshold. A control below 16px makes Safari zoom the page
+     when it is focused, which is a layout shift the person did not ask for. */
+  --kairos-text-input: var(--kairos-text-lg);
 
-  /* Product Scale tracking. The visual spec tabulates Brand Scale values
-     (0.18em-0.20em); these are the tighter software equivalents named in
-     Component Defaults. */
-  --kairos-track-button: 0.14em;
-  --kairos-track-label: 0.08em;
+  /* Product Scale tracking. Four ranks, because the stylesheet was using
+     eleven values against three tokens and referencing none of them: 0.02,
+     0.03, 0.04, 0.06, 0.08, 0.09, 0.1, 0.12, 0.14, 0.16, and 0.18em, all
+     written by hand. Nobody can tell 0.08em from 0.09em on a screen, so the
+     difference was never a decision — it was eleven separate guesses. */
   --kairos-track-display: 0.02em;
+  --kairos-track-heading: 0.06em;
+  --kairos-track-label: 0.08em;
+  --kairos-track-button: 0.14em;
 
   /* --- Motion -----------------------------------------------------------
-     ease-out, at or under 700ms. Honoured against prefers-reduced-motion in
-     kairos.css. */
+     ease-out, at or under 700ms. Honoured against prefers-reduced-motion by a
+     block at the foot of kairos.css, which collapses every duration here to
+     `--kairos-duration-none` and every loop to a single iteration. */
   --kairos-ease: cubic-bezier(0, 0, 0.2, 1);
-  --kairos-duration: 250ms;
+  /* 200ms, because that is what six of the nine transitions in the stylesheet
+     already ran at while the token said 250ms and nothing read it. Two ranks:
+     the fast one is for a control acknowledging a press, the slow one for
+     something entering or leaving the page. */
+  --kairos-duration: 200ms;
+  --kairos-duration-fast: 120ms;
+  /* Something arriving on the page rather than a control acknowledging a
+     press. Longer, because an entrance the eye did not ask for has to be slow
+     enough to read as deliberate. */
+  --kairos-duration-enter: 450ms;
+  /* The skeleton pulse, which is a loop rather than a transition. */
+  --kairos-duration-pulse: 1.4s;
+  /* What every duration above collapses to under reduced motion. Not `0s`: a
+     zero-length animation does not reliably fire `animationend` or
+     `transitionend`, so code waiting on one to unmount a node or advance a step
+     waits forever. Reduced motion should take away the movement, not the event.
+     One millisecond lands on the final keyframe in the same frame it starts. */
+  --kairos-duration-none: 1ms;
 }
+
+/* ==========================================================================
+   Breakpoints
+   ==========================================================================
+   Documented constants, not tokens, and the distinction is forced rather than
+   chosen: a CSS custom property cannot be used in a media query. Writing one
+   into a `max-width` condition does not work in any engine — the media query
+   is evaluated before the cascade resolves a custom property, so there is
+   nothing to read. The only ways to name a breakpoint are a convention like
+   this one or `@custom-media`,
+   which needs a PostCSS build. This package has deliberately never had a build
+   step — `dist/` is hand-edited source and the export map points straight at
+   it — so adopting `@custom-media` would cost the whole toolchain to name
+   seven numbers. It is written here instead, and the numbers are typed by hand
+   at each `@media`.
+
+   That means nothing enforces this list. It is a comment, and this file's own
+   tests exist because a comment is not enforcement — so treat it as the
+   register you check before adding an eighth width, not as a guarantee that
+   there are only seven.
+
+   Seven boundaries across thirteen width queries in `kairos.css`. Where a
+   boundary needs both sides it is written as a complementary pair — 767/768
+   and 899/900 — which is one boundary written correctly, not two widths.
+
+     420px   Dialog actions stack. The narrow phone.
+     520px   The filter bar's search field takes its own row.
+     640px   An equal-width action row collapses to one column.
+     768px   The table-to-card swap, and the main mobile boundary. Written as
+             `max-width: 767px` / `min-width: 768px`.
+     900px   The sidebar appears and the bottom nav goes. Written as
+             `max-width: 899px` / `min-width: 900px`. `kairos-desktop-only`
+             and `kairos-mobile-only` are this boundary.
+     980px   The login grid collapses to one column.
+     1200px  The main region takes its roomiest padding.
+
+   All seven were probed either side in a browser against the built workshop,
+   and every one changes a layout no other one changes, so this is already the
+   smallest set that keeps every layout correct. Folding 420 and 640 into 520
+   was the candidate and both were measured and rejected: the dialog's two
+   buttons are 260px wide together and sit in a row with room to spare at
+   430px, so stacking them from 421px up doubles that row's height for nothing;
+   and moving 640 changes what an equal action row does between 521 and 640
+   rather than preserving it. Figures in `docs/decisions.md`.
+
+   The filter bar is the alternative to all of this. It reflows from one column
+   to four across seven widths on `auto-fit` and `minmax` alone, with no media
+   query, and its single breakpoint at 520 exists only to undo a `span 2` that
+   has nothing to span in a one-column grid. Content deciding beats a named
+   width, and it is a larger change than this one. */
