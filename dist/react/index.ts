@@ -36,12 +36,16 @@ export type { SortHeaderProps, SortDirection } from './SortHeader';
 export { default as OverflowMenu } from './OverflowMenu';
 export type { OverflowMenuProps, OverflowItem } from './OverflowMenu';
 
-// Types only for now. The component that reads them is group 2 of
-// action-composition, and its shape is reviewed before any of it is rendered.
+export { default as ActionSet } from './ActionSet';
 export type {
   Action,
   ActionContext,
   ActionSetProps,
+  Destructive,
+  DestructiveAction,
+  LinkAction,
+  RankedAction,
+  RunAction,
   SecondaryActions,
 } from './ActionSet';
 

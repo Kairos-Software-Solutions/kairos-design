@@ -1,5 +1,6 @@
 'use client';
 
+import { type RefObject } from 'react';
 import { DropdownMenu } from 'radix-ui';
 
 export interface OverflowItem {
@@ -37,6 +38,18 @@ export interface OverflowMenuProps {
   label: string;
   /** Gives a page-level menu the same visual weight as its adjacent button. */
   context?: 'row' | 'header';
+  /**
+   * The trigger element, for a caller that has to put focus back on it.
+   *
+   * Radix returns focus here on close by itself, so nothing needs this to
+   * open and close a menu. It exists for the one case where that restore does
+   * not land: a menu item that opens a dialog. The dialog's focus scope
+   * mounts first and wins, and the dialog then has nothing outside an overlay
+   * to hand focus back to when it closes — measured, and it left a person who
+   * had just cancelled a deletion at the top of the page. `ActionSet` passes
+   * the same ref to `ConfirmDialog`, which restores to it.
+   */
+  triggerRef?: RefObject<HTMLButtonElement | null>;
 }
 
 /** The gap between the trigger and the menu, and the menu and the viewport. */
@@ -65,7 +78,8 @@ const VIEWPORT_PADDING = 8;
  * so an app stylesheet writing a rule about our class can no longer put the
  * clipping back.
  */
-export default function OverflowMenu({ items, label, context = 'row' }: OverflowMenuProps) {
+export default function OverflowMenu({ items, label, context = 'row', triggerRef }: OverflowMenuProps) {
+
   // A trigger that opens an empty menu is a dead control. Render nothing.
   if (items.length === 0) return null;
 
@@ -95,6 +109,7 @@ export default function OverflowMenu({ items, label, context = 'row' }: Overflow
     <DropdownMenu.Root modal={false}>
       <DropdownMenu.Trigger asChild>
         <button
+          ref={triggerRef}
           type="button"
           className={`kairos-overflow-trigger${context === 'header' ? ' kairos-overflow-trigger--header' : ''}`}
           aria-label={`Actions for ${label}`}

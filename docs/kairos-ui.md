@@ -276,6 +276,10 @@ Destructive actions live in `kairos-overflow-item--destructive` and are gated by
 a dialog that names the record. The confirm button takes the destructive
 treatment, never amber.
 
+In React, do not assemble these by hand. `ActionSet` takes the actions and
+decides the rank, the placement, the order and the confirmation; the one
+judgement it leaves you is which action is primary on the screen.
+
 ## Forms
 
 | Class | Use for | Do not use for | Modifiers |
@@ -393,6 +397,7 @@ fails on it.
 
 | Export | Notes |
 | --- | --- |
+| `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, and cannot take a ranked slot at all. **Peer dependency: `radix-ui`.** |
 | `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. |
 | `StateChip` | The four states, plus every app's old spelling as a deprecated alias so adoption is not one enormous commit |
 | `Segmented` | Filters, wizard steps, the theme choice |
@@ -409,11 +414,11 @@ fails on it.
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
 | `SectionTag` | The Brand Scale section transition. `as` renders the label as a heading, so a screen reader's heading list can carry the page |
 | `Panel` | Border, ground, and `kairos-pad`. `flush` drops the padding for a table that supplies its own |
-| `PageHeader` | Title, one-line `description`, and one primary action |
+| `PageHeader` | Title, one-line `description`, and an action group. Pass `ActionSet` to `actions`; `PageHeader` owns the `kairos-page-header-actions` wrapper, so the `page` context renders the controls and nothing around them |
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
 
-Radix is the one dependency, and only for the dialogs. A modal has to trap
+Radix is the one dependency, and only for what opens over the page. A modal has to trap
 focus, restore it, close on Escape, and mark the rest of the page inert; hand
 rolling that in a shared component means every Kairos app inherits the same
 subtle keyboard trap. Everything else, including the three theme icons, is

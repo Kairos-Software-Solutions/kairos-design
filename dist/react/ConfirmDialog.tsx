@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { type RefObject, useState } from 'react';
 import Button from './Button';
 import Dialog from './Dialog';
 
@@ -29,6 +29,8 @@ export interface ConfirmDialogProps {
   destructive?: boolean;
   onConfirm: () => void | Promise<void>;
   onClose: () => void;
+  /** Where focus goes when this closes. See `Dialog`. */
+  restoreFocusTo?: RefObject<HTMLElement | null>;
 }
 
 /**
@@ -51,6 +53,7 @@ export default function ConfirmDialog({
   destructive = true,
   onConfirm,
   onClose,
+  restoreFocusTo,
 }: ConfirmDialogProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -77,7 +80,7 @@ export default function ConfirmDialog({
   }
 
   return (
-    <Dialog open={open} onClose={close} title={title}>
+    <Dialog open={open} onClose={close} title={title} restoreFocusTo={restoreFocusTo}>
       <p className="kairos-body">{message}</p>
 
       {error ? (
