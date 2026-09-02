@@ -70,7 +70,12 @@ export { default as Dialog } from './Dialog';
 export type { DialogProps } from './Dialog';
 
 export { default as ConfirmDialog } from './ConfirmDialog';
-export type { ConfirmDialogProps } from './ConfirmDialog';
+export type { ConfirmDialogProps, ConfirmDetails } from './ConfirmDialog';
+export { confirmationMatches, confirmGateOpen } from './confirm';
+export type { ConfirmGate } from './confirm';
+
+export { default as CopyField } from './CopyField';
+export type { CopyFieldProps } from './CopyField';
 
 export { default as Toast, ToastRegion, TransientToast } from './Toast';
 export type { ToastProps } from './Toast';
