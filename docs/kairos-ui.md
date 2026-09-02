@@ -126,11 +126,13 @@ Where a boundary needs both sides it is written as a complementary pair —
 `max-width: 767px` against `min-width: 768px`, `max-width: 899px` against
 `min-width: 900px`. That is one boundary written correctly, not two widths.
 
-420, 520 and 640 are three phone-range boundaries within 220px of each other,
-one per component, and 980 exists for a single screen. That is worth
-collapsing and has not been: seven of the nine classes these queries touch have
-no story, so a collapse could only be reasoned about, and collapsing a
-breakpoint is a layout change.
+All seven were measured either side in a browser, and each one changes a layout
+no other one changes — so this is already the smallest set that keeps every
+layout correct. Folding 420 and 640 into 520 was tested and rejected on the
+numbers; see `docs/decisions.md`.
+
+The filter bar shows the alternative. It reflows from one column to four across
+seven widths on `auto-fit` and `minmax` alone, with no media query at all.
 
 ### Line, radius, and the stamp
 

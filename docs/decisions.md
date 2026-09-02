@@ -719,7 +719,7 @@ inverted surface" and the Rows section promised "the optional stripe". The
 swatches vanished on their own, because that page parses the token file. The
 sentences did not, because prose is the part no parser reads.
 
-### Breakpoints are constants, and the collapse is not done
+### Breakpoints are constants, and all seven are load-bearing
 
 **Constants referenced by convention, written at the foot of `tokens.css`.**
 Forced rather than chosen: a CSS custom property cannot be used in a media
@@ -736,23 +736,58 @@ one boundary written as its two sides, which is correct rather than duplicated.
 Thirteen width queries across those seven, plus `pointer: coarse`,
 `prefers-reduced-motion` and `print`.
 
-**The collapse was not done, and that is the honest outcome rather than a
-deferral.** 420, 520 and 640 are three phone-range boundaries within 220px of
-each other, one per component, and 980 exists for one screen — the same shape
-as eleven tracking values and 38 padding values before either was a scale. The
-change asks for each collapse to be checked in the workshop rather than reasoned
-about, because collapsing a breakpoint is a layout change and 767 against 768
-may be load-bearing at a width nobody has looked at.
+**Five classes had no story, not seven.** An earlier pass counted by grepping
+`stories/` for CSS class names, which misses every class a React component
+emits: `.kairos-dialog-actions` comes from `ConfirmDialog` and
+`.kairos-toast-region` from `Toast`, and both are rendered by
+`Components/Feedback`. The five genuinely uncovered were
+`.kairos-filter-bar-search`, `.kairos-filter-bar-action`, `.kairos-login-grid`,
+`.kairos-kicker` and `.kairos-desktop-only`. `Screens/Record list/Filtered` and
+`Screens/Sign in` cover them now, and every breakpoint rule in the stylesheet
+has something that renders it.
 
-The workshop cannot check it. Of the nine classes these queries touch, two have
-a story: `.kairos-action-row--equal` and `.kairos-mobile-only`. Nothing renders
-`.kairos-dialog-actions`, `.kairos-filter-bar-search`,
-`.kairos-filter-bar-action`, `.kairos-login-grid`, `.kairos-kicker`,
-`.kairos-toast-region` or `.kairos-desktop-only`. Collapsing on that evidence
-would be reasoning about it, which is the thing the change rules out.
+**The collapse was measured and there is nothing to collapse.** Each boundary
+was probed either side in a real browser — Chromium against the built workshop,
+reading computed style and geometry rather than reading the CSS:
 
-So the widths are named and documented and the set is unchanged. The stories
-come first, and the collapse is a change that starts after they exist.
+| Boundary | What changes across it, measured |
+| --- | --- |
+| 420 | Dialog actions `row` → `column-reverse`, height 36px → 84px |
+| 520 | Filter search `grid-column: auto` → `span 2`, width 221px → 455px |
+| 640 | Equal action row 1 column → 2, height 84px → 36px |
+| 768 | Main padding `20/16/96` → `28/28/104`; kicker `none` → `inline-block`; filter action gains its 23px label offset and stops being full-width |
+| 900 | `desktop-only` `none` → `block`; the sidebar appears and main narrows from 899px to 656px |
+| 980 | Login grid 1 column → 2 |
+| 1200 | Main padding `32/48/48` → `48` |
+
+Every one fires, and no two fire on the same thing. So the smallest set that
+keeps every layout correct is the set that is there.
+
+The obvious candidate was folding 420 and 640 into 520, since three phone-range
+boundaries within 220px of each other is the shape of eleven tracking values
+before they were a scale. Both were tested by injecting the collapsed rules into
+the running workshop and measuring, and both were rejected on the numbers:
+
+- **420 → 520 is a regression.** The dialog's two buttons measure 87px and
+  161px. With the 12px gap that is 260px, and they sit in a row with 170px to
+  spare at 430px wide. Collapsing to 520 stacks them from 421px to 520px and
+  doubles the row's height from 36px to 84px, on exactly the screens with the
+  least height to spend.
+- **640 → 520 is not a regression, it is a different design.** Between 521px
+  and 640px it would put two 219–274px buttons side by side where there is now
+  one full-width column. Nothing breaks at that size. But the current rule is a
+  decision — an equal-width action row is one column on a phone — and swapping
+  it is choosing a different layout, not preserving the one that is there. The
+  task is to reduce the set while every layout stays correct, and this does not
+  meet that.
+
+Worth noting what the filter bar does instead, because it is the alternative to
+all of this: `grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px),
+1fr))` reflows it from one column to four across seven different widths without
+a single media query. Its one breakpoint at 520 exists only to undo a
+`grid-column: span 2` that has nothing to span in a one-column grid. A system
+built that way needs fewer named widths because the content decides. That is a
+larger change than this one and it is not started here.
 
 **The workshop viewports were replaced.** 320, 720, 1024 and 1440 were the
 widths the system makes promises about, which is not the list of widths it

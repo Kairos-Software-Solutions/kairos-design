@@ -23,7 +23,6 @@ const tokens = readFileSync(join(ROOT, 'dist', 'tokens.css'), 'utf8');
 
 /** Comments quote the values they replaced, so they are not evidence. */
 const css = raw.replace(/\/\*[\s\S]*?\*\//g, '');
-const lines = css.split('\n');
 
 /**
  * Everything in the package that can read a token: both stylesheets and every
@@ -57,20 +56,65 @@ function scale(prefix) {
 const SPACE = scale('--kairos-space-');
 const SPACING_PROP = /^(padding|margin|gap|row-gap|column-gap)(-|$)|^--(stack-gap|pad|split-gap)$/;
 
+/**
+ * Every declaration in the stylesheet, as `{ prop, value, line }`.
+ *
+ * This used to be a pass over the file's lines, matching a declaration against the
+ * whole line, which meant a rule written as `.kairos-x { padding: 13px; }` was
+ * invisible to every check built on it — the line holds a selector and a brace
+ * as well as the declaration, so it never matched. That is a hole in a
+ * guardrail rather than a live failure, because the stylesheet is formatted one
+ * declaration per line throughout. It stops being formatted that way the first
+ * time somebody adds a one-line rule, and the check would go quiet without
+ * going red.
+ *
+ * A declaration starts at the beginning of a line, after a `;`, or after the
+ * `{` that opens its block, and ends at the next `;` or `}`. The trailing
+ * semicolon is optional, because the last declaration in a block may omit it
+ * and CSS is still valid. Comments are already stripped from `css`.
+ *
+ * Selectors do not match: in `a:hover {` the character after `hover` is `{`,
+ * which is not an end-of-declaration, and in `@media (min-width: 900px) {`
+ * nothing opens a declaration before `min-width`.
+ */
+function declarations() {
+  const out = [];
+  const pattern = /(?:^|[;{])\s*(--[a-z0-9-]+|[a-z-]+)\s*:\s*([^;{}]*?)(\s*!important)?\s*(?=[;}])/gm;
+  for (const match of css.matchAll(pattern)) {
+    const [, prop, value] = match;
+    out.push({
+      prop,
+      value: value.trim(),
+      line: css.slice(0, match.index).split('\n').length,
+    });
+  }
+  return out;
+}
+
+const DECLARATIONS = declarations();
+
+test('the declaration scan sees a rule written on one line', () => {
+  // The scan is what every check below is built on, so its blind spot is
+  // theirs. This is the shape that used to escape: a whole rule on one line.
+  const found = [
+    ...'.probe { padding: 13px; }'.matchAll(
+      /(?:^|[;{])\s*(--[a-z0-9-]+|[a-z-]+)\s*:\s*([^;{}]*?)(\s*!important)?\s*(?=[;}])/gm,
+    ),
+  ].map((m) => [m[1], m[2].trim()]);
+  assert.deepEqual(found, [['padding', '13px']]);
+});
+
 test('every spacing value is a step on the scale', () => {
   const offenders = [];
-  lines.forEach((line, index) => {
-    const m = line.match(/^\s*(--[a-z-]+|[a-z-]+)\s*:\s*(.+?)(\s*!important)?;\s*$/);
-    if (!m) return;
-    const [, prop, value] = m;
-    if (!SPACING_PROP.test(prop)) return;
+  for (const { prop, value, line } of DECLARATIONS) {
+    if (!SPACING_PROP.test(prop)) continue;
     // `calc()` around a safe-area inset is a layout expression, not a step.
-    if (/calc\(|env\(/.test(value)) return;
+    if (/calc\(|env\(/.test(value)) continue;
     for (const [, px] of value.matchAll(/(?<![\w(-])(\d*\.?\d+)px/g)) {
       if (px === '0') continue;
-      if (!SPACE.has(`${px}px`)) offenders.push(`${index + 1}: ${prop}: ${value}`);
+      if (!SPACE.has(`${px}px`)) offenders.push(`${line}: ${prop}: ${value}`);
     }
-  });
+  }
   assert.deepEqual(offenders, [], `spacing off the scale:\n${offenders.join('\n')}`);
 });
 
@@ -93,7 +137,9 @@ test('every font size is a step on the type scale', () => {
   // 33 distinct sizes shipped before this, six of them inside one pixel of
   // each other. A rank nobody can see is not a rank; it is a value a later
   // screen copies and a fourth app then rounds differently.
-  const offenders = [...css.matchAll(/font-size:\s*([\d.]+(?:rem|px))\s*;/g)].map((m) => m[1]);
+  const offenders = DECLARATIONS.filter(
+    (d) => d.prop === 'font-size' && /^[\d.]+(rem|px)$/.test(d.value),
+  ).map((d) => `${d.line}: ${d.value}`);
   assert.deepEqual(offenders, [], `font size off the scale:\n${offenders.join('\n')}`);
 });
 
@@ -102,8 +148,9 @@ test('every shadow comes from the stamp tokens', () => {
   // A hand-written offset is a fifth rank nobody agreed to.
   // A focus ring is drawn with `box-shadow` too, and it is a different
   // mechanism with its own width token. This is about the stamp.
-  const offenders = [...css.matchAll(/box-shadow:\s*([^;]*\d+px[^;]*);/g)]
-    .map((m) => m[1])
+  const offenders = DECLARATIONS.filter((d) => d.prop === 'box-shadow')
+    .map((d) => d.value)
+    .filter((value) => /\d+px/.test(value))
     .filter((value) => !value.includes('focus') && !value.startsWith('inset'))
     .filter((value) => !value.includes('var(--kairos-shadow'));
   assert.deepEqual(offenders, [], `hand-written shadow:\n${offenders.join('\n')}`);

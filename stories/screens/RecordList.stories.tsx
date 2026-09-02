@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import DataTable, { type Column } from '../../dist/react/DataTable';
 import Button from '../../dist/react/Button';
@@ -5,9 +6,11 @@ import StateChip from '../../dist/react/StateChip';
 import EmptyState from '../../dist/react/EmptyState';
 import OverflowMenu from '../../dist/react/OverflowMenu';
 import { PageHeader } from '../../dist/react/Panel';
+import InputField from '../../dist/react/Field';
+import Segmented from '../../dist/react/Segmented';
 import { formatMoney } from '../../dist/format/money';
 import { formatDate } from '../../dist/format/dates';
-import { AppShell, MAILKIT_NAV, UPTIME_NAV } from './Shell';
+import { AppShell, MAILKIT_NAV, PAYKIT_NAV, UPTIME_NAV } from './Shell';
 import { accounts, invoices, monitors, type Account, type Invoice, type Monitor } from '../fixtures';
 
 /**
@@ -124,18 +127,7 @@ export const Uptime: Story = {
 /** Paykit's invoices screen, the densest of the three. */
 export const Paykit: Story = {
   render: () => (
-    <AppShell
-      product="Paykit"
-      nav={[
-        { label: 'Dashboard' },
-        { label: 'Invoices', group: 'Money', current: true },
-        { label: 'Payments', group: 'Money' },
-        { label: 'Expenses', group: 'Money' },
-        { label: 'Customers', group: 'CRM' },
-        { label: 'Products', group: 'CRM' },
-        { label: 'Reports', group: 'System' },
-      ]}
-    >
+    <AppShell product="Paykit" nav={PAYKIT_NAV}>
       <div className="kairos-stack kairos-stack--xl">
         <PageHeader
           title="Invoices"
@@ -171,4 +163,71 @@ export const Empty: Story = {
       </div>
     </AppShell>
   ),
+};
+
+/**
+ * A filtered list, reached from the screen above it.
+ *
+ * This story exists because four breakpoint rules had nothing to act on in the
+ * workshop and so could only be reasoned about: `.kairos-filter-bar-search` at
+ * 520px, `.kairos-filter-bar-action` and `.kairos-kicker` at 767px, and
+ * `.kairos-desktop-only` at 899px. Every one of them is on this screen.
+ *
+ * The two kickers are the pair the 767px rule distinguishes. The plain one is
+ * chrome — it repeats what the top bar already says — and it goes on a phone.
+ * The link one is the way back to the parent screen, which is navigation, and
+ * it stays.
+ */
+export const Filtered: Story = {
+  render: function FilteredStory() {
+    const [state, setState] = useState<'all' | 'overdue' | 'settled'>('overdue');
+    return (
+      <AppShell product="Paykit" nav={PAYKIT_NAV}>
+        <div className="kairos-stack kairos-stack--xl">
+          <div>
+            <span className="kairos-kicker">Angostura Holdings Limited</span>
+            <a className="kairos-kicker-link" href="#">All customers</a>
+            <PageHeader
+              title="Invoices"
+              description="5 open · TTD 4,342,550.00 outstanding."
+              actions={<Button variant="primary">New invoice</Button>}
+            />
+          </div>
+
+          <form className="kairos-panel kairos-filter-bar" onSubmit={(e) => e.preventDefault()}>
+            <div className="kairos-filter-bar-search">
+              <InputField label="Search" placeholder="Reference or customer" />
+            </div>
+            <Segmented
+              label="Filter invoices"
+              value={state}
+              onChange={setState}
+              options={[
+                { value: 'all', label: 'All' },
+                { value: 'overdue', label: 'Overdue' },
+                { value: 'settled', label: 'Settled' },
+              ]}
+            />
+            <InputField label="Due before" type="date" defaultValue="2026-10-01" />
+            <Button className="kairos-filter-bar-action" variant="secondary" type="submit">
+              Apply
+            </Button>
+          </form>
+
+          <p className="kairos-meta kairos-desktop-only">
+            Showing 5 of 5. Sorting is in the table header.
+          </p>
+
+          <DataTable
+            label="Invoices"
+            rows={invoices}
+            columns={invoiceColumns}
+            getKey={(row) => row.id}
+            defaultSort={{ key: 'due', direction: 'descending' }}
+            empty={<EmptyState message="No invoices match these filters." />}
+          />
+        </div>
+      </AppShell>
+    );
+  },
 };

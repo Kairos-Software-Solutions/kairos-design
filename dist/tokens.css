@@ -399,10 +399,17 @@
      980px   The login grid collapses to one column.
      1200px  The main region takes its roomiest padding.
 
-   420, 520 and 640 are three phone-range boundaries inside 220px of each
-   other, one per component, and 980 exists for one screen. That is the shape
-   of eleven tracking values and 38 padding values before they were a scale,
-   and it is worth collapsing. It was not collapsed here: seven of the nine
-   classes these queries touch have no story, so a collapse could only be
-   reasoned about, and collapsing a breakpoint is a layout change. The stories
-   come first. See `docs/decisions.md`. */
+   All seven were probed either side in a browser against the built workshop,
+   and every one changes a layout no other one changes, so this is already the
+   smallest set that keeps every layout correct. Folding 420 and 640 into 520
+   was the candidate and both were measured and rejected: the dialog's two
+   buttons are 260px wide together and sit in a row with room to spare at
+   430px, so stacking them from 421px up doubles that row's height for nothing;
+   and moving 640 changes what an equal action row does between 521 and 640
+   rather than preserving it. Figures in `docs/decisions.md`.
+
+   The filter bar is the alternative to all of this. It reflows from one column
+   to four across seven widths on `auto-fit` and `minmax` alone, with no media
+   query, and its single breakpoint at 520 exists only to undo a `span 2` that
+   has nothing to span in a one-column grid. Content deciding beats a named
+   width, and it is a larger change than this one. */

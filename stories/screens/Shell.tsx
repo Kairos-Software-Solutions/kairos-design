@@ -157,6 +157,16 @@ export const MAILKIT_NAV: NavItem[] = [
   { label: 'API Keys', group: 'System' },
 ];
 
+export const PAYKIT_NAV: NavItem[] = [
+  { label: 'Dashboard' },
+  { label: 'Invoices', group: 'Money', current: true },
+  { label: 'Payments', group: 'Money' },
+  { label: 'Expenses', group: 'Money' },
+  { label: 'Customers', group: 'CRM' },
+  { label: 'Products', group: 'CRM' },
+  { label: 'Reports', group: 'System' },
+];
+
 export const UPTIME_NAV: NavItem[] = [
   { label: 'Monitors', current: true },
   { label: 'Settings' },
