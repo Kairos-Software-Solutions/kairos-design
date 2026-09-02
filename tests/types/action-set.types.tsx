@@ -98,3 +98,56 @@ export const unknownContext: ActionSetProps = {
   // @ts-expect-error there are four contexts
   context: 'sidebar',
 };
+
+/* Links, allowed. */
+
+export const linkAction: ActionSetProps = {
+  context: 'row',
+  more: [{ label: 'Open in Paykit', href: '#paykit' }],
+};
+
+export const externalLink: ActionSetProps = {
+  context: 'row',
+  more: [{ label: 'View in bank portal', href: 'https://example.com', external: true }],
+};
+
+export const disabledLink: ActionSetProps = {
+  context: 'page',
+  more: [{ label: 'Open in Paykit', href: '#paykit', disabled: true }],
+};
+
+/* Links, forbidden. */
+
+// An action either runs or navigates. Both is two actions wearing one label,
+// and nothing could decide which one a press means.
+export const bothKinds: ActionSetProps = {
+  context: 'row',
+  // @ts-expect-error an action runs or navigates, never both
+  more: [{ label: 'Open', href: '#x', onSelect: () => {} }],
+};
+
+// A destructive link would leave the page, so the confirmation it is supposed
+// to be gated behind would have nothing to stand in front of.
+export const destructiveLink: ActionSetProps = {
+  context: 'row',
+  // @ts-expect-error a link cannot be destructive
+  more: [{ label: 'Delete', href: '/delete', destructive: { confirm: 'Delete it?' } }],
+};
+
+// `external` describes a destination, so it means nothing without one.
+export const externalWithoutHref: ActionSetProps = {
+  context: 'row',
+  // @ts-expect-error external needs an href
+  more: [{ label: 'Open', onSelect: () => {}, external: true }],
+};
+
+/* A dialog footer has no menu. */
+
+export const dialogRanked: ActionSetProps = { context: 'dialog', primary: act, secondary: [act] };
+
+export const dialogWithMenu: ActionSetProps = {
+  context: 'dialog',
+  primary: act,
+  // @ts-expect-error a dialog footer has no menu
+  more: [act],
+};

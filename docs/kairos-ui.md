@@ -267,7 +267,7 @@ Where the hierarchy leaves the order open, ask rather than guess.
 | `kairos-page-header-primary` | The one primary action on the screen | A second amber claim | — |
 | `kairos-action-row` | A row of buttons | A single button | `--equal` `--end` `--top` |
 | `kairos-overflow-menu` | Secondary and destructive row actions | The primary action | — |
-| `kairos-overflow-item` | One row inside the menu | — | `--destructive` `--divided` |
+| `kairos-overflow-item` | One row inside the menu | — | `--destructive` `--divided`, and `[data-disabled]` for one that is unavailable |
 | `kairos-dialog-content` | Modal surface | Page-level notices | — |
 | `kairos-segmented` | Filters and wizard steps | Anything styled as a button row | `--links` |
 | `kairos-icon-action` | An icon-only control that has an `aria-label` naming its record | A rail of three per table row | `--accent` `--danger` |
@@ -400,7 +400,7 @@ fails on it.
 | `Banner` | `alert` for a failure, `status` otherwise |
 | `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
 | `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
-| `OverflowMenu` | The only other control a row carries. Behaviour is Radix `DropdownMenu`: typeahead, arrow keys, Escape returning focus, and a menu that is never clipped by the table panel it opens inside. Placement lives on a wrapper Radix owns, so a rule your stylesheet writes about `.kairos-overflow-menu` styles the menu and cannot move it. **Peer dependency: `radix-ui`.** |
+| `OverflowMenu` | The only other control a row carries. Behaviour is Radix `DropdownMenu`: typeahead, arrow keys, Escape returning focus, and a menu that is never clipped by the table panel it opens inside. Placement lives on a wrapper Radix owns, so a rule your stylesheet writes about `.kairos-overflow-menu` styles the menu and cannot move it. A disabled item renders unavailable rather than vanishing; every item disabled renders the trigger unavailable. **Peer dependency: `radix-ui`.** |
 | `DataTable` | Table on desktop, record cards below 768px. Sorting, paging, row selection, search and column visibility, all off `columns` plus a prop each. A column declares its role once and that drives the table, the card, and the order. |
 | `FilterBar` | The row above a record list that narrows it: a debounced search box and any number of segmented filters, collected into one `FilterState` the screen reads. It narrows nothing itself — what `overdue` means is the screen's. Not for sorting; the table header does that. |
 | `CollapsibleCard` | Built on `<details>`, so it works before hydration and prints expanded |

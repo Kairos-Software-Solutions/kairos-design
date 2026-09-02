@@ -1984,11 +1984,22 @@ textarea.kairos-input-field {
   transition: background-color var(--kairos-duration) var(--kairos-ease), border-color var(--kairos-duration) var(--kairos-ease), color var(--kairos-duration) var(--kairos-ease);
 }
 
-.kairos-overflow-trigger:hover,
+.kairos-overflow-trigger:hover:not(:disabled),
 .kairos-overflow-trigger[aria-expanded='true'] {
   border-color: var(--kairos-border);
   background: var(--kairos-elevated);
   color: var(--kairos-text);
+}
+
+/* Every item in the menu disabled means no action can be taken on this record,
+   which is worth saying. The same two signals as every other disabled control
+   in the package: the ground drops to the page and the border drops to the
+   subtle weight, per ADR 0004. */
+.kairos-overflow-trigger:disabled {
+  border-color: var(--kairos-border-subtle);
+  background: var(--kairos-bg);
+  color: var(--kairos-text-muted);
+  cursor: not-allowed;
 }
 
 .kairos-overflow-trigger--header {
@@ -2048,8 +2059,22 @@ textarea.kairos-input-field {
   transition: background-color var(--kairos-duration) var(--kairos-ease);
 }
 
-.kairos-overflow-item:hover {
+.kairos-overflow-item:hover:not([data-disabled]) {
   background: var(--kairos-row-hover);
+}
+
+/* The two signals `.kairos-button:disabled` and `.kairos-input-field:disabled`
+   already use, so "not available" reads the same inside a menu as it does on a
+   control that commits: the ground drops to the page so the item stops sitting
+   on the raised menu surface, and the label drops to muted. Not opacity, per
+   ADR 0004 — one flat dim on a borderless item is one signal and barely that.
+   A disabled item used to be dropped from the menu entirely, which meant a
+   person could not tell an action they were looking for from one that was
+   never there. */
+.kairos-overflow-item[data-disabled] {
+  background: var(--kairos-bg);
+  color: var(--kairos-text-muted);
+  cursor: not-allowed;
 }
 
 /* A destructive action is separated from the routine ones by a rule and a gap
@@ -2065,8 +2090,16 @@ textarea.kairos-input-field {
   font-weight: 600;
 }
 
-.kairos-overflow-item--destructive:hover {
+.kairos-overflow-item--destructive:hover:not([data-disabled]) {
   background: var(--kairos-state-overdue-tint);
+}
+
+/* A disabled destructive item drops its red with everything else. Keeping the
+   colour would leave the one item in the menu that still shouts, for the one
+   action that cannot be taken. */
+.kairos-overflow-item--destructive[data-disabled] {
+  color: var(--kairos-text-muted);
+  font-weight: inherit;
 }
 
 /* Data table */

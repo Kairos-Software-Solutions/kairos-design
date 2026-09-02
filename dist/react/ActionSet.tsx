@@ -28,15 +28,29 @@
  * There is no `rank` field, and that is deliberate: rank is decided by which
  * slot an action is passed in, so an action cannot claim one.
  */
-export interface Action {
+interface ActionBase {
   label: string;
-  onSelect: () => void;
   /**
-   * Renders the action unavailable rather than hiding it. An action that
-   * vanishes when it cannot be used leaves a person looking for something
-   * they remember being there.
+   * Renders the action unavailable rather than hiding it, which is the
+   * treatment every other disabled control in this package takes: the ground
+   * drops to the page and the label drops to muted, per ADR 0004. An action
+   * that vanishes when it cannot be used leaves a person looking for
+   * something they remember being there, with no way to find out why it went.
    */
   disabled?: boolean;
+}
+
+/**
+ * An action that runs.
+ *
+ * The only kind that can be destructive, because a destructive action is
+ * gated behind a confirmation and a link cannot be — following an `href`
+ * leaves the page, so the confirmation would have nothing to sit in front of.
+ */
+export interface RunAction extends ActionBase {
+  onSelect: () => void;
+  href?: never;
+  external?: never;
   /**
    * Marks the action as destructive or irreversible, which is a property and
    * not a rank. Given a slot beside primary and secondary it would produce a
@@ -58,6 +72,25 @@ export interface Action {
     confirm: string;
   };
 }
+
+/**
+ * An action that navigates.
+ *
+ * Here because the alternative is worse. Without it, a screen with one link
+ * action — `Open in Paykit`, `View in bank portal` — has to assemble its
+ * actions by hand and go around this component, and a call site that has gone
+ * around it is a call site none of these types reach. That is the standing
+ * risk in ADR 0008, and this is the cheapest place to narrow it.
+ */
+export interface LinkAction extends ActionBase {
+  href: string;
+  /** Opens in a new tab. */
+  external?: boolean;
+  onSelect?: never;
+  destructive?: never;
+}
+
+export type Action = RunAction | LinkAction;
 
 /**
  * Nought to two, as a tuple rather than an `Action[]` with a length check.
@@ -87,7 +120,7 @@ export type ActionContext = 'page' | 'dialog' | 'row' | 'card';
 
 export type ActionSetProps =
   | {
-      context: 'page' | 'dialog';
+      context: 'page';
       /** The one action that can claim the accent. */
       primary?: Action;
       /**
@@ -109,6 +142,19 @@ export type ActionSetProps =
        * rather than as a menu holding one item.
        */
       more?: Action[];
+    }
+  | {
+      /**
+       * A dialog footer, which has no `more`.
+       *
+       * A dialog is one question. A footer that grows a menu is a dialog
+       * doing too much, and the answer is a screen rather than a third rank
+       * of action inside a modal. Leaving the slot out is what makes that a
+       * compile error instead of a convention.
+       */
+      context: 'dialog';
+      primary?: Action;
+      secondary?: SecondaryActions;
     }
   | {
       context: 'row' | 'card';

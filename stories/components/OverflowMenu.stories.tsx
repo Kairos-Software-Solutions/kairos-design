@@ -26,7 +26,7 @@ export const Items: Story = {
     >
       <Section
         title="Item shapes"
-        lede="An action, a link, a link that leaves the app, and a destructive action behind its rule. A disabled item is omitted rather than greyed: an unavailable action a person can still reach is a question with no answer."
+        lede="An action, a link, a link that leaves the app, an item the call site disabled, and a destructive action behind its rule. The disabled one renders unavailable rather than vanishing, and a disabled link renders without its href, because there is no disabled attribute on a link."
       >
         <div className="kairos-panel kairos-pad kairos-action-row">
           <span className="kairos-muted">INV-2026-0184</span>
@@ -62,19 +62,31 @@ export const Items: Story = {
       </Section>
 
       <Section
-        title="Nothing to offer"
-        lede="Every item disabled leaves no item, and a trigger that opens an empty menu is a dead control. The component renders nothing at all — the space below is the whole story."
+        title="Nothing available"
+        lede="Every item disabled makes the trigger itself unavailable, with the same two signals a disabled button and a disabled field take. Opening a menu in which nothing can be chosen is not an answer, and it is also the one arrangement Radix will not open with a mouse."
       >
-        <div className="kairos-panel kairos-pad">
+        <div className="kairos-panel kairos-pad kairos-action-row">
+          <span className="kairos-muted">INV-2026-0185</span>
           <OverflowMenu
             label="INV-2026-0185"
             items={[
               { label: 'Record payment', onSelect: () => {}, disabled: true },
+              { label: 'Open in Paykit', href: '#paykit', disabled: true },
               { label: 'Delete', destructive: true, onSelect: () => {}, disabled: true },
             ]}
           />
         </div>
       </Section>
+
+      <Section
+        title="Nothing at all"
+        lede="No items is the one case that renders nothing. A trigger that opens an empty menu is a dead control, and the space below is the whole story."
+      >
+        <div className="kairos-panel kairos-pad">
+          <OverflowMenu label="INV-2026-0186" items={[]} />
+        </div>
+      </Section>
+
     </Page>
   ),
 };

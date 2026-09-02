@@ -8,6 +8,17 @@ export interface OverflowItem {
   href?: string;
   /** Opens in a new tab. Only meaningful with `href`. */
   external?: boolean;
+  /**
+   * Renders the item unavailable rather than omitting it, taking the same two
+   * signals every disabled control in this package takes: the ground drops to
+   * the page and the label drops to muted, per ADR 0004. An item that
+   * disappears when it cannot be used leaves a person hunting for something
+   * they remember being there, with no way to find out why it went.
+   *
+   * A disabled item that carries an `href` renders without one, because an
+   * anchor with no `href` is not focusable and not clickable — there is no
+   * `disabled` attribute on a link to do the job.
+   */
   disabled?: boolean;
   /**
    * Marks the item as destructive or irreversible. It is separated from the
@@ -55,15 +66,24 @@ const VIEWPORT_PADDING = 8;
  * clipping back.
  */
 export default function OverflowMenu({ items, label, context = 'row' }: OverflowMenuProps) {
-  // A disabled item is omitted rather than rendered unavailable, which is what
-  // this prop has always meant here.
-  const usable = items.filter((item) => !item.disabled);
-
   // A trigger that opens an empty menu is a dead control. Render nothing.
-  if (usable.length === 0) return null;
+  if (items.length === 0) return null;
+
+  // Every item disabled is a different case, and it gets a different answer:
+  // the trigger renders unavailable rather than opening a menu in which
+  // nothing can be chosen. "No action can be taken on this record right now"
+  // is information, and a disabled control is how the rest of this package
+  // says it.
+  //
+  // It is also the only arrangement Radix cannot open with a mouse. Measured:
+  // with `modal={false}` and no item able to take focus, the menu opens on
+  // pointerdown and is dismissed again inside one frame, so a click appears to
+  // do nothing at all. Keyboard opening works. A control that responds to a
+  // keyboard and not to a click is worse than one that says it is unavailable.
+  const allDisabled = items.every((item) => item.disabled);
 
   // Destructive items sit last, behind a rule.
-  const ordered = [...usable.filter((i) => !i.destructive), ...usable.filter((i) => i.destructive)];
+  const ordered = [...items.filter((i) => !i.destructive), ...items.filter((i) => i.destructive)];
   const firstDestructive = ordered.findIndex((i) => i.destructive);
 
   return (
@@ -78,6 +98,7 @@ export default function OverflowMenu({ items, label, context = 'row' }: Overflow
           type="button"
           className={`kairos-overflow-trigger${context === 'header' ? ' kairos-overflow-trigger--header' : ''}`}
           aria-label={`Actions for ${label}`}
+          disabled={allDisabled}
         >
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
             <circle cx="3" cy="8" r="1.4" fill="currentColor" />
@@ -114,12 +135,12 @@ export default function OverflowMenu({ items, label, context = 'row' }: Overflow
 
             if (item.href) {
               return (
-                <DropdownMenu.Item asChild key={item.label}>
+                <DropdownMenu.Item asChild key={item.label} disabled={item.disabled}>
                   <a
                     className={className}
-                    href={item.href}
-                    target={item.external ? '_blank' : undefined}
-                    rel={item.external ? 'noreferrer' : undefined}
+                    href={item.disabled ? undefined : item.href}
+                    target={item.external && !item.disabled ? '_blank' : undefined}
+                    rel={item.external && !item.disabled ? 'noreferrer' : undefined}
                   >
                     {item.label}
                   </a>
@@ -133,8 +154,13 @@ export default function OverflowMenu({ items, label, context = 'row' }: Overflow
             // which are declarations only a button needs. On a div they are
             // three lines of stylesheet that do nothing.
             return (
-              <DropdownMenu.Item asChild key={item.label} onSelect={() => item.onSelect?.()}>
-                <button type="button" className={className}>
+              <DropdownMenu.Item
+                asChild
+                key={item.label}
+                disabled={item.disabled}
+                onSelect={() => item.onSelect?.()}
+              >
+                <button type="button" className={className} disabled={item.disabled}>
                   {item.label}
                 </button>
               </DropdownMenu.Item>
