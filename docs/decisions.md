@@ -516,3 +516,272 @@ table row separators read distinctly heavier. See the contrast section above:
 `--kairos-border-subtle` drew the only boundary on two live controls at 1.49:1,
 and lifting it to clear 3:1 lifts every separator that reads through the same
 token.
+
+
+## Guardrails, 0.3.2
+
+### Six tokens nothing read, and what happened to each
+
+The docblock on `tests/scale.test.mjs` opens by saying a token nothing reads is
+a comment, and then the test below it checked a different property — that no
+literal sits off the scale. Related, not the same. So the failure the file was
+written to catch was never caught, and six tokens shipped unread.
+
+The test now checks the property its own docblock describes: every token in
+`tokens.css` is referenced by `kairos.css`, `base.css`, or a React module. The
+old test was narrowed to geometry, type and motion, exempting colour because "a
+colour token is legitimately read by an app rather than by this stylesheet."
+That exemption was covering for a search surface that only read one file. Three
+of the six dead tokens were colour.
+
+| Token | Outcome |
+| --- | --- |
+| `--kairos-text-input` | `.kairos-input-field` and `.kairos-select` now read it |
+| `--kairos-text-chip` | `.kairos-state-chip` now reads it |
+| `--kairos-text-meta` | `.kairos-meta`, `.kairos-section-meta` and `.kairos-record-card-meta` now read it |
+| `--kairos-text-on-dark` | Removed |
+| `--kairos-accent-dim` | Removed |
+| `--kairos-row-stripe` | Removed |
+
+The three that were pointed at rules render identically, because each role token
+is an alias of the exact scale step the rule already held. Nothing moved a
+pixel. What changed is that the reason is now written where the value is:
+`--kairos-text-input` is 16px because Safari zooms the page when a control under
+16px takes focus, and a later pass tightening the type scale would have taken
+`--kairos-text-lg` down without ever seeing that.
+
+The three removals, each with the case for keeping it and why it lost:
+
+**`--kairos-text-on-dark`** held `#fff7e8` in both themes — it does not invert.
+The token that does is `--kairos-invert-fg`, and it is what every dark-ground
+rule in the stylesheet reads. This was already flagged above as two names for
+one value, waiting to drift the first time somebody moved one on purpose. The
+role it could have named is text on a ground that stays dark in both themes, and
+the system has no such ground carrying text.
+
+**`--kairos-accent-dim`** was a 20%-opacity amber wash. The comment three lines
+above it says full-saturation amber is a fill for actions and active
+navigation, and `.kairos-nav-link[aria-current='page']` takes the full value.
+A translucent variant is a second amber signal, and it would have been the
+fifth thing on a table row that says "this one" — after hover, selection, the
+separator and focus.
+
+**`--kairos-row-stripe`** named a zebra stripe with no rule anywhere. Striping
+answers the same question `--kairos-border-subtle` already answers on every row,
+and after that token lifted to clear 3:1 it answers it more strongly than
+before. Two answers is worse than one: a striped row under hover and a plain row
+not under hover would land at similar weights, so the state that matters gets
+harder to see, not easier. Bringing it back is a design decision with a story
+attached, not a token restored quietly.
+
+### The a11y gate was configured, not running
+
+`.storybook/preview.tsx` has set `a11y: { test: 'error' }` since the workshop
+was built. The addon draws a panel; only a runner turns a violation into a
+failed build, and nothing installed ran one. So the strictest setting the
+parameter has was on, and a story with an unlabelled image would have shipped.
+
+`@storybook/addon-vitest` runs it now, under `npm run test-stories`. Chosen
+over `@storybook/test-runner` because Storybook 10's own documentation treats
+the Vitest addon as the path and the test-runner as what to use "if you cannot
+use the Vitest addon", and because the addon also runs play functions — which
+is the rendered-component testing this repo still lists as unbuilt. Proved by
+adding a story with an unlabelled image: `image-alt`, one failed test, exit 1.
+
+It is a separate script from `npm test` on purpose. The Node suite runs in
+under a second with no browser, and making every commit wait on Chromium would
+cost the fast loop that catches most of what gets caught.
+
+Two Vite notes, both the same shape. `aria-query`, `lz-string`, `dequal` and
+`pretty-format` are CommonJS and reach the browser through the a11y addon's
+annotations; unbundled, the browser asks each for a named export a CJS module
+cannot give and every story file fails to import before a test runs. They are
+in `optimizeDeps.include` on the project rather than the root config, because
+the project is what serves the browser. And there is no `vitest.setup.ts`:
+since Storybook 10.3 the plugin provisions preview annotations itself, and a
+hand-written `setProjectAnnotations` makes it skip that in favour of a list
+that goes stale the first time an addon is added.
+
+### `landmark-one-main` and `region` were never going to fire
+
+The plan for this change assumed both rules fire on every component story as
+fragment-rendering artifacts, and called for either a `<main>` in the decorator
+or a written suppression. Neither is needed, and the reason is worth writing
+down because the assumption is a reasonable one.
+
+`region` is in the a11y addon's own `DISABLED_RULES`, with its own comment: in
+component testing landmarks are not always present and the check causes false
+positives. `landmark-one-main` matches `html:not(html *)` — the `html` element
+and nothing else — and the addon runs axe with `include: document.body`, so the
+only node the rule can match is outside the context.
+
+A `<main>` decorator was written and measured: 30 tests passed before it and 30
+after, in both directions. It was reverted. A fix that changes no result is a
+fix for a problem you do not have, and it would have left the next reader
+believing the landmark gate was live.
+
+### What the a11y gate does not cover
+
+Recorded in `preview.tsx` beside the parameter, and it is the reason
+`tests/contrast.test.mjs` exists rather than being redundant with it.
+
+axe ships exactly one enabled contrast rule, `color-contrast`, and it is WCAG
+1.4.3: text against its background. There is no axe rule for 1.4.11 non-text
+contrast. A border, a control edge, a focus ring and a chip outline are
+invisible to it at any ratio — which is exactly how `--kairos-border-subtle`
+drew the only boundary on two live controls at 1.73:1 through three releases
+with a green workshop.
+
+### Contrast is computed, not commented
+
+Every contrast figure in `tokens.css` was correct and unchecked. A comment is
+correct on the day it is written and silent every day after.
+
+`tests/contrast.test.mjs` computes WCAG ratios from the token file and asserts
+text at 4.5:1 and non-text at 3:1, in both themes, against all three grounds.
+It resolves `var()` aliases and falls back to the light value for anything the
+dark block does not redeclare, which is how the cascade delivers it and the
+case a naive per-block lookup gets wrong.
+
+Not sampled from a rendering. Sampling catches composition failures a token
+pair cannot predict and needs a browser; computing from the file is cheap,
+deterministic, and catches the class of failure that actually happened. Where a
+composition is reachable and no story builds it, the pair is named by hand.
+
+Every figure the comments assert was recomputed and every one matched: amber at
+1.52 on cream and 11.67 on ink, `--kairos-border-subtle` at 3.52/3.72/3.04 in
+light and 3.77/3.41/3.04 in dark, the disabled primary's label at 13.17 and
+6.26. Nothing in this file was found to be lying.
+
+**Floors compare against the unrounded ratio.** The first candidate written for
+the fix below measured 4.4988 and displays as 4.50 — a value that fails WCAG
+and passes a test that rounds first. Rounding is for a person to read.
+
+### `--kairos-accent-on-light` lifted from #96690e to #8a600d
+
+The one real failure the new test found. `.kairos-button--tertiary` takes this
+token for its label and `.kairos-card` sets an elevated ground, so a tertiary
+button inside a card is a composition all three apps can build. It measured
+3.97:1 against a 4.5:1 requirement.
+
+The alternative was forbidding the composition. Rejected: a rule that a card
+may not contain a tertiary button is unenforceable across three repositories
+and would be broken by the first person who had not read this file. The token
+is one value in one place.
+
+At #96690e the page read 4.60 and surface 4.86 — it passed everywhere a
+reviewer would think to look, and failed on the one ground nothing rendered.
+Same method as `--kairos-border-subtle`: hue 40deg and saturation 83% unchanged,
+lightness alone moved, stopped at the lightest step that clears. Now 5.31 on the
+page, 5.61 on surface, 4.56 on elevated. Amber-toned text and icons in all three
+apps read slightly darker.
+
+### Landing order
+
+The plan noted this change would be red on arrival, since the unread-token
+assertion and the `--kairos-border-subtle` assertion both describe failures that
+existed when it was written, and asked for a choice between landing after
+remediation or landing with those two skipped behind a pointer.
+
+It landed after remediation, so neither is skipped. No assertion in this change
+is skipped for any reason.
+
+### `Foundations/Type` existed in the menu and nowhere else
+
+The workshop's `storySort` has listed Introduction, Colour, Type, Geometry,
+Elevation and Motion since the workshop was built. Two of the six existed.
+Space, which did exist, was not in the list, so it sorted last by accident
+rather than by decision.
+
+Type is now built, and it reads its values out of `tokens.css` through custom
+properties the way Colour and Space do, so a token change moves the page and
+the page cannot drift from what it documents. All eight sizes are set in one
+column — seven from the type scale block plus `--kairos-text-title`, which
+sits with the roles because it is the Bebas size, and which is a step whether
+or not it is filed as one. Five of the eight had never been rendered beside
+each other, which is the only arrangement in which "is this a rank or a guess"
+is a question you can answer by looking.
+
+A second story shows the rule that gets broken rather than stating it: two
+identical panels, Bebas on the page title in one and Bebas on everything in the
+other. That second panel is not a caricature — it is what every heading class
+rendered outside `.kairos-app-shell` until `0.3.0`, because the rule dropping
+Bebas was scoped to the shell and a dialog is not inside one. A specimen that
+only shows the correct case cannot teach anyone to spot the wrong one.
+
+Introduction and Motion were removed from the sort order rather than stubbed.
+Elevation is the stamp, and the stamp is a section of Geometry. An empty page
+named in a menu is the same defect one line further along.
+
+Two ledes on the Colour page had gone stale in the same commit that deleted the
+tokens under them: the Text section promised "the value that survives an
+inverted surface" and the Rows section promised "the optional stripe". The
+swatches vanished on their own, because that page parses the token file. The
+sentences did not, because prose is the part no parser reads.
+
+### Breakpoints are constants, and the collapse is not done
+
+**Constants referenced by convention, written at the foot of `tokens.css`.**
+Forced rather than chosen: a CSS custom property cannot be used in a media
+query, because the query is evaluated before the cascade resolves one. The
+alternative is `@custom-media`, which needs a PostCSS build, and this package
+has deliberately never had one — `dist/` is hand-edited source and the export
+map points straight at it. A whole toolchain to name seven numbers is not a
+trade worth making. The cost of the choice is that nothing enforces the list;
+it is a register to check, not a guarantee.
+
+There are seven boundaries, not nine widths. `max-width: 767px` against
+`min-width: 768px`, and `max-width: 899px` against `min-width: 900px`, are each
+one boundary written as its two sides, which is correct rather than duplicated.
+Thirteen width queries across those seven, plus `pointer: coarse`,
+`prefers-reduced-motion` and `print`.
+
+**The collapse was not done, and that is the honest outcome rather than a
+deferral.** 420, 520 and 640 are three phone-range boundaries within 220px of
+each other, one per component, and 980 exists for one screen — the same shape
+as eleven tracking values and 38 padding values before either was a scale. The
+change asks for each collapse to be checked in the workshop rather than reasoned
+about, because collapsing a breakpoint is a layout change and 767 against 768
+may be load-bearing at a width nobody has looked at.
+
+The workshop cannot check it. Of the nine classes these queries touch, two have
+a story: `.kairos-action-row--equal` and `.kairos-mobile-only`. Nothing renders
+`.kairos-dialog-actions`, `.kairos-filter-bar-search`,
+`.kairos-filter-bar-action`, `.kairos-login-grid`, `.kairos-kicker`,
+`.kairos-toast-region` or `.kairos-desktop-only`. Collapsing on that evidence
+would be reasoning about it, which is the thing the change rules out.
+
+So the widths are named and documented and the set is unchanged. The stories
+come first, and the collapse is a change that starts after they exist.
+
+**The workshop viewports were replaced.** 320, 720, 1024 and 1440 were the
+widths the system makes promises about, which is not the list of widths it
+behaves differently at. 720 sits between 640 and 767, so it renders three
+boundaries identically to 660 or 700, and nothing in the set landed either side
+of 420, 520, 900 or 980 — four boundaries could have moved and no viewport would
+have shown it. The eight now sit one pixel under a boundary or just over it, so
+stepping between neighbours is the boundary crossing and nothing else.
+
+### Release note, 0.3.2
+
+**No runtime behaviour changes and no class renamed.** Three things a consuming
+app will see:
+
+Amber-toned text and icons read slightly darker in light theme.
+`--kairos-accent-on-light` moved from `#96690e` to `#8a600d` so a tertiary
+button inside a card clears 4.5:1 rather than 3.97:1.
+
+Three tokens are gone: `--kairos-text-on-dark`, `--kairos-accent-dim` and
+`--kairos-row-stripe`. Nothing in this package read any of them, and nothing in
+Paykit, Mailkit or Uptime is known to — but an app that did will get an
+unresolved `var()` rather than a build error, so it is worth a grep. Each has a
+replacement or a reason above.
+
+Nothing else moves. `--kairos-text-input`, `--kairos-text-chip` and
+`--kairos-text-meta` are now read by the rules that were holding their values
+literally, and each role token is an alias of the exact step the rule already
+had, so every one of those renders identically.
+
+For anyone working on this repo rather than consuming it, the change is that
+four rules it states about itself are now checked by something that runs, and
+they run on a pull request rather than after the merge.

@@ -46,7 +46,6 @@
   --kairos-text: #16110b;
   --kairos-text-2: #473728;
   --kairos-text-muted: #79624a;
-  --kairos-text-on-dark: #fff7e8;
 
   /* --- Accent ----------------------------------------------------------- */
   /* Full-saturation amber is a fill, never a text colour: it measures 1.52:1
@@ -55,7 +54,6 @@
      3:1 on its own. */
   --kairos-accent: #ffc247;
   --kairos-accent-hover: #e6a92d;
-  --kairos-accent-dim: rgba(255, 194, 71, 0.2);
   /* The disabled primary's fill: amber carried 70% of the way to the page.
      Rank 1 disabled has to stay ahead of rank 2 enabled, so this rank is the
      one control that does not drop its ground — it desaturates instead. Still
@@ -63,7 +61,17 @@
      reads at 13.17:1 on it. */
   --kairos-accent-disabled: #ffd278;
   --kairos-accent-text: #16110b;
-  --kairos-accent-on-light: #96690e;
+  /* Text, so it owes 4.5:1 — and on the tightest ground it can sit on, not on
+     the page. `.kairos-button--tertiary` takes this for its label and
+     `.kairos-card` sets an elevated ground, so a tertiary button in a card is
+     a composition all three apps can build and no story does. At #96690e that
+     composition measured 3.97:1 while the page read 4.60 and surface 4.86,
+     which is a token that passes everywhere a reviewer would think to look.
+
+     Same method as `--kairos-border-subtle` above: 40deg and 83% unchanged,
+     lightness alone moved, and stopped at the lightest step that clears.
+     5.31 on the page, 5.61 on surface, 4.56 on elevated. */
+  --kairos-accent-on-light: #8a600d;
 
   /* --- Inverted surface ------------------------------------------------- */
   /* Ink-filled buttons, the sidebar brand block, active wizard steps. A pair
@@ -105,7 +113,6 @@
   /* --- Rows ------------------------------------------------------------- */
   --kairos-row-hover: #fffcf3;
   --kairos-row-selected: #f8ebd2;
-  --kairos-row-stripe: #fbf2e0;
 
   /* --- Loading and overlay ---------------------------------------------- */
   --kairos-skeleton-bg: #f1e5cf;
@@ -145,13 +152,11 @@
   --kairos-text: #f5f1e8;
   --kairos-text-2: #e0d7c8;
   --kairos-text-muted: #b9ae9c;
-  --kairos-text-on-dark: #fff7e8;
 
   /* Amber is 11.67:1 on ink and needs no dark variant. Only the text-safe
      value moves, because on the dark base amber clears 3:1 unaided. */
   --kairos-accent: #ffc247;
   --kairos-accent-hover: #e6a92d;
-  --kairos-accent-dim: rgba(255, 194, 71, 0.16);
   /* The same 70%, carried toward the dark page instead, so the desaturation
      reads as the same gesture in both themes. Ink label at 6.26:1. */
   --kairos-accent-disabled: #ba8e36;
@@ -179,7 +184,6 @@
 
   --kairos-row-hover: #2a231c;
   --kairos-row-selected: #3a2f1e;
-  --kairos-row-stripe: #221c16;
 
   --kairos-skeleton-bg: #2e2720;
   --kairos-skeleton-fg: #3a322a;
@@ -359,3 +363,46 @@
      One millisecond lands on the final keyframe in the same frame it starts. */
   --kairos-duration-none: 1ms;
 }
+
+/* ==========================================================================
+   Breakpoints
+   ==========================================================================
+   Documented constants, not tokens, and the distinction is forced rather than
+   chosen: a CSS custom property cannot be used in a media query. Writing one
+   into a `max-width` condition does not work in any engine — the media query
+   is evaluated before the cascade resolves a custom property, so there is
+   nothing to read. The only ways to name a breakpoint are a convention like
+   this one or `@custom-media`,
+   which needs a PostCSS build. This package has deliberately never had a build
+   step — `dist/` is hand-edited source and the export map points straight at
+   it — so adopting `@custom-media` would cost the whole toolchain to name
+   seven numbers. It is written here instead, and the numbers are typed by hand
+   at each `@media`.
+
+   That means nothing enforces this list. It is a comment, and this file's own
+   tests exist because a comment is not enforcement — so treat it as the
+   register you check before adding an eighth width, not as a guarantee that
+   there are only seven.
+
+   Seven boundaries across thirteen width queries in `kairos.css`. Where a
+   boundary needs both sides it is written as a complementary pair — 767/768
+   and 899/900 — which is one boundary written correctly, not two widths.
+
+     420px   Dialog actions stack. The narrow phone.
+     520px   The filter bar's search field takes its own row.
+     640px   An equal-width action row collapses to one column.
+     768px   The table-to-card swap, and the main mobile boundary. Written as
+             `max-width: 767px` / `min-width: 768px`.
+     900px   The sidebar appears and the bottom nav goes. Written as
+             `max-width: 899px` / `min-width: 900px`. `kairos-desktop-only`
+             and `kairos-mobile-only` are this boundary.
+     980px   The login grid collapses to one column.
+     1200px  The main region takes its roomiest padding.
+
+   420, 520 and 640 are three phone-range boundaries inside 220px of each
+   other, one per component, and 980 exists for one screen. That is the shape
+   of eleven tracking values and 38 padding values before they were a scale,
+   and it is worth collapsing. It was not collapsed here: seven of the nine
+   classes these queries touch have no story, so a collapse could only be
+   reasoned about, and collapsing a breakpoint is a layout change. The stories
+   come first. See `docs/decisions.md`. */

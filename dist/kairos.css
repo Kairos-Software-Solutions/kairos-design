@@ -471,7 +471,7 @@ h6 {
 .kairos-meta {
   margin: 0;
   color: var(--kairos-text-muted);
-  font-size: var(--kairos-text-md);
+  font-size: var(--kairos-text-meta);
 }
 
 .kairos-text-secondary {
@@ -788,7 +788,7 @@ h6 {
 .kairos-section-meta {
   margin: var(--kairos-space-2xs) 0 0;
   color: var(--kairos-text-muted);
-  font-size: var(--kairos-text-md);
+  font-size: var(--kairos-text-meta);
 }
 
 .kairos-form-grid {
@@ -1638,7 +1638,12 @@ input[type='radio'] {
   height: var(--kairos-control-h);
   min-height: var(--kairos-control-h);
   padding: 0 var(--kairos-space-md);
-  font-size: var(--kairos-text-lg);
+  /* The same 16px `--kairos-text-lg` resolves to, reached through the role
+     token, because the reason this control is 16px is not that it is a large
+     rank. Safari zooms the page when a control under 16px takes focus, so
+     dropping the type rank here would move the layout on every phone. Named,
+     it survives a pass that tightens the type scale. */
+  font-size: var(--kairos-text-input);
   line-height: 1.2;
   border: var(--kairos-border-w-strong) solid var(--kairos-border);
   border-radius: var(--kairos-radius-input);
@@ -1720,7 +1725,7 @@ textarea.kairos-input-field {
   background: var(--chip-tint, var(--kairos-elevated));
   color: var(--chip-color, var(--kairos-text));
   font-family: var(--kairos-body);
-  font-size: var(--kairos-text-xs);
+  font-size: var(--kairos-text-chip);
   font-weight: 600;
   letter-spacing: var(--kairos-track-label);
   line-height: 1;
@@ -2649,7 +2654,7 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   gap: var(--kairos-space-xs);
   min-width: 0;
   color: var(--kairos-text-muted);
-  font-size: var(--kairos-text-md);
+  font-size: var(--kairos-text-meta);
   white-space: normal;
 }
 

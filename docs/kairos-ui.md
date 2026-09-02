@@ -99,6 +99,39 @@ Four ranks, because nobody can tell 0.08em from 0.09em and the stylesheet was
 shipping both. `--kairos-track-display` (0.02em), `--kairos-track-heading`
 (0.06em), `--kairos-track-label` (0.08em), `--kairos-track-button` (0.14em).
 
+### Breakpoints
+
+Seven, and they are **documented constants referenced by convention, not
+tokens**. That is forced, not chosen: a CSS custom property cannot be used in a
+media query, because the query is evaluated before the cascade resolves one.
+The alternative is `@custom-media`, which needs a PostCSS build — and this
+package has deliberately never had a build step, since `dist/` is hand-edited
+source and the export map points straight at it. Naming seven numbers is not
+worth a toolchain. The numbers are typed by hand at each `@media`, and the
+register lives at the foot of `tokens.css`.
+
+Nothing enforces this list. Check it before adding an eighth width.
+
+| Width | What moves |
+| --- | --- |
+| 420px | Dialog actions stack |
+| 520px | The filter bar's search field takes its own row |
+| 640px | An equal-width action row collapses to one column |
+| 768px | The table-to-card swap, and the main mobile boundary |
+| 900px | The sidebar appears and the bottom nav goes |
+| 980px | The login grid collapses to one column |
+| 1200px | The main region takes its roomiest padding |
+
+Where a boundary needs both sides it is written as a complementary pair —
+`max-width: 767px` against `min-width: 768px`, `max-width: 899px` against
+`min-width: 900px`. That is one boundary written correctly, not two widths.
+
+420, 520 and 640 are three phone-range boundaries within 220px of each other,
+one per component, and 980 exists for a single screen. That is worth
+collapsing and has not been: seven of the nine classes these queries touch have
+no story, so a collapse could only be reasoned about, and collapsing a
+breakpoint is a layout change.
+
 ### Line, radius, and the stamp
 
 Two border weights and no third: `--kairos-border-w` draws a container and

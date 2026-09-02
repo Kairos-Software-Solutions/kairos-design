@@ -11,7 +11,7 @@
  * These tests are what makes the difference between a design system and a
  * document about one.
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -24,6 +24,20 @@ const tokens = readFileSync(join(ROOT, 'dist', 'tokens.css'), 'utf8');
 /** Comments quote the values they replaced, so they are not evidence. */
 const css = raw.replace(/\/\*[\s\S]*?\*\//g, '');
 const lines = css.split('\n');
+
+/**
+ * Everything in the package that can read a token: both stylesheets and every
+ * React module. Comments are stripped from kairos.css above because they quote
+ * the values they replaced; tokens.css keeps its own, since a token read only
+ * by another token inside that file is genuinely read.
+ */
+const surfaces = [
+  css,
+  readFileSync(join(ROOT, 'dist', 'base.css'), 'utf8'),
+  ...readdirSync(join(ROOT, 'dist', 'react'))
+    .filter((name) => /\.tsx?$/.test(name))
+    .map((name) => readFileSync(join(ROOT, 'dist', 'react', name), 'utf8')),
+].join('\n');
 
 /** The literal value of a scale token, resolved one level through `var()`. */
 function scale(prefix) {
@@ -101,18 +115,26 @@ test('no literal duration or easing', () => {
   assert.deepEqual([...ms, ...ease], [], 'motion belongs to --kairos-duration and --kairos-ease');
 });
 
-test('every geometry and type token is read by the stylesheet', () => {
-  // A token nothing reads cannot enforce anything, and the four apps had
-  // already drifted on every one of these before they were written down.
-  // Geometry, type, and motion only. A colour token is legitimately read by an
-  // app rather than by this stylesheet, so an unread one is not evidence of
-  // anything; an unread control height is.
-  const declared = [...tokens.matchAll(/(--kairos-(?:space|pad|gap|radius|border-w|track|duration|ease|row-h|nav-row-h|control-h|table-header-h|page-header-h|sidebar-w|panel-pad|section-pad|page-pad|screen-pad)[a-z0-9-]*)\s*:/g)]
-    .map((m) => m[1]);
-  const unread = [...new Set(declared)].filter((name) => {
-    const used = new RegExp(`var\\(${name}[,)]`).test(css);
-    const aliased = new RegExp(`var\\(${name}[,)]`).test(tokens);
-    return !used && !aliased;
+test('every token is read by something', () => {
+  // The docblock at the top of this file describes a token nothing reads, and
+  // for a while the only test of it was this one, narrowed to geometry, type
+  // and motion because "a colour token is legitimately read by an app rather
+  // than by this stylesheet". That exemption was doing the work of a missing
+  // search surface, not of a real difference: once base.css and the React
+  // modules are read too, a colour token nothing in the package touches is as
+  // dead as an unread control height. Six were, and one of them named a zebra
+  // stripe that had never been drawn.
+  //
+  // A consuming app may still be the only reader of a token, and that is
+  // fine — the token has to be read HERE by whatever demonstrates it. If the
+  // package cannot show its own token in use, the token is a document.
+  const declared = [...new Set([...tokens.matchAll(/(--kairos-[a-z0-9-]+)\s*:/g)].map((m) => m[1]))];
+  const unread = declared.filter((name) => {
+    const reference = new RegExp(`var\\(${name}[,)]`);
+    // `--kairos-shadow-color` is read by the four stamp tokens inside
+    // tokens.css itself, which is a real reader; so is any role token
+    // aliasing a scale step.
+    return !reference.test(surfaces) && !reference.test(tokens);
   });
   assert.deepEqual(unread, [], `declared and never read:\n${unread.join('\n')}`);
 });

@@ -35,7 +35,7 @@ export const Palette: Story = {
         <Swatches tokens={group(themed, '--kairos-border')} />
       </Section>
 
-      <Section title="Text" lede="Three ranks plus the value that survives an inverted surface.">
+      <Section title="Text" lede="Three ranks. The value for text on an inverted surface is not here — it is `invert-fg` below, which inverts, where a fourth text rank held one value in both themes and did not.">
         <Swatches tokens={group(themed, '--kairos-text')} />
       </Section>
 
@@ -75,7 +75,7 @@ export const Palette: Story = {
         <Swatches tokens={group(themed, '--kairos-danger')} />
       </Section>
 
-      <Section title="Rows" lede="Hover, selection, and the optional stripe. All three sit within a hair of the surface under them.">
+      <Section title="Rows" lede="Hover and selection, both within a hair of the surface under them. There is no zebra stripe: the row separator already answers that question, and after it lifted to clear 3:1 it answers it more strongly than a stripe would.">
         <Swatches tokens={group(themed, '--kairos-row-')} />
       </Section>
 
