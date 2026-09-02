@@ -36,6 +36,15 @@ export type { SortHeaderProps, SortDirection } from './SortHeader';
 export { default as OverflowMenu } from './OverflowMenu';
 export type { OverflowMenuProps, OverflowItem } from './OverflowMenu';
 
+// Types only for now. The component that reads them is group 2 of
+// action-composition, and its shape is reviewed before any of it is rendered.
+export type {
+  Action,
+  ActionContext,
+  ActionSetProps,
+  SecondaryActions,
+} from './ActionSet';
+
 export { default as DataTable } from './DataTable';
 export { compare, sortRows, nextSort } from './sort';
 export type { SortState, Sortable } from './sort';

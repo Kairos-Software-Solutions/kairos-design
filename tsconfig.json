@@ -26,6 +26,7 @@
     "dist/**/*.ts",
     "dist/**/*.tsx",
     "stories/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "tests/types/**/*"
   ]
 }
