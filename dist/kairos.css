@@ -1475,7 +1475,7 @@ h6 {
   width: 100%;
 }
 
-.kairos-button:hover:not(:disabled) {
+.kairos-button:hover:not(:disabled):not([aria-busy='true']) {
   transform: translate(-2px, -2px);
   box-shadow: var(--button-shadow-hover, var(--button-shadow, none));
   background: var(--button-hover-bg, var(--button-bg, var(--kairos-surface)));
@@ -1489,7 +1489,7 @@ h6 {
   --button-border-width: 2px;
 }
 
-.kairos-button:active:not(:disabled) {
+.kairos-button:active:not(:disabled):not([aria-busy='true']) {
   transform: translate(1px, 1px);
   box-shadow: var(--button-shadow-active, none);
 }
@@ -1561,6 +1561,58 @@ h6 {
   --button-bg: var(--kairos-accent-disabled);
   --button-hover-bg: var(--kairos-accent-disabled);
   --button-color: var(--kairos-accent-text);
+}
+
+/* Working, which is not the same as unavailable ------------------------------
+   A button mid-request keeps its rank's fill, its border and its stamp. It
+   takes none of the disabled treatment above, and that is the whole point: the
+   two signals say "this will still be unavailable after you look away", and a
+   button waiting on a response is the opposite of that. Greying out the action
+   somebody just pressed reads as the press having failed.
+
+   What it loses is hover and press, because a control that cannot be actioned
+   should not answer as though it can. `cursor: progress` rather than
+   `not-allowed` for the same reason.
+
+   Both labels occupy one grid cell, so the box is the wider of the two in
+   every state and pressing the button cannot resize it or move the row it sits
+   in. This is the only way to hold that guarantee: a label swapped in place
+   measures its own content, and `Save` becoming `Saving…` is a button that
+   grows 22px under the pointer that is still on it.
+
+   `visibility` rather than `opacity` or `display`. It keeps the hidden cell's
+   box, which is what reserves the width, and it takes the cell out of the
+   accessibility tree — so the button's name is `Save` at rest and `Saving…`
+   while it works, with no `aria-hidden` bookkeeping to get wrong. */
+.kairos-button-stack {
+  display: grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.kairos-button-label,
+.kairos-button-pending {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kairos-space-xs);
+  white-space: nowrap;
+}
+
+.kairos-button-pending {
+  visibility: hidden;
+}
+
+.kairos-button[aria-busy='true'] {
+  cursor: progress;
+}
+
+.kairos-button[aria-busy='true'] .kairos-button-label {
+  visibility: hidden;
+}
+
+.kairos-button[aria-busy='true'] .kairos-button-pending {
+  visibility: visible;
 }
 
 /* Checkboxes and radios were shipping the browser default, which paints them

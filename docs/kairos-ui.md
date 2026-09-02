@@ -263,7 +263,8 @@ Where the hierarchy leaves the order open, ask rather than guess.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-button` | Any action, on a `<button>` or on an `<a>` that navigates | — | `--sm` |
+| `kairos-button` | Any action, on a `<button>` or on an `<a>` that navigates | — | `--sm`, and `[aria-busy]` for one waiting on a response |
+| `kairos-button-stack` | The two label cells of a button that can load, sharing one grid area so the box is the wider of them in both states | A button that cannot load; it takes no wrapper and renders its children directly | — |
 | `kairos-page-header-primary` | The one primary action on the screen | A second amber claim | — |
 | `kairos-action-row` | A row of buttons | A single button | `--equal` `--end` `--top` |
 | `kairos-overflow-menu` | Secondary and destructive row actions | The primary action | — |
@@ -275,6 +276,20 @@ Where the hierarchy leaves the order open, ask rather than guess.
 Destructive actions live in `kairos-overflow-item--destructive` and are gated by
 a dialog that names the record. The confirm button takes the destructive
 treatment, never amber.
+
+**A button waiting on a response is not a disabled one.** `aria-busy` keeps the
+rank's fill, border and stamp and takes none of the disabled treatment: the two
+disabled signals say "still unavailable when you look back", and greying out
+the action somebody just pressed reads as the press having failed. What it loses
+is hover, press, and any further click. It keeps its tab stop — `disabled` would
+move focus to the body at the moment the answer arrives, on the control the user
+just pressed Enter on — so `aria-disabled` carries the state and the click
+handler refuses the press.
+
+The box is held by rendering both labels into one grid cell, so it measures the
+wider of the two in every state. A label swapped in place measures its own
+content, and `Save` becoming `Saving…` is a button that grows under the pointer
+that is still on it.
 
 In React, do not assemble these by hand. `ActionSet` takes the actions and
 decides the rank, the placement, the order and the confirmation; the one
@@ -311,6 +326,8 @@ decides whether that filter box appears, so there is one boundary and not two.
 | `kairos-banner` | Page-level notice, one per screen | Field-level errors | `--danger` `--warning` `--success` `--inline` |
 | `kairos-toast` | Transient confirmation of a completed action | Anything the user must act on | — |
 | `kairos-toast-region` | The fixed container, `role="status"` | — | — |
+| `kairos-progress-dot` | The pending ring, in `currentColor`, so it takes the colour of whatever it sits in | Determinate progress; a ring that never fills cannot show how far along a batch is | — |
+| `kairos-spin` | The rotation, on its own class so anything can turn | Carrying the meaning by itself. Under `prefers-reduced-motion` the guard stops it after one pass, and a static ring says nothing — pair it with a word | — |
 | `kairos-tooltip` | A short explanation attached to a control, on hover or focus | A control's only name or description — hover does not exist on touch and does not appear in a screenshot | — |
 | `kairos-popover` | A small panel of content or controls anchored to what opened it | A list of actions, which is `kairos-overflow-menu`; or anything you need an answer to, which is `kairos-dialog-content` | — |
 
@@ -412,7 +429,7 @@ fails on it.
 | `Select` | The chooser for a list too long for the native control. Past ten options it grows a box that narrows the list as you type, which Radix's own typeahead does not do — typeahead jumps to a match, and jumping inside two hundred tenants is not narrowing to the four that match. Ten or fewer, keep the native `<select>`. **Peer dependency: `radix-ui`.** |
 | `Tooltip` | A short explanation on hover or focus. Takes `name` for an icon-only trigger and puts it on the control as `aria-label`, so the control is named whether or not the tooltip ever opens. **Peer dependency: `radix-ui`.** |
 | `Popover` | A small panel of content or controls beside the page. Not a menu — nothing in it is a chosen item and using a control inside it does not close it. Not a dialog — it is dismissed by clicking anywhere else, so it is wrong for anything you need an answer to. **Peer dependency: `radix-ui`.** |
-| `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. |
+| `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. `loading` puts it mid-request: it keeps its rank and its box, turns the ring, announces itself busy, and swallows every further press — which is what stops a held Enter on a `type="submit"` sending two invoices. `loadingLabel` is what it says while working, and naming the work is the only part of the state that survives reduced motion. Passing either prop, even `loading={false}`, is what reserves the room; a button handed neither renders the markup it always did. |
 | `StateChip` | The four states, plus every app's old spelling as a deprecated alias so adoption is not one enormous commit |
 | `Segmented` | Filters, wizard steps, the theme choice |
 | `InputField`, `Field` | Label, control, hint, and error as one unit, with the empty rows held |
