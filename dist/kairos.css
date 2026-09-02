@@ -3436,3 +3436,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 }
 
 /* HMR probe */
+
+/* Deliberately off the space scale. This branch exists to prove CI goes red
+   and will be deleted. */
+.kairos-throwaway {
+  padding: 13px;
+}
