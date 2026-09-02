@@ -5,8 +5,9 @@
  * decisions of their own. If you find yourself passing a `style` prop with a
  * colour or a pixel value into one, the value belongs in the token layer.
  *
- * Peer dependencies: `react` everywhere, and `@radix-ui/react-dialog` for
- * `Dialog` and `ConfirmDialog` only.
+ * Peer dependencies: `react` everywhere, `radix-ui` for the components that
+ * open something over the page, and `@tanstack/react-table` for `DataTable`.
+ * Both are optional: a package importing `Button` installs neither.
  */
 
 export { default as Button } from './Button';

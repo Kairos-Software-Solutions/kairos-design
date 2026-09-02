@@ -1,7 +1,7 @@
 'use client';
 
 import { type ReactNode, useEffect, useRef } from 'react';
-import * as RadixDialog from '@radix-ui/react-dialog';
+import { Dialog as RadixDialog } from 'radix-ui';
 
 export interface DialogProps {
   open: boolean;
@@ -13,8 +13,8 @@ export interface DialogProps {
 /**
  * A modal surface.
  *
- * Requires `@radix-ui/react-dialog` as a peer dependency. That is a deliberate
- * exception to this registry's no-dependency rule: a modal has to trap focus,
+ * Requires `radix-ui` as a peer dependency. That is a deliberate exception to
+ * this registry's no-dependency rule: a modal has to trap focus,
  * restore it, close on Escape, mark the rest of the page inert, and keep all
  * of that correct across React's concurrent rendering. Hand-rolling it in a
  * shared component means every Kairos app inherits the same subtle keyboard

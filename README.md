@@ -15,7 +15,7 @@ today, and where the two disagree, this repo wins.
 | Vocabulary | `kairos-design/kairos.css` | The `kairos-*` class vocabulary, 220 classes. Consumes tokens only, no framework. |
 | Base | `kairos-design/base.css` | Element-level defaults. Opt-in, because a library that restyles a host app's bare `table` and `input` is invasive. |
 | Formatters | `kairos-design/format/money`, `/format/dates` | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
-| React | `kairos-design/react` | Components emitting the classes above. Peer dependency `@radix-ui/react-dialog`, for the dialogs only. |
+| React | `kairos-design/react` | Components emitting the classes above. Optional peer dependencies: `radix-ui` for anything that opens over the page, `@tanstack/react-table` for `DataTable`. |
 | Manifest | `docs/kairos-ui.md` | The canonical component list. Read it before building UI. |
 | Workshop | `npm run storybook` | Every component and every screen, both themes, four viewports. |
 
