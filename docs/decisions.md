@@ -1100,6 +1100,21 @@ and the tab stop, because `disabled` at the moment the answer arrives drops
 focus off the control the person just pressed Enter on. A contract test asserts
 that `disabled` never carries `pending` here.
 
+### The gate belongs to `ActionSet` too
+
+A destructive action's placement, ordering and confirmation are `ActionSet`'s
+decisions, so its gate has to be as well. Without the two props on
+`Destructive`, an app needing a typed confirmation on a row action had to go
+around `ActionSet` and assemble an `OverflowMenu` and a `ConfirmDialog` by
+hand — and a call site that has gone around that component is a call site none
+of its types reach, which is the standing risk its own docblock names.
+
+`DestructiveAction.onSelect` grew the same argument `onConfirm` did, and for
+the same reason: a handler taking fewer parameters assigns to one taking more.
+The type tests assert both — a handler ignoring the details, and one
+destructuring the reason out of them — because the claim being made is that no
+existing call site changes.
+
 ### `CopyField`, because a read-only value is not a disabled input
 
 Every Kairos app that shows a technical value had built this. Mailkit's was

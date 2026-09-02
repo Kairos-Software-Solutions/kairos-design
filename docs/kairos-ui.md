@@ -477,7 +477,7 @@ fails on it.
 
 | Export | Notes |
 | --- | --- |
-| `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, and cannot take a ranked slot at all. **Peer dependency: `radix-ui`.** |
+| `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, may add `typeToConfirm` and `requireReason` to strengthen the gate, and cannot take a ranked slot at all. **Peer dependency: `radix-ui`.** |
 | `Select` | The chooser for a list too long for the native control. Past ten options it grows a box that narrows the list as you type, which Radix's own typeahead does not do — typeahead jumps to a match, and jumping inside two hundred tenants is not narrowing to the four that match. Ten or fewer, keep the native `<select>`. **Peer dependency: `radix-ui`.** |
 | `Tooltip` | A short explanation on hover or focus. Takes `name` for an icon-only trigger and puts it on the control as `aria-label`, so the control is named whether or not the tooltip ever opens. **Peer dependency: `radix-ui`.** |
 | `Popover` | A small panel of content or controls beside the page. Not a menu — nothing in it is a chosen item and using a control inside it does not close it. Not a dialog — it is dismissed by clicking anywhere else, so it is wrong for anything you need an answer to. **Peer dependency: `radix-ui`.** |

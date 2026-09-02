@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import ConfirmDialog from './ConfirmDialog';
+import ConfirmDialog, { type ConfirmDetails } from './ConfirmDialog';
 import OverflowMenu, { type OverflowItem } from './OverflowMenu';
 
 /**
@@ -68,6 +68,24 @@ export interface Destructive {
    * `Delete INV-0042?`. Set it where that reads badly.
    */
   title?: string;
+  /**
+   * The string the person has to type before this will run, for a consequence
+   * that reaches past the screen: a public object deleted for every reader, a
+   * key every application is using.
+   *
+   * Passed straight to `ConfirmDialog`, where the reasoning and the limits
+   * are written. Leave it out on an action whose consequence is one record on
+   * one screen — a gate that asks for typing on everything gets typed through
+   * on everything.
+   */
+  typeToConfirm?: string;
+  /**
+   * The action lands in an audit trail and the trail needs to say why. The
+   * written reason arrives at `onSelect`.
+   */
+  requireReason?: boolean;
+  /** What the reason is for, in the field's hint row. */
+  reasonHint?: string;
 }
 
 /**
@@ -102,7 +120,12 @@ export interface RunAction extends ActionBase {
  * front of.
  */
 export interface DestructiveAction extends ActionBase {
-  onSelect: () => void;
+  /**
+   * Runs once the gate is satisfied, with whatever the gate collected. A
+   * handler ignoring the argument still assigns, so an action with no
+   * `typeToConfirm` and no `requireReason` is written exactly as before.
+   */
+  onSelect: (details: ConfirmDetails) => void;
   href?: never;
   external?: never;
   destructive: Destructive;
@@ -360,6 +383,9 @@ export default function ActionSet(props: ActionSetProps) {
       title={pending.destructive.title ?? `${pending.label} ${label}?`}
       message={pending.destructive.confirm}
       confirmLabel={pending.label}
+      typeToConfirm={pending.destructive.typeToConfirm}
+      requireReason={pending.destructive.requireReason}
+      reasonHint={pending.destructive.reasonHint}
       onConfirm={pending.onSelect}
       onClose={() => setPending(null)}
       restoreFocusTo={trigger}
