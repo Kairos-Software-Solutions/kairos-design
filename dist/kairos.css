@@ -956,7 +956,6 @@ h6 {
 .kairos-wizard-steps-list {
   display: flex;
   gap: var(--kairos-space-sm);
-  min-width: max-content;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -2210,6 +2209,40 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   background: var(--kairos-row-selected);
 }
 
+/* The selection column, which is always first and always narrow.
+
+   `width: 1%` is the table idiom for a cell that takes what it needs and gives
+   the rest away: a pixel width would guess at a checkbox size the platform
+   decides, and it decides differently on a phone. First rather than last
+   because a control the reader has not reached yet is a control they scroll a
+   wide table sideways to find.
+
+   `DataTable` renders this from its `selectable` prop, never from a declared
+   column, so a call site cannot put a second one in or move this one. */
+.kairos-selection-cell,
+.kairos-columns-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Same box as `.kairos-checkbox-row input`, and for the same reason: the
+   native control keeps its keyboard behaviour and its platform hit area. */
+.kairos-selection-cell input {
+  display: block;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+}
+
+/* The rail the columns menu sits in, at the opposite end of the header from
+   the selection column. Its body cells are empty on purpose: the menu is
+   about the table and not about any row, so a row has nothing to put here.
+   The alternative — hanging it off the last data column's header — makes a
+   menu about the whole table read as a menu about that one column. */
+.kairos-columns-cell {
+  text-align: right;
+}
+
 /* One card list for every screen that renders a table as cards below 768px.
    This was six near-identical class blocks, one per list screen, which is why
    the same defect — a card holding every field, plus an Open button — had to be
@@ -2250,6 +2283,68 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 
 .kairos-record-list {
   display: none;
+}
+
+/* The pager under a record list.
+
+   One pager, not two. The table above 768px and the cards below it are two
+   renderings of one list, so a second control would give one list two
+   positions to be in, and the announcement would fire twice. It sits under
+   both rather than inside the panel, which clips its content to the radius
+   and would cut a focus ring on the last control.
+
+   The sentence and the controls sit at opposite ends and wrap onto two rows
+   when there is no room for one, which is what happens at the 320px floor. */
+.kairos-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--kairos-space-md);
+  margin-top: var(--kairos-space-lg);
+}
+
+/* The controls stay together when the sentence wraps above them. Tighter than
+   the gap around them, because they are one control in two halves. */
+.kairos-pagination-controls {
+  display: flex;
+  gap: var(--kairos-space-sm);
+}
+
+/* The bar over a list that has a selection.
+
+   It states the count and holds whatever the screen does with that count. It
+   ranks nothing and arranges nothing — the actions are a slot the call site
+   fills, and when `ActionSet` lands it renders into this slot. A bar that
+   composed its own buttons would be a second action pattern beside the one
+   the registry is about to standardise on.
+
+   It carries `--kairos-row-selected`, the same ground the selected rows below
+   it carry, so the bar and the rows read as one thing rather than two. */
+.kairos-bulk-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--kairos-space-md);
+  min-height: var(--kairos-control-h);
+  padding: var(--kairos-space-sm) var(--kairos-space-lg);
+  margin-bottom: var(--kairos-space-lg);
+  background: var(--kairos-row-selected);
+  border: var(--kairos-border-w) solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-panel);
+}
+
+/* The count is the sentence, so it reads at body size and not as a label. */
+.kairos-bulk-bar-count {
+  font-size: var(--kairos-text-body);
+  color: var(--kairos-text);
+}
+
+.kairos-bulk-bar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kairos-space-sm);
 }
 
 /* Skeleton shapes. A skeleton is a promise about what is arriving, so a form
@@ -2480,6 +2575,10 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 /* The filter row above a list: a search field that takes the space, and the
    selects and buttons that do not. */
 .kairos-filter-bar {
+  /* The height of a field's label row. A control with no label of its own has
+     to skip it to sit level with the fields beside it, and two things in this
+     bar are in that position. Held here so both read one value. */
+  --filter-label-offset: calc(0.76rem * 1.4 + 6px);
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
   /* Fields line up on their controls, not on their outer boxes. A date field
@@ -2497,15 +2596,51 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    left a stray tracked-caps label floating on a phone, where the row stacks and
    there is nothing left to align to. Spacing is spacing; it lives here. */
 .kairos-filter-bar-action {
-  margin-top: calc(0.76rem * 1.4 + 6px);
+  margin-top: var(--filter-label-offset);
   --button-shadow: none;
   --button-shadow-hover: none;
+}
+
+/* A segmented filter in the bar is the other unlabelled control, and it takes
+   the same offset.
+
+   It also has to be told to hug. `.kairos-segmented` is `inline-flex`, which
+   sizes to its segments everywhere except inside a grid, where a grid item
+   stretches to its column and the inline sizing has nothing left to do. The
+   bar shipped with three segments in a box wide enough for six, and "Settled"
+   wrapped onto a second line inside it, because 180px of column was narrower
+   than the segments and 1fr of it was wider. Its own bottom margin goes too:
+   the bar's `gap` is the spacing here. */
+.kairos-filter-bar > .kairos-segmented {
+  justify-self: start;
+  margin-top: var(--filter-label-offset);
+  margin-bottom: 0;
+}
+
+/* Above the card breakpoint the segments stay on one line.
+
+   A track in this grid is around 190px and three segments need around 230, so
+   the control was being squeezed 40px short and wrapping "Settled" onto a
+   second line inside its own box. `max-content` takes the 40px from the
+   neighbouring track, which has slack because the fields in it are inputs
+   that shrink. Only above 768px: below it the tracks are narrow enough that
+   the same rule would push the page sideways, and there the control takes
+   what it is given like everything else in the bar. */
+@media (min-width: 768px) {
+  .kairos-filter-bar > .kairos-segmented {
+      min-width: max-content;
+    }
 }
 
 @media (max-width: 767px) {
   .kairos-filter-bar-action {
       margin-top: 0;
       width: 100%;
+    }
+
+  /* The bar stacks, so there is nothing left to sit level with. */
+  .kairos-filter-bar > .kairos-segmented {
+      margin-top: 0;
     }
 }
 

@@ -80,18 +80,34 @@ export function sortRows<Row>(
  *
  * `null` means "no override" rather than "no sort" — the caller falls back to
  * `defaultSort`.
+ *
+ * The screen's own default column is the exception, and it has two states
+ * rather than three, because one of the three would be the state it is already
+ * in. Pressing it reverses; pressing it again returns to the default. Whether
+ * the default runs ascending or descending, the first press has to move
+ * something, or the header reads as broken.
  */
 export function nextSort(
   current: SortState | null,
   key: string,
   defaultSort: SortState | null = null
 ): SortState | null {
+  const isDefaultColumn = defaultSort?.key === key;
+  const defaultDirection = isDefaultColumn ? defaultSort!.direction : null;
+
   if (!current || current.key !== key) {
-    // If the screen already defaults to this column ascending, start at
-    // descending, or the first press on it appears to do nothing.
-    const alreadyAscending = defaultSort?.key === key && defaultSort.direction === 'ascending';
-    return { key, direction: alreadyAscending ? 'descending' : 'ascending' };
+    // Starting in the direction the screen already sorts this column would
+    // leave the table exactly as it was, so start at the other one.
+    return { key, direction: defaultDirection === 'ascending' ? 'descending' : 'ascending' };
   }
+
+  if (isDefaultColumn) {
+    // Two states, not three: reverse the default, then drop back to it.
+    return current.direction === defaultDirection
+      ? { key, direction: current.direction === 'ascending' ? 'descending' : 'ascending' }
+      : null;
+  }
+
   if (current.direction === 'ascending') return { key, direction: 'descending' };
   return null;
 }

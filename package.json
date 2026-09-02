@@ -1,6 +1,6 @@
 {
   "name": "kairos-design",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "The shared Kairos design system: tokens, component vocabulary, and formatters.",
   "type": "module",
   "license": "UNLICENSED",
@@ -29,10 +29,14 @@
   ],
   "peerDependencies": {
     "@radix-ui/react-dialog": ">=1",
+    "@tanstack/react-table": ">=9",
     "react": ">=18"
   },
   "peerDependenciesMeta": {
     "@radix-ui/react-dialog": {
+      "optional": true
+    },
+    "@tanstack/react-table": {
       "optional": true
     },
     "react": {
@@ -60,6 +64,7 @@
     "@storybook/addon-themes": "^10.5.10",
     "@storybook/addon-vitest": "^10.5.10",
     "@storybook/react-vite": "^10.5.10",
+    "@tanstack/react-table": "^9.2.4",
     "@types/node": "^26.4.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",

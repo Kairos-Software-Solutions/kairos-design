@@ -184,7 +184,7 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-page-title` | The one Bebas element on the screen, 24px | Any other heading | — |
 | `kairos-page-header-description` | One line of supporting copy under the title. `PageHeader` renders it from its `description` prop | A paragraph; keep it to a sentence | — |
 | `kairos-view` | The centred content column inside `kairos-main` | A tile dashboard that wants the full width | — |
-| `kairos-filter-bar` | 40px row: segmented filter plus search | Sorting; the table header does that | — |
+| `kairos-filter-bar` | The row above a record list: search, segmented filters, and any field the screen filters by. `FilterBar` renders it | Sorting; the table header does that. A submit button on a bar that narrows live | — |
 | `kairos-theme-toggle` | System / Light / Dark | Any other setting | `--inline` |
 | `kairos-skip-link` | First focusable element on every page | — | — |
 
@@ -196,6 +196,10 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-table-wrap` | The scroll container around a table | A panel that should swap to cards instead | — |
 | `kairos-table-panel` | **A modifier on `kairos-panel`**, never a replacement. Removes the padding and clips the header band to the radius | Writing it alone: on its own it paints no border, no ground, no radius, and no stamp | — |
 | `kairos-sort-header` | Header-cell sort button, carries `aria-sort` | Headers with no natural order | — |
+| `kairos-pagination` | The one pager under a record list: the position sentence at one end, the controls at the other | A second pager for the cards; the table and the cards are one list and share it | — |
+| `kairos-pagination-controls` | The Previous/Next pair inside `kairos-pagination`, kept together when the sentence wraps above them | Page-number links; a list this size does not need them | — |
+| `kairos-selection-cell` | The checkbox column on a selectable table, header and body. Always first, always narrow | A second control column; `DataTable` renders this one from `selectable` and a call site cannot declare another | — |
+| `kairos-bulk-bar` | The bar over a list with a selection: the count at one end, a slot for what the screen does with it at the other | Composing the actions inside the slot; that is `ActionSet` | — |
 | `kairos-record-card` | The same records below 768px | Desktop lists | `--inert` |
 | `kairos-collapsible-card` | Detail-heavy cards, collapsed by default | Cards of 3 fields or fewer | — |
 | `kairos-state-chip` | Status of a record | Counts, labels, categories | `--settled` `--overdue` `--awaiting` `--draft` `--neutral` |
@@ -219,6 +223,34 @@ padding is `kairos-pad`, a separate class. A panel written by hand takes both. T
 `flush`, so a table can supply its own — which is the whole meaning of that
 prop, and it was inert for as long as the component applied no padding to
 remove.
+
+One list has one pager. The table above 768px and the cards below it are two
+renderings of the same records, so `kairos-pagination` sits under both rather
+than inside the table panel, and the cards page exactly as the table does. A
+second pager would give one list two positions to be in and would announce the
+same page change twice. Infinite scroll on the cards is a different product
+decision and is not this.
+
+The position reads as a sentence — `Showing 1 to 25 of 300` — and that sentence
+is the live region. Sorting needs a hidden announcer because a re-ordered table
+says nothing a screen reader can read; a page change already writes its new
+position on the screen, so the words a sighted reader sees are the words that
+get announced. No pager renders when the records fit one page.
+
+Selection is a table affordance, not a column. `DataTable` renders it from its
+`selectable` prop, so the checkbox is always the first cell and there is never
+a second one — a call site that can declare a selection column can declare two,
+and can put one last. The row still carries three things and no more: the
+linked identifier, the overflow menu, and the checkbox.
+
+A selection survives a sort and a page change, because it is keyed by the row
+id the call site supplies rather than by position. `kairos-bulk-bar` states the
+whole count, not the part of it currently on screen, so records ticked on page
+one stay discoverable from page three. The bar's action slot ranks nothing and
+arranges nothing; the composition of those actions is `ActionSet`.
+
+Below 768px the list renders as record cards, and a card carries no checkbox.
+What a card renders is the `record-card` contract and it is settled elsewhere.
 
 Columns run in the order the user reads a record by: the human-readable
 identifier, then the secondary identifiers that separate two similar names,
@@ -331,7 +363,6 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| `FilterBar` | The 40px segmented-plus-search row. The CSS is here; the debounce and the filter-state contract are still per-app. |
 | `Select`, `Textarea` | Field variants. `Field` takes them today via its render prop, but neither has a named wrapper. |
 | Rendered component tests | The contract tests are static. Nothing here has been rendered by a test runner, because the registry ships no build step — the first app to adopt it is what exercises the JSX. |
 | Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
@@ -370,7 +401,8 @@ fails on it.
 | `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
 | `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
 | `OverflowMenu` | The only other control a row carries. Portalled to `<body>` and positioned by hand, because a table panel is an overflow container and would clip it. An app stylesheet re-declaring `.kairos-overflow-menu` as `position: absolute` puts the clipping back. |
-| `DataTable` | Table on desktop, record cards below 768px, sorting on the data. Columns declare a role, the card builds itself from it, and the array's order is the column order above. |
+| `DataTable` | Table on desktop, record cards below 768px. Sorting, paging, row selection, search and column visibility, all off `columns` plus a prop each. A column declares its role once and that drives the table, the card, and the order. |
+| `FilterBar` | The row above a record list that narrows it: a debounced search box and any number of segmented filters, collected into one `FilterState` the screen reads. It narrows nothing itself — what `overdue` means is the screen's. Not for sorting; the table header does that. |
 | `CollapsibleCard` | Built on `<details>`, so it works before hydration and prints expanded |
 | `compare`, `sortRows`, `nextSort` | The comparator, separately importable and separately tested |
 | `Dialog`, `ConfirmDialog` | The destructive gate. **Peer dependency: `@radix-ui/react-dialog`.** |

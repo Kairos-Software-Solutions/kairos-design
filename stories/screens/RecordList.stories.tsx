@@ -44,7 +44,7 @@ const accountColumns: Array<Column<Account>> = [
     role: 'actions',
     cell: (row) => (
       <OverflowMenu
-        label={`Actions for ${row.email}`}
+        label={row.email}
         items={[
           { label: 'Edit quota', onSelect: () => {} },
           { label: 'Change password', onSelect: () => {} },

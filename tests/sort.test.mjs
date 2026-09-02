@@ -124,3 +124,17 @@ test('pressing the default column first goes somewhere visible', () => {
     direction: 'descending',
   });
 });
+
+test('pressing the default column first goes somewhere visible when the default is descending', () => {
+  // What `DataTable` passes: the current state starts as the screen's default,
+  // not as null. On a descending default this used to return `null`, which
+  // resolves back to that same default, so the press moved nothing and the
+  // header read as broken. Every Paykit list screen defaults descending.
+  const fallback = { key: 'due', direction: 'descending' };
+
+  const first = nextSort(fallback, 'due', fallback);
+  assert.deepEqual(first, { key: 'due', direction: 'ascending' });
+
+  // And back to the default, which is the way out of an accidental press.
+  assert.equal(nextSort(first, 'due', fallback), null);
+});

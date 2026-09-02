@@ -57,3 +57,29 @@ export const monitors: Monitor[] = [
   { id: '3', name: 'Paykit', status: 'down', lastChecked: '12s ago', uptime: 94.2 },
   { id: '4', name: 'Merchden storefront', status: 'paused', lastChecked: '4h ago', uptime: 99.8 },
 ];
+
+/**
+ * A hundred invoices, which is the size the pager exists for.
+ *
+ * The only generated fixture in the file, and it is generated because five
+ * hand-written rows are why pagination was invisible in the workshop for three
+ * releases: nothing in the registry ever held more records than fit a screen.
+ * It cycles the five real invoices above so the customers, amounts and states
+ * stay real, and walks the reference and the dates so no two rows collide and
+ * a sort has something to do.
+ */
+export const manyInvoices: Invoice[] = Array.from({ length: 100 }, (_, i) => {
+  const source = invoices[i % invoices.length];
+  const day = (i % 28) + 1;
+  const month = (i % 6) + 3;
+  const pad = (n: number) => String(n).padStart(2, '0');
+
+  return {
+    ...source,
+    id: `many-${i + 1}`,
+    reference: `INV-2026-${pad(i + 1)}`,
+    issued: `2026-${pad(month)}-${pad(day)}`,
+    due: `2026-${pad(month + 1)}-${pad(day)}`,
+    total: source.total + i * 1_100,
+  };
+});

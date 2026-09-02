@@ -820,3 +820,103 @@ had, so every one of those renders identically.
 For anyone working on this repo rather than consuming it, the change is that
 four rules it states about itself are now checked by something that runs, and
 they run on a pull request rather than after the merge.
+
+## Table behaviour, 0.4.0
+
+[ADR 0006](adr/0006-take-table-behaviour-from-tanstack-table.md) is the
+authority for the dependency, under the principle in
+[ADR 0005](adr/0005-buy-behaviour-and-build-appearance.md): buy behaviour,
+build appearance.
+
+### What was bought
+
+`DataTable` runs on TanStack Table. `@tanstack/react-table` is an optional peer
+dependency, so an app importing `Button` installs nothing and an app importing
+`DataTable` installs one package.
+
+The library was adopted on one condition, checked rather than assumed: no
+`kairos-*` class had to change to accommodate it. None did. Every element and
+every class in the rendered table is still this package's — the library holds
+the row model and the state and emits no markup and no CSS. A required class
+change would have been the signal that it is not headless and that this was the
+wrong change.
+
+Four things the registry did not have arrive with it, each off by default and
+each behind one prop: paging at 25 rows, row selection, a search term, and
+hideable columns. The registry had no pagination class in 197 classes, and
+every list fixture in the workshop held five rows, which is why a business with
+three hundred invoices got three hundred rows and nobody could see it.
+
+### What was kept
+
+**`compare` is registered, not replaced.** Blanks sort last in both
+directions. That is a defect this repo already found and fixed in Paykit, where
+a descending sort on a column with blanks put a block of dashes at the top, and
+the library's default comparator would have reintroduced it. `sortRows` and
+`nextSort` are still exported and `tests/sort.test.mjs` passes unchanged.
+
+**The three-state sort cycle is ours.** Ascending, descending, then back to the
+screen's default. The library's own toggle is a two-state flip, which leaves a
+reader who sorted by mistake no way back short of reloading. The default column
+is the exception and has two states, because the third would be the state it is
+already in — and pressing a column the screen already sorts descending now
+reverses rather than appearing to do nothing, which it used to.
+
+**`ColumnRole` is ours.** The library knows about tables and nothing about a
+record card, and the card is half of what `DataTable` is for. A column still
+declares its role once and that declaration still drives the table, the card,
+and the order.
+
+**Selection is a table capability, not a column.** A `selectable` prop rather
+than a column the call site declares, because a call site that can declare a
+selection column can also declare two, or put it last.
+
+### What the selected-row bar is and is not
+
+`kairos-bulk-bar` states the count and holds a slot. It ranks nothing and
+arranges nothing. Action composition is `ActionSet`, arriving in 0.5.0 under
+[ADR 0008](adr/0008-compose-actions-through-a-component.md), and it renders
+into this slot. A bar that composed its own buttons would have been a second
+action pattern beside the one the registry is about to standardise on.
+
+`--kairos-row-selected` and `.kairos-table tbody tr[aria-selected='true'] td`
+both shipped in 0.1.0. Nothing ever set that attribute, so a selected row could
+not exist and the ground never painted. That rule is unchanged; it now has a
+setter.
+
+### What the workshop found
+
+**The segmented filter never fitted the filter bar.** `.kairos-segmented` is
+`inline-flex`, which sizes to its segments everywhere except inside a grid,
+where a grid item stretches to its column instead. A track in
+`.kairos-filter-bar` is around 190px and three segments need around 230, so the
+control shipped stretched *and* squeezed: a box wide enough for six segments,
+with "Settled" wrapped onto a second line inside it. `justify-self: start` stops
+the stretch and `min-width: max-content` above 768px stops the squeeze. The
+label-row offset that `.kairos-filter-bar-action` carried as a literal is now
+`--filter-label-offset`, read by both controls that need it.
+
+**Two stories labelled a menu twice.** `OverflowMenu` builds its trigger label
+as `Actions for ${label}`, and two call sites passed `Actions for INV-0042`,
+which read as "Actions for Actions for INV-0042" to a screen reader.
+
+### Release note, 0.4.0
+
+**Breaking: `DataTable` needs `@tanstack/react-table` installed.** One command,
+and only for apps that import `DataTable`.
+
+**Breaking: a table pages at 25 rows unless told otherwise.** A table that
+wants what it had takes `pageSize={rows.length}`. The migration note in
+[adoption.md](adoption.md) gives the one line.
+
+`columns` arrays do not change. `Column<Row>` is now `ColumnDef` with the six
+Kairos fields folded over it, so a column can carry `size`, `filterFn` or
+`enableHiding` as well — and nothing has to.
+
+Selection below 768px is a known gap. A record card carries no checkbox,
+because what a card renders is the `record-card` contract and this change does
+not touch it. A phone reader can sort, page and search a list but not select
+from it.
+
+Paykit, Mailkit and Uptime were not migrated. Each pins a version and moves on
+its own schedule.

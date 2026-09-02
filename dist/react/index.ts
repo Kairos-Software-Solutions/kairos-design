@@ -19,7 +19,9 @@ export { default as Segmented } from './Segmented';
 export type { SegmentedProps, SegmentedOption } from './Segmented';
 
 export { default as InputField, Field } from './Field';
+export { default as FilterBar } from './FilterBar';
 export type { InputFieldProps, FieldProps } from './Field';
+export type { FilterBarProps, FilterState, FilterSegment } from './FilterBar';
 
 export { default as Banner } from './Banner';
 export type { BannerProps, BannerTone } from './Banner';
@@ -36,7 +38,7 @@ export type { OverflowMenuProps, OverflowItem } from './OverflowMenu';
 export { default as DataTable } from './DataTable';
 export { compare, sortRows, nextSort } from './sort';
 export type { SortState, Sortable } from './sort';
-export type { DataTableProps, Column, ColumnRole } from './DataTable';
+export type { DataTableProps, Column, ColumnRole, Selection } from './DataTable';
 
 export { default as CollapsibleCard } from './CollapsibleCard';
 export type { CollapsibleCardProps } from './CollapsibleCard';
