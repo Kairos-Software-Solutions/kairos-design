@@ -17,8 +17,10 @@ const meta = {
     variant: { control: 'select', options: ['primary', 'secondary', 'tertiary', 'ghost', 'danger', 'dangerSolid'] },
     size: { control: 'inline-radio', options: ['sm', 'md'] },
     disabled: { control: 'boolean' },
+    loading: { control: 'boolean' },
+    loadingLabel: { control: 'text' },
   },
-  args: { children: 'Save changes', variant: 'primary', size: 'md' },
+  args: { children: 'Save changes', variant: 'primary', size: 'md', loadingLabel: 'Saving…' },
 } satisfies Meta<typeof Button>;
 
 export default meta;
@@ -178,6 +180,93 @@ export const Edges: Story = {
             Send invoice
           </Button>
           <Button variant="secondary">Save as draft</Button>
+        </div>
+      </Section>
+    </Page>
+  ),
+};
+
+/**
+ * The state that did not exist for the first five versions, and the two
+ * comparisons that check it.
+ *
+ * `kairos-spin` and `kairos-progress-dot` both shipped for five versions with
+ * no caller: the ring was in the vocabulary, the animation was in the
+ * vocabulary, and a submit button that shows it was pressed was left to each
+ * app. Three apps, three answers.
+ *
+ * What a story has to draw, because neither is visible in one button on its own:
+ *
+ * - **Rest beside busy.** The box is the wider of the two labels in *both*
+ *   states, so pressing the button cannot resize it or move the row it sits
+ *   in. Swap the two cells out of their shared grid area and the right edge
+ *   moves the moment the request starts.
+ * - **Busy beside disabled.** They have to read differently. A busy button
+ *   keeps its rank's fill, its border and its stamp; a disabled one drops the
+ *   ground to the page and the border to the subtle weight. Give busy the
+ *   disabled treatment and every press looks like a press that failed.
+ *
+ * Check it with reduced motion on as well. The ring stops turning — the global
+ * guard collapses the animation to one iteration — so the label is the whole
+ * signal at that point, which is why `loadingLabel` names the work rather than
+ * saying `Loading`.
+ */
+export const Working: Story = {
+  render: () => (
+    <Page
+      title="Working"
+      lede="A button waiting on a response is not an unavailable one. It keeps its rank and its box, and it refuses every further press."
+    >
+      <Section
+        title="Rest beside busy, one edge"
+        lede="Each rank twice, left-aligned against a guide: at rest, then mid-request. Both boxes are the wider of the two labels, so the two right edges line up down the column. A label swapped in place instead of stacked would step outward on every busy row."
+      >
+        <div
+          className="kairos-panel kairos-pad kairos-stack kairos-stack--sm"
+          style={{ borderLeft: '2px dashed var(--kairos-accent-on-light)' }}
+        >
+          {ALL_RANKS.map((variant) => (
+            <div key={variant} className="kairos-action-row">
+              <Button variant={variant} loading={false} loadingLabel="Sending…">
+                Send
+              </Button>
+              <Button variant={variant} loading loadingLabel="Sending…">
+                Send
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="Busy against unavailable"
+        lede="The pairing that has to stay distinguishable. Working keeps the rank; unavailable drops its ground and its border. If these two rows read alike, the busy rule is repainting the rank it should be leaving alone."
+      >
+        <div className="kairos-panel kairos-pad kairos-stack kairos-stack--sm">
+          {ALL_RANKS.map((variant) => (
+            <div key={variant} className="kairos-action-row">
+              <Button variant={variant} loading loadingLabel="Saving…">
+                Save
+              </Button>
+              <Button variant={variant} disabled>
+                Save
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Section>
+
+      <Section
+        title="The label carries the meaning"
+        lede="Left: the work is named. Right: the prop was skipped, so the pending label falls back to the resting one. Both hold their box and both announce busy, but only the first says anything a reader did not already know — and under reduced motion, where the ring is a static glyph, the first is the only one still communicating."
+      >
+        <div className="kairos-panel kairos-pad kairos-action-row">
+          <Button variant="primary" loading loadingLabel="Sending invoice…">
+            Send invoice
+          </Button>
+          <Button variant="primary" loading>
+            Send invoice
+          </Button>
         </div>
       </Section>
     </Page>

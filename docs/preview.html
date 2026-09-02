@@ -76,6 +76,28 @@
       <button class="kairos-button kairos-button--sm kairos-button--secondary" type="button">Small</button>
       <button class="kairos-button kairos-button--secondary" type="button" disabled>Disabled</button>
     </div>
+    <p class="kairos-muted">Working, beside unavailable. A button mid-request keeps its rank and its box; only a
+      genuinely unavailable one drops its ground and its border. Both cells sit in one grid area, so the box is the
+      wider of the two labels at rest as well as in flight and pressing it moves nothing.</p>
+    <div class="kairos-action-row">
+      <button class="kairos-button kairos-button--primary" type="button" aria-busy="true" aria-disabled="true">
+        <span class="kairos-button-stack">
+          <span class="kairos-button-label">Send invoice</span>
+          <span class="kairos-button-pending">
+            <span class="kairos-progress-dot kairos-spin" aria-hidden="true"></span>Sending invoice&hellip;
+          </span>
+        </span>
+      </button>
+      <button class="kairos-button kairos-button--primary" type="button">
+        <span class="kairos-button-stack">
+          <span class="kairos-button-label">Send invoice</span>
+          <span class="kairos-button-pending">
+            <span class="kairos-progress-dot kairos-spin" aria-hidden="true"></span>Sending invoice&hellip;
+          </span>
+        </span>
+      </button>
+      <button class="kairos-button kairos-button--primary" type="button" disabled>Send invoice</button>
+    </div>
   </section>
 
   <section>

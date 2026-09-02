@@ -394,3 +394,63 @@ test('a modifier that changes display comes after the block it modifies', () => 
 
   assert.deepEqual(misordered, [], 'the block will override the modifier');
 });
+
+/**
+ * A button waiting on a response.
+ *
+ * Four claims, and the review that asked for this state is the reason each one
+ * is checked rather than commented. `kairos-spin` and `kairos-progress-dot`
+ * both shipped for five versions with no caller and no manifest row, which is
+ * how a design system grows a spinner nobody can find and every app builds its
+ * own.
+ */
+test('a busy button keeps its box, its rank, and its focus', () => {
+  const source = readFileSync(join(ROOT, 'dist', 'react', 'Button.tsx'), 'utf8');
+  const body = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+
+  // Focus. `disabled` moves it to the body at the moment the answer arrives,
+  // and the answer arrives on the control the user just pressed Enter on.
+  assert.match(body, /aria-disabled=\{busy/, 'busy is carried by aria-disabled');
+  assert.doesNotMatch(body, /(?<!aria-)disabled=\{(busy|loading)/, 'busy must not set the disabled attribute');
+
+  // The press. Nothing else refuses it, so this handler is the only thing
+  // between a held Enter and two invoices.
+  assert.match(body, /if \(busy\)[\s\S]{0,120}preventDefault\(\)/, 'a busy press is refused');
+
+  // The box. Both labels in one grid cell is what makes the width the wider of
+  // the two in every state; hiding one with `display` would collapse it.
+  const cells = /\.kairos-button-label,\s*\.kairos-button-pending \{([^}]*)\}/.exec(css);
+  assert.ok(cells, 'the two label cells share a rule');
+  assert.match(cells[1], /grid-area:\s*1 \/ 1/, 'both labels occupy one cell');
+
+  /** The declarations of the rule whose selector list is exactly this. */
+  const ruleFor = (selector) => {
+    const match = [...css.matchAll(/([^{}]+)\{([^}]*)\}/g)].find(
+      ([, list]) => list.replace(/\/\*[\s\S]*?\*\//g, '').trim() === selector
+    );
+    assert.ok(match, `${selector} has a rule of its own`);
+    return match[2];
+  };
+
+  for (const selector of ['.kairos-button-pending', ".kairos-button[aria-busy='true'] .kairos-button-label"]) {
+    const declarations = ruleFor(selector);
+    assert.match(declarations, /visibility:\s*hidden/, `${selector} hides with visibility`);
+    assert.doesNotMatch(declarations, /display:\s*none/, `${selector} must keep its box`);
+  }
+
+  // The rank. A greyed-out control says "still unavailable when you look
+  // back", which is the opposite of what a button mid-request is doing.
+  const busyRules = [...css.matchAll(/\.kairos-button\[aria-busy='true'\][^{]*\{([^}]*)\}/g)];
+  assert.ok(busyRules.length >= 3, 'the busy state has its own rules');
+  for (const [, declarations] of busyRules) {
+    assert.doesNotMatch(declarations, /--button-(bg|border|color)/, 'busy must not repaint the rank');
+  }
+});
+
+test('hover and press are refused while a button is busy', () => {
+  for (const state of ['hover', 'active']) {
+    const rule = new RegExp(`\\.kairos-button:${state}([^{]*)\\{`).exec(css);
+    assert.ok(rule, `the :${state} rule was found`);
+    assert.match(rule[1], /:not\(\[aria-busy='true'\]\)/, `:${state} is guarded against busy`);
+  }
+});
