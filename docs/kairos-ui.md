@@ -286,7 +286,9 @@ judgement it leaves you is which action is primary on the screen.
 | --- | --- | --- | --- |
 | `kairos-field` | Label, control, hint, and error as one unit | Read-only display of a value | — |
 | `kairos-input-field` | Text, number, textarea; 16px minimum | — | — |
-| `kairos-select` | Native select, styled; wrap in `kairos-select-wrap` for the caret | — | — |
+| `kairos-select` | Native select, styled; wrap in `kairos-select-wrap` for the caret. Also the combobox trigger, which is the same box | More than ten options — past that a person cannot see the list and needs to type, and this control cannot be typed into | — |
+| `kairos-combobox` | The combobox trigger, beside `kairos-select` — adds the value/caret layout a button needs and a select does not | Ten options or fewer, where the native select opens the platform picker on a phone | — |
+| `kairos-combobox-menu` | The list a combobox opens, with `-filter`, `-list`, `-item`, `-tick` and `-empty` inside it | Row actions; that is `kairos-overflow-menu` | — |
 | `kairos-input-label` | The field label, uppercase and tracked | A heading | — |
 | `kairos-field-hint` | What the field expects | Error text | — |
 | `kairos-field-error` | Plain language saying what to do next | A generic failure string | — |
@@ -295,6 +297,13 @@ judgement it leaves you is which action is primary on the screen.
 A field holds its label, hint, and error rows whether or not they carry
 content, so validating a form does not move the layout.
 
+**Ten is the boundary between the two chooseers, and it is a number rather than
+a judgement.** Ten options or fewer: the native `<select>`, which opens the
+platform picker on a phone, works before hydration, and costs nothing. More
+than ten: `Select`, which puts a filter box above the list, because past that
+a person can no longer see whether what they want is in it. The same number
+decides whether that filter box appears, so there is one boundary and not two.
+
 ## Feedback
 
 | Class | Use for | Do not use for | Modifiers |
@@ -302,6 +311,8 @@ content, so validating a form does not move the layout.
 | `kairos-banner` | Page-level notice, one per screen | Field-level errors | `--danger` `--warning` `--success` `--inline` |
 | `kairos-toast` | Transient confirmation of a completed action | Anything the user must act on | — |
 | `kairos-toast-region` | The fixed container, `role="status"` | — | — |
+| `kairos-tooltip` | A short explanation attached to a control, on hover or focus | A control's only name or description — hover does not exist on touch and does not appear in a screenshot | — |
+| `kairos-popover` | A small panel of content or controls anchored to what opened it | A list of actions, which is `kairos-overflow-menu`; or anything you need an answer to, which is `kairos-dialog-content` | — |
 
 There is no accent banner. Amber is the action colour, and a banner is not an
 action.
@@ -367,7 +378,7 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| `Select`, `Textarea` | Field variants. `Field` takes them today via its render prop, but neither has a named wrapper. |
+| `Textarea` | A named wrapper. `kairos-input-field` already styles a `<textarea>` — its own height, padding and `resize: vertical` — and `Field` takes one today through its render prop, so what is missing is only the component. Left open deliberately: it is not an overlay, and claiming it here would mean this change grew a component for no reason beyond sharing a table row with one. |
 | Rendered component tests | The contract tests are static. Nothing here has been rendered by a test runner, because the registry ships no build step — the first app to adopt it is what exercises the JSX. |
 | Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
 
@@ -398,6 +409,9 @@ fails on it.
 | Export | Notes |
 | --- | --- |
 | `ActionSet` | A screen's actions, declared by role and rendered for the surface. `context` picks the surface — `page`, `dialog`, `row`, `card` — and decides which slots exist, so a row declaring a primary action does not compile. A destructive action carries the string its confirmation reads, and cannot take a ranked slot at all. **Peer dependency: `radix-ui`.** |
+| `Select` | The chooser for a list too long for the native control. Past ten options it grows a box that narrows the list as you type, which Radix's own typeahead does not do — typeahead jumps to a match, and jumping inside two hundred tenants is not narrowing to the four that match. Ten or fewer, keep the native `<select>`. **Peer dependency: `radix-ui`.** |
+| `Tooltip` | A short explanation on hover or focus. Takes `name` for an icon-only trigger and puts it on the control as `aria-label`, so the control is named whether or not the tooltip ever opens. **Peer dependency: `radix-ui`.** |
+| `Popover` | A small panel of content or controls beside the page. Not a menu — nothing in it is a chosen item and using a control inside it does not close it. Not a dialog — it is dismissed by clicking anywhere else, so it is wrong for anything you need an answer to. **Peer dependency: `radix-ui`.** |
 | `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. |
 | `StateChip` | The four states, plus every app's old spelling as a deprecated alias so adoption is not one enormous commit |
 | `Segmented` | Filters, wizard steps, the theme choice |

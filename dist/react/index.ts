@@ -24,6 +24,15 @@ export { default as FilterBar } from './FilterBar';
 export type { InputFieldProps, FieldProps } from './Field';
 export type { FilterBarProps, FilterState, FilterSegment } from './FilterBar';
 
+export { default as Select, FILTER_THRESHOLD } from './Select';
+export type { SelectProps, SelectOption } from './Select';
+
+export { default as Tooltip } from './Tooltip';
+export type { TooltipProps } from './Tooltip';
+
+export { default as Popover } from './Popover';
+export type { PopoverProps } from './Popover';
+
 export { default as Banner } from './Banner';
 export type { BannerProps, BannerTone } from './Banner';
 
