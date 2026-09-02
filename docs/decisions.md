@@ -1182,3 +1182,18 @@ So the button branch renders `Button`, and `RunAction` grew `pending` and
 cannot: choosing one closes the menu it was in, so there is nothing left on the
 screen to put the state on. That is a real constraint rather than a gap — an
 action whose progress the person needs to watch has earned a button.
+
+## A switcher top bar keeps its brand, 0.7.1
+
+`.kairos-topbar-brand` was hidden above 900px unconditionally, and that is
+right for the bar it was written for: the mobile row beside a sidebar, where
+the sidebar's own plaque carries the brand two hundred pixels to the left.
+
+It is wrong for `--switcher`, which is the top bar of a shell that has *no*
+sidebar — a control plane, a client portal. There, nothing else on the page is
+carrying the mark, so the desktop view of an entire surface rendered with no
+Kairos on it. Found by looking at Mailkit's client portal at 1280px during its
+adoption; the phone view was correct, which is why the rule had survived.
+
+One selector, scoped to the variant. Nothing else moves, and the mobile row
+still hides its brand on desktop.

@@ -3371,6 +3371,17 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   .kairos-topbar-brand {
       display: none;
     }
+  
+  /* Except on a switcher bar, which is the top bar of a shell that has no
+     sidebar — a control plane, a client portal. The rule above is written for
+     the mobile row that sits beside a sidebar, where hiding the brand is right
+     because the sidebar's own plaque is carrying it two hundred pixels to the
+     left. On a switcher bar there is no sidebar and nothing else on the page
+     is carrying it, so the desktop view of a whole surface rendered with no
+     Kairos mark on it at all. */
+  .kairos-topbar--switcher .kairos-topbar-brand {
+      display: flex;
+    }
 }
 
 @media (max-width: 899px) {
