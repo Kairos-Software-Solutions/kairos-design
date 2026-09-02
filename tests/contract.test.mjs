@@ -454,3 +454,37 @@ test('hover and press are refused while a button is busy', () => {
     assert.match(rule[1], /:not\(\[aria-busy='true'\]\)/, `:${state} is guarded against busy`);
   }
 });
+
+/**
+ * The manifest names every class, or names the block a class belongs to.
+ *
+ * `docs/kairos-ui.md` opens by saying a component not in the manifest does not
+ * exist for the next agent, and the layout section says an undocumented class
+ * is one the next agent reinvents. Both were true and neither was checked: 88
+ * classes had a rule in `kairos.css`, no row, and no documented parent, and 50
+ * of them were already live in Paykit, card, mailkit or uptime markup. Three
+ * apps writing a vocabulary the manifest does not admit to is how the fourth
+ * app writes its own.
+ *
+ * An element is covered by its block's row on purpose -- `kairos-record-card`
+ * earns a row and `kairos-record-card-meta` is spoken for by it. That is the
+ * line this test draws, so a genuinely new role fails and a new element of a
+ * documented role does not.
+ */
+test('every class has a manifest row, or a documented block', () => {
+  const manifest = readFileSync(join(ROOT, 'docs', 'kairos-ui.md'), 'utf8');
+  const named = new Set([...manifest.matchAll(/kairos-[a-z0-9-]+/g)].map((m) => m[0]));
+
+  /** `kairos-a-b-c` -> `kairos-a-b`, `kairos-a`. */
+  const blocksOf = (cls) => {
+    const parts = cls.split('-');
+    return Array.from({ length: parts.length - 2 }, (_, i) => parts.slice(0, parts.length - 1 - i).join('-'));
+  };
+
+  const undocumented = [...defined]
+    .filter((cls) => !cls.includes('--'))
+    .filter((cls) => !named.has(cls) && !blocksOf(cls).some((block) => named.has(block)))
+    .sort();
+
+  assert.deepEqual(undocumented, [], 'these have a rule and no row; add one or name their block');
+});

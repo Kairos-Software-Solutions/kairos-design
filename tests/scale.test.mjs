@@ -191,11 +191,20 @@ test('a table panel is always a panel', () => {
   // radius, no stamp. It is a modifier on `.kairos-panel`, and the release
   // where `DataTable` emitted it alone is the release where every table in
   // every Kairos app lost its container.
-  const react = readFileSync(join(ROOT, 'dist', 'react', 'DataTable.tsx'), 'utf8');
-  const classNames = [...react.matchAll(/className="([^"]*kairos-table-panel[^"]*)"/g)].map((m) => m[1]);
-  assert.ok(classNames.length > 0, 'DataTable should render a table panel');
-  for (const value of classNames) {
-    assert.match(value, /\bkairos-panel\b/, `"${value}" is a table panel with no panel`);
+  // Every surface that writes the class, not only the component. The preview is
+  // what the two surfaces with no bundler copy from, and it carried a table
+  // panel with no panel of its own while this test watched `DataTable` alone.
+  const sources = [
+    ['DataTable.tsx', readFileSync(join(ROOT, 'dist', 'react', 'DataTable.tsx'), 'utf8'), /className="([^"]*kairos-table-panel[^"]*)"/g],
+    ['preview.html', readFileSync(join(ROOT, 'docs', 'preview.html'), 'utf8'), /class="([^"]*kairos-table-panel[^"]*)"/g],
+  ];
+
+  for (const [name, source, pattern] of sources) {
+    const classNames = [...source.matchAll(pattern)].map((m) => m[1]);
+    assert.ok(classNames.length > 0, `${name} should render a table panel`);
+    for (const value of classNames) {
+      assert.match(value, /\bkairos-panel\b/, `${name}: "${value}" is a table panel with no panel`);
+    }
   }
 });
 

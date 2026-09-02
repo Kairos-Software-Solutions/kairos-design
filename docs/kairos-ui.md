@@ -187,6 +187,17 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-filter-bar` | The row above a record list: search, segmented filters, and any field the screen filters by. `FilterBar` renders it | Sorting; the table header does that. A submit button on a bar that narrows live | — |
 | `kairos-theme-toggle` | System / Light / Dark | Any other setting | `--inline` |
 | `kairos-skip-link` | First focusable element on every page | — | — |
+| `kairos-shell-body` | The column beside the sidebar that holds the topbar and `kairos-main`, and owns the viewport height | A content wrapper inside `kairos-main`; that is `kairos-view` | — |
+| `kairos-nav-link` | One sidebar destination, `36px`, amber on `[aria-current="page"]` | An action; a nav row goes somewhere | — |
+| `kairos-nav-group` | The label over a group of nav rows, `10px` tracked caps | A nav row itself | — |
+| `kairos-nav-sheet` | The full-screen nav a phone opens from the topbar, below `900px` | Desktop, and any list of actions; that is `kairos-overflow-menu` | — |
+| `kairos-breadcrumb` | The trail above a page title, and only where nesting is real | Restating the nav item you are already on | — |
+| `kairos-tabs-list`, `kairos-tab` | Tabs within one record, ruled underneath, active on `[data-state="active"]` | Filtering a list; that is `kairos-segmented`. Navigation between pages; that is `kairos-nav-link` | — |
+| `kairos-wizard-step` | One step in `kairos-wizard-steps`, with `[data-done]` and a `-marker` | A tab; a step has an order and a completion | — |
+| `kairos-tool-surface` | A one-panel screen centred in the viewport: sign-in, a not-found, a single prompt | An app screen with a shell; that is `kairos-app-shell` | — |
+| `kairos-sign-in`, `kairos-auth` | The panel on that surface, capped at `25rem` and `24rem` and never wider than the phone it is on | Two names for one thing in a new screen — pick `kairos-auth`, which carries the form, header and link elements | — |
+| `kairos-login-grid` | The two-column sign-in layout, collapsing at `980px` | A content grid; that is `kairos-grid-auto` | — |
+| `kairos-setting-row` | A settings label and its control on one line, wrapping | A form field; that is `kairos-field` | — |
 
 ## Data
 
@@ -209,6 +220,15 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-metric` | A single figure with its label | A figure inside a table cell | — |
 | `kairos-skeleton` | Loading placeholder shaped like its content | Empty states | `--line` `--heading` `--label` `--row` `--control` `--summary` |
 | `kairos-figure` | Money and any figure that must not break across lines | Text | — |
+| `kairos-record-list` | The card list below `768px`. It is `display: none` above that width, so it is the pair to `kairos-desktop-table` and not a layout you reach for directly | A grid of cards on desktop | — |
+| `kairos-record-rows`, `kairos-record-row` | Records inside a panel as ruled rows rather than a table: a dashboard summary, a short related list | Repeating records with columns to compare; that is `kairos-table`. Fewer than three; write them out | — |
+| `kairos-record-open` | The whole-row target on a ruled row, with `-label` naming the record | A table row; the row handler and the identifier link do that | — |
+| `kairos-record-link` | The linked identifier in a row or card. Bold, so the identifier is the heaviest ink in the row | `Open` or `View`; the link text has to name the record | — |
+| `kairos-cell-note` | A second line under a cell's value, muted and small | The value itself | — |
+| `kairos-cell-secondary` | A cell that reads one rank below the identifier | Muting a whole column; the data is the heaviest ink on the screen | — |
+| `kairos-columns-cell` | The column-visibility control's cell, last and narrow, beside `kairos-selection-cell` | A second action column; the row carries the identifier, the menu and the checkbox and nothing else | — |
+| `kairos-tile` | A dashboard count as a link: `-heading`, `-name`, `-count` | A figure with no destination; that is `kairos-metric` | — |
+| `kairos-definition-grid` | A record's fields as a `<dl>`, label over value, on a detail screen | A form; a definition list is read, not edited | — |
 
 A table panel takes three classes: `kairos-panel kairos-table-panel
 kairos-desktop-table`. Paykit's call sites always wrote all three; when that
@@ -272,6 +292,12 @@ Where the hierarchy leaves the order open, ask rather than guess.
 | `kairos-dialog-content` | Modal surface | Page-level notices | — |
 | `kairos-segmented` | Filters and wizard steps | Anything styled as a button row | `--links` |
 | `kairos-icon-action` | An icon-only control that has an `aria-label` naming its record | A rail of three per table row | `--accent` `--danger` |
+| `kairos-overflow` | The inline wrapper the menu trigger sits in | Positioning the menu; Radix owns that wrapper and a rule here cannot move it | — |
+| `kairos-inline-action` | An underlined action inside a sentence or a cell, `24px` target | A ranked action; that is `kairos-button--tertiary` | — |
+| `kairos-inline-actions` | Two or three inline actions pushed to the end of a row | A row of buttons; that is `kairos-action-row` | — |
+| `kairos-dialog-actions` | The footer of a dialog, actions to the end, stacking full-width below `420px` | Composing or ranking them; that is `ActionSet` with `context="dialog"` | — |
+| `kairos-dialog-overlay`, `kairos-dialog-title` | The scrim and the heading of a dialog. `Dialog` renders both | A page-level heading; that is `kairos-page-title` | — |
+| `kairos-block` | A button that fills its container, on a phone or in a stacked dialog footer | A desktop action row, where a full-width primary reads as a banner | — |
 
 Destructive actions live in `kairos-overflow-item--destructive` and are gated by
 a dialog that names the record. The confirm button takes the destructive
@@ -308,6 +334,11 @@ judgement it leaves you is which action is primary on the screen.
 | `kairos-field-hint` | What the field expects | Error text | — |
 | `kairos-field-error` | Plain language saying what to do next | A generic failure string | — |
 | `kairos-wizard-steps` | Multi-step progress | A button row | — |
+| `kairos-form-grid` | Fields across the width, `auto-fit` from `220px`, bottoms aligned | A single column; that is `kairos-form-stack` | — |
+| `kairos-submit-wrap` | A submit button with a status line reserved beneath it, so a result arriving moves nothing | Wrapping a whole form | — |
+| `kairos-action-status` | The line under a submit saying what happened | A page-level notice, which is `kairos-banner`, or a field's own error, which is `kairos-field-error` | — |
+| `kairos-submit-error` | A failed submit, with the accent rule down its left edge | A field-level error | — |
+| `kairos-error-text`, `kairos-row-error` | Error text in brick, `13px` | A new screen. These two are the same declarations under two names, and `kairos-field-error` is the one inside a field — reach for that first and use these only where an error has no field to belong to | — |
 
 A field holds its label, hint, and error rows whether or not they carry
 content, so validating a form does not move the layout.
@@ -341,6 +372,7 @@ action.
 | `kairos-lockup` | The CDN wordmark, theme-switched | A redrawn or recoloured logo | `--light` `--dark` |
 | `kairos-wordmark` | Text wordmark where the image will not fit | Replacing the lockup on a login screen | — |
 | `kairos-section-tag` | Opening a section on a Brand Scale page: a label, then a rule to the edge | A heading inside a panel; that is `kairos-section-title` | — |
+| `kairos-kicker` | The eyebrow over a page title, and only where it names real nesting: `Invoices` above `Invoice INV-0042` | A top-level screen, where the nav item repeated above the title is two lines of chrome carrying no information | — |
 
 Logos are linked from `https://cdn.kairossolutionstt.com` by URL, never copied
 into a repo. Ship both variants, with the same `alt` on each, and let the
@@ -383,6 +415,25 @@ often enough that writing them again is the likely mistake.
 | `kairos-visually-hidden` | Text for a screen reader only | Hiding something from everyone; use `hidden` | — |
 | `kairos-align-right` | A figure column | Text | — |
 | `kairos-nowrap` | A value that must not break | A paragraph | — |
+| `kairos-grid-auto` | A tile or card grid, `auto-fit` from `200px`, no media query | Fields; that is `kairos-form-grid` | — |
+| `kairos-inline-pair` | A glyph and its label, or a value and its unit, as one unit on a line | A row of siblings; that is `kairos-chip-row` | — |
+| `kairos-ruled-row` | A row closed by a rule underneath: a panel heading over its content | Rows inside a list, which rule at the top so the first row does not double | — |
+| `kairos-narrow` | A centred `42rem` column, wider than prose and narrower than the page | Prose; that is `kairos-measure` | — |
+| `kairos-fit`, `kairos-block` | Width to the content, and width to the container | Height. A control's height comes from its slot | — |
+| `kairos-break` | An identifier with no spaces that would otherwise overflow: a URL, a token, an API key | A figure. `kairos-figure` exists because `overflow-wrap` breaks a number into two numbers | — |
+| `kairos-body` | A paragraph at body size with prose line height, margin cleared | A table cell, which takes its own | — |
+| `kairos-meta` | A muted supporting line at `13px` | The record's own data | — |
+| `kairos-label-caps` | A standalone tracked-caps label outside a field | A sentence. Cap it at three words | — |
+| `kairos-text-secondary`, `kairos-text-tertiary` | One and two ranks below primary ink | Either, in new code. `kairos-muted` is the documented name for tertiary and `kairos-cell-secondary` for a table cell; these two are the older spellings, kept because Paykit and card both write them | — |
+| `kairos-bold`, `kairos-underline`, `kairos-capitalize` | Weight `700`, an underline, and title-casing a value that arrives lowercase | Emphasis by weight where a rank exists. If a label is heavier than its value the ranks are inverted | — |
+| `kairos-mono` | An identifier read character by character, in the mono stack | Prose. `kairos-code` is the bordered form for one an operator copies | — |
+| `kairos-plain-link` | A link that carries its meaning by position rather than by underline: a card, a nav row, a whole record row | Body copy, where an unmarked link is unfindable | — |
+| `kairos-plain-list`, `kairos-bullets` | A list with no markers, and one with them | Rows of records; that is `kairos-record-rows` | — |
+| `kairos-flush` | Clearing a margin the element brought with it | Removing a panel's padding, which is `Panel`'s `flush` prop and a different mechanism | — |
+| `kairos-mt-md`, `kairos-mb-lg` | A one-off `24px` above or below. **Both resolve to `--kairos-space-xl`, not to `md` or `lg`** — the names are older than the scale and are wrong about it | Spacing a stack; that is `kairos-stack`, which sets one gap and cannot disagree with itself | — |
+| `kairos-desktop-only`, `kairos-mobile-only` | Showing something on one side of the `900px` sidebar boundary | The `768px` table-to-card swap, which is `kairos-desktop-table` and `kairos-record-list` | — |
+| `kairos-print-only`, `kairos-print-header` | A block that appears on paper only, and the ruled letterhead at the top of it, with `-title`, `-business` and `-meta` | Screen. Nothing in the print header renders in a browser, so it is invisible to every check that is not a print preview | — |
+| `kairos-motion-fade-up`, `kairos-motion-fade-in`, `kairos-motion-slide-in-right` | A Brand Scale entrance, `450ms`, decelerating into rest | Product Scale, where a screen full of arriving panels is a screen you wait for | — |
 
 An app that writes its own `.myapp-stack`, `.myapp-muted`, or `.myapp-grow` has
 forked one of these. Check this table before adding a class to an app
