@@ -19,9 +19,9 @@ export type { StateChipProps, StateVariant } from './StateChip';
 export { default as Segmented } from './Segmented';
 export type { SegmentedProps, SegmentedOption } from './Segmented';
 
-export { default as InputField, Field } from './Field';
+export { default as InputField, Field, Textarea, SelectField } from './Field';
 export { default as FilterBar } from './FilterBar';
-export type { InputFieldProps, FieldProps } from './Field';
+export type { InputFieldProps, FieldProps, TextareaProps, SelectFieldProps } from './Field';
 export type { FilterBarProps, FilterState, FilterSegment } from './FilterBar';
 
 export { default as Select, FILTER_THRESHOLD } from './Select';

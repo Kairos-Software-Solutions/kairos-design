@@ -1197,3 +1197,167 @@ adoption; the phone view was correct, which is why the rule had survived.
 
 One selector, scoped to the variant. Nothing else moves, and the mobile row
 still hides its brand on desktop.
+
+## The five things an app was still writing itself, 0.8.0
+
+Paykit's adoption is the first one that went all the way down: its stylesheet
+came off 3,820 lines, its local `ui/` components were deleted, and its money
+and date call sites were routed through the formatters. What was left at the end
+was a list of five things the app could not get from the package, written down
+in its own repository as `docs/kairos-design-gaps.md` so they could be closed
+here rather than quietly becoming permanent.
+
+They are closed here. An app carrying a documented list of registry gaps is a
+fork with a reading list attached, and the app that wrote the list is the only
+one that knows what is missing.
+
+### `kairos-figure` did the nowrap nowhere
+
+The class the manifest documents as "money and any figure that must not break
+across lines" had no base rule. What shipped was three table-scoped selectors,
+and the nowrap among them was spelled `.kairos-table td.tabular` — a name that
+predates the vocabulary and that the manifest never admitted to.
+
+So a figure outside a table got neither the tabular numerals nor the nowrap.
+`base.css` sets `overflow-wrap: anywhere` on `p`, `li`, `td`, `th`, `dd` and
+`dt`, which is right for prose and puts `00` on its own line under
+`TTD 41,800.` — and every figure on a record card, in a definition list, and in
+a summary row is one of those elements. On an invoice two lines read as two
+numbers, which is commercial risk rather than a layout complaint.
+
+`.kairos-figure` is now unscoped and carries all three declarations; the
+`.tabular` pair is retired. `overflow-wrap: normal` is the half that gets left
+out, and it is the half that matters: the space after the currency code is
+already non-breaking, which stops a break *there* and says nothing about a
+break inside the digits.
+
+### The print block left a dark-theme reader with a blank sheet
+
+The registry's print rules painted the shell white and left the tokens wherever
+the theme had put them. A reader on the dark theme printed bone text onto a
+white page.
+
+The obvious fix is a forced-light palette re-declared inside `@media print`,
+which is about fifty lines of hex kept in step by hand — and the next colour
+token added to the light block would simply be missing from the paper copy,
+silently. So the dark palette is wrapped in `@media not print` instead. `:root`
+is already the light values, so with the overrides out of the cascade on paper
+they stand on their own, and a token is on paper the moment it is on screen.
+There is nothing to keep in step.
+
+Two things follow the palette over. The lockup cannot: it is two files rather
+than one mark in two colours, so `kairos.css` turns it back with doubled
+selectors that clear the `[data-theme='dark']` block's own. And the chrome goes
+— sidebar, bottom nav, filter bar, pager, bulk bar, buttons, menus, the
+selection and column cells. A print is read by an accountant, a bank, or the
+owner in six months; none of them can press `Next`.
+
+**Paper is not a phone.** A sheet is about 739px across once the margins are
+off it, which is under the 768px table-to-card boundary — so a printed report
+came out as the phone card list, and the payments report lost a column on the
+way to it. `kairos-desktop-table` and `kairos-record-list` are a matched pair
+on screen and they stay one on paper: the table prints and the cards do not.
+This is the width no media query can see, which is why it is answered here
+rather than by adding an eighth breakpoint.
+
+### `PageHeader` did not render the kicker
+
+`kairos-kicker` has been in the manifest and in the stylesheet throughout, and
+the component rendered the title, the description and the actions — nothing
+above the title. The kicker has to sit inside `kairos-page-header-body`, which
+is a place a call site cannot reach from outside the component, so Paykit kept
+a whole second `PageHeader` for the sixty-six screens that name a parent.
+
+The drift was already visible in this repository, in the one story that wrote a
+kicker by hand: two elements above the header instead of one inside its body,
+and the anchor carried `kairos-kicker-link` without `kairos-kicker`, so it took
+the underline and missed the eyebrow rank the underline is added to.
+
+`kicker` and `kickerHref` now sit on the component. `kickerAs` renders the
+anchor with the router's own link, because the default `<a>` is a full page
+load in a routed app — a component rather than a node, since the class list
+belongs on the anchor itself and a finished node handed in would be deciding it
+at the call site again. `EmptyState` takes a node for the opposite reason: an
+action is whatever the surface has, and three of the five have no router at
+all.
+
+The kicker is also why no screen needs a `BACK TO …` button. Navigation between
+pages is a link, and a bordered button in the header spends one of the two
+secondary action slots doing a link's job.
+
+### The two short form controls had no names
+
+`Textarea` sat under "Not yet built" for three versions on the grounds that it
+is not an overlay and claiming it would have grown a component for no reason.
+The reason arrived when a consuming app wrote it: `kairos-input-field` has
+styled a textarea since the port and `Field` has taken one through its render
+prop, so the app that needs it writes the same eight lines everyone else does.
+
+The native select had no row at all, which is worse, because the manifest is
+explicit that ten options or fewer should stay native — it opens the platform
+picker on a phone, works before hydration, and costs nothing — and gave that
+case nothing to call. `Select` is the other chooser, the combobox past ten. So
+every app hand-assembled `Field` around `kairos-select-wrap` around
+`kairos-select`, and the wrapper is the part that gets left out; without it the
+caret is gone.
+
+Both live in `Field.tsx` beside `InputField`, because four labelled controls
+are one family and a file each would say they were four.
+
+### A keyboard user could not see where they were in a combobox
+
+`.kairos-combobox-filter:focus-visible` set `outline: none` and put nothing in
+its place — no visible focus on the one control in that menu that is typed
+into, WCAG 2.2 SC 2.4.7. The reason the outline was cancelled is real: the menu
+clips to `overflow: hidden` over 4px of padding, and the global ring sits 2px
+off the element at 2px wide, so a ring around a full-width filter is drawn into
+the clip.
+
+`.kairos-combobox-item[data-highlighted]` marked the keyboard position with
+`--kairos-row-hover`, which is 1.02:1 against the menu's surface on the light
+theme. Fine as a pointer hint, where the pointer is already the position; not a
+position a person can see.
+
+Both now draw the two-tone stamp as inset shadows — ink at the boundary, amber
+just within — where nothing crops them. This is the one menu in the package
+with the problem, and the asymmetry is Radix's: `DropdownMenu` moves DOM focus
+onto the item, so an overflow item picks up the global ring for free, while
+`Select` keeps focus on the filter and publishes the position as an attribute
+only. The attribute now draws the ring the focus it stands for would have.
+
+### Thirteen classes that were filed in the wrong repository
+
+Paykit's remaining `paykit-` rules each carried a comment explaining why the
+registry had no name for the role. Reading them together, most of the
+explanations were about the registry rather than about Paykit: none of the
+rules held a value of its own, none was wired to Paykit's state, and the role
+each named was one any Kairos app would want.
+
+So `kairos-ruled-top`, `kairos-quoted`, `kairos-inset`,
+`kairos-label-value-grid`, `kairos-prewrap`, `kairos-settled-text`,
+`kairos-count`, `kairos-centred`, `kairos-centred-panel`, `kairos-side-rail`
+and `kairos-thumb` are registry classes, with `kairos-stack--start`,
+`kairos-stack--end`, `kairos-field--narrow` and `kairos-select--wide` as
+modifiers on the blocks they only make sense on.
+
+`kairos-select--wide` is the one worth naming separately. Paykit was getting it
+with `.paykit-company-switcher .kairos-select { min-width: 200px }` — an app
+rule reaching into a registry class, which is how a registry class ends up
+meaning two things in two apps.
+
+A fourteenth turned out not to exist: `paykit-choice-box` was a duplicate of
+`.kairos-choice-row input`, declaration for declaration. The app had rewritten
+a rule it was already getting, which is the failure mode this whole exercise is
+about.
+
+### Minor rather than major
+
+No prop was removed and no documented class was removed. `.kairos-table
+td.tabular` and its `th` pair are gone, and they were never in the manifest and
+are written by no app — Paykit's only reference to the name was the comment
+explaining that it was the wrong one.
+
+The forced-light print palette is the one change with reach beyond a call site:
+a surface that was somehow relying on dark tokens on paper is not, any more.
+That was the defect.
+
