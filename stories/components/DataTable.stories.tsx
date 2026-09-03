@@ -495,6 +495,101 @@ export const Filtered: StoryObj = {
 };
 
 /**
+ * Two filters on one bar, one of them wider than a share of the row.
+ *
+ * This story exists because the bar had no story and shipped broken for four
+ * versions. Its tracks were a grid, which gives every child the same width,
+ * and a segmented filter is the one child whose width is decided by its own
+ * segments. The rule reaching for the difference was `min-width: max-content`,
+ * which reserved the width without being able to obtain it: the tracks had a
+ * fixed floor, so no track ever grew to fit its contents and a five-option
+ * filter rendered straight out through the panel's right edge — by 138px at
+ * 900px wide, and still visible at 1440px.
+ *
+ * Five options is the case to keep here, because three fitted by luck. Narrow
+ * the viewport and the segments should wrap the bar rather than leave it, and
+ * the panel's right border should stay in front of every control on every
+ * width down to 320px.
+ */
+export const TwoFilters: StoryObj = {
+  render: function Render() {
+    const [filters, setFilters] = useState<FilterState>({
+      search: '',
+      segments: { state: 'all', severity: 'all' },
+    });
+
+    const { state, severity } = filters.segments;
+    const rows = manyInvoices.filter(
+      (row) =>
+        (state === 'all' || row.state === state) &&
+        (severity === 'all' || row.reference.endsWith(severity === 'critical' ? '1' : '2')),
+    );
+
+    return (
+      <div className="kairos-stack kairos-stack--lg">
+        <FilterBar
+          label="Filter invoices"
+          value={filters}
+          onChange={setFilters}
+          search={{ placeholder: 'Reference or customer' }}
+          segments={[
+            {
+              key: 'state',
+              label: 'Filter invoices by state',
+              options: [
+                { value: 'all', label: 'All' },
+                { value: 'overdue', label: 'Overdue' },
+                { value: 'settled', label: 'Settled' },
+              ],
+            },
+            {
+              key: 'severity',
+              label: 'Filter invoices by age',
+              options: [
+                { value: 'all', label: 'All' },
+                { value: 'critical', label: 'Critical' },
+                { value: 'high', label: 'High' },
+                { value: 'medium', label: 'Medium' },
+                { value: 'low', label: 'Low' },
+              ],
+            },
+          ]}
+        />
+        <DataTable
+          label="Invoices"
+          rows={rows}
+          columns={invoiceColumns}
+          getKey={(row) => row.id}
+          filterActive={state !== 'all' || severity !== 'all'}
+          onClearFilters={() =>
+            setFilters({ search: '', segments: { state: 'all', severity: 'all' } })
+          }
+          empty={<EmptyState message="No invoices match those filters." />}
+        />
+      </div>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const bar = canvas.getByRole('form', { name: 'Filter invoices' });
+
+    // The defect this story is here for. Every control the bar holds sits
+    // inside the panel that draws its border, at whatever width the story is
+    // being rendered at — which is the assertion the four broken versions
+    // would have failed.
+    const panel = bar.getBoundingClientRect();
+    for (const child of Array.from(bar.children)) {
+      const box = child.getBoundingClientRect();
+      await expect(Math.round(box.right)).toBeLessThanOrEqual(Math.round(panel.right));
+    }
+
+    // And it is still a filter bar: both segmented groups narrow the list.
+    await userEvent.click(canvas.getByRole('button', { name: 'Overdue' }));
+    await waitFor(() => expect(canvas.getByRole('button', { name: 'Overdue' })).toHaveAttribute('aria-pressed', 'true'));
+  },
+};
+
+/**
  * A search burst filters once.
  *
  * The manifest called the debounce the missing half of this component. Five

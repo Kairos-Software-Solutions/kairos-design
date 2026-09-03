@@ -2914,8 +2914,15 @@ th[aria-sort='descending'] .kairos-sort-header::after {
      to skip it to sit level with the fields beside it, and two things in this
      bar are in that position. Held here so both read one value. */
   --filter-label-offset: calc(0.76rem * 1.4 + 6px);
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  /* Flex and not grid, because this bar mixes two kinds of control and grid
+     can only give them one kind of track. A field shrinks to whatever share of
+     the row it is handed; a segmented filter is as wide as its own segments and
+     cannot be handed anything narrower without a label breaking inside it. A
+     grid track is one width for everything in it, so sizing the tracks for the
+     fields squeezed the segments and sizing them for the segments wasted the
+     row. Flex sizes each child by what that child is. */
+  display: flex;
+  flex-wrap: wrap;
   /* Fields line up on their controls, not on their outer boxes. A date field
      carries a line restating its value, so aligning the bottoms put a select's
      box level with that hint instead of level with the other inputs. */
@@ -2925,12 +2932,22 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   margin-bottom: var(--kairos-space-lg);
 }
 
+/* Anything in the bar that is a field takes a share of the row and shrinks
+   with it. 180px is the narrowest a labelled control stays readable at, and it
+   is a basis rather than a floor: the row wraps before it is broken, and a
+   child alone on a wrapped line shrinks the rest of the way. */
+.kairos-filter-bar > * {
+  flex: 1 1 180px;
+  min-width: 0;
+}
+
 /* The submit button has no label of its own, so it needs the label row's
    height to sit level with the controls beside it. That offset used to be an
    `aria-hidden` span reading "Report", which did the job on a desktop grid and
    left a stray tracked-caps label floating on a phone, where the row stacks and
    there is nothing left to align to. Spacing is spacing; it lives here. */
 .kairos-filter-bar-action {
+  flex: 0 0 auto;
   margin-top: var(--filter-label-offset);
   --button-shadow: none;
   --button-shadow-hover: none;
@@ -2939,32 +2956,22 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 /* A segmented filter in the bar is the other unlabelled control, and it takes
    the same offset.
 
-   It also has to be told to hug. `.kairos-segmented` is `inline-flex`, which
-   sizes to its segments everywhere except inside a grid, where a grid item
-   stretches to its column and the inline sizing has nothing left to do. The
-   bar shipped with three segments in a box wide enough for six, and "Settled"
-   wrapped onto a second line inside it, because 180px of column was narrower
-   than the segments and 1fr of it was wider. Its own bottom margin goes too:
-   the bar's `gap` is the spacing here. */
+   It is sized by its own segments and never by the row. `flex-basis: auto`
+   reads that natural width, so the segments stay on one line whenever the row
+   has space for them; `flex-shrink: 1` with no floor gives the width back when
+   the row does not, and the control wraps its segments internally rather than
+   pushing the page sideways.
+
+   This used to be `min-width: max-content` on a grid item, which reserved the
+   width without being able to obtain it: the tracks had a fixed 180px floor,
+   so a track never grew to fit its contents and a five-option filter rendered
+   straight out through the panel's right edge — by 143px at 900px wide and
+   still 8px at 1440px. Its own bottom margin goes too: the bar's `gap` is the
+   spacing here. */
 .kairos-filter-bar > .kairos-segmented {
-  justify-self: start;
+  flex: 0 1 auto;
   margin-top: var(--filter-label-offset);
   margin-bottom: 0;
-}
-
-/* Above the card breakpoint the segments stay on one line.
-
-   A track in this grid is around 190px and three segments need around 230, so
-   the control was being squeezed 40px short and wrapping "Settled" onto a
-   second line inside its own box. `max-content` takes the 40px from the
-   neighbouring track, which has slack because the fields in it are inputs
-   that shrink. Only above 768px: below it the tracks are narrow enough that
-   the same rule would push the page sideways, and there the control takes
-   what it is given like everything else in the bar. */
-@media (min-width: 768px) {
-  .kairos-filter-bar > .kairos-segmented {
-      min-width: max-content;
-    }
 }
 
 @media (max-width: 767px) {
@@ -2979,16 +2986,13 @@ th[aria-sort='descending'] .kairos-sort-header::after {
     }
 }
 
+/* The search box is the one control the reader goes to first, so it takes the
+   slack the others do not want. It grows three times as fast and starts from a
+   wider basis, which is what the old `grid-column: span 2` was buying. */
 .kairos-filter-bar-search {
   display: grid;
-  grid-column: span 2;
+  flex: 3 1 260px;
   gap: var(--kairos-space-xs);
-}
-
-@media (max-width: 520px) {
-  .kairos-filter-bar-search {
-      grid-column: auto;
-    }
 }
 
 /* A compact data value with its overflow menu, used on record headers. */
