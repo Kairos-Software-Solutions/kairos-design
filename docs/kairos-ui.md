@@ -343,6 +343,15 @@ judgement it leaves you is which action is primary on the screen.
 A field holds its label, hint, and error rows whether or not they carry
 content, so validating a form does not move the layout.
 
+**A form that carries one message for all of its fields says so, and stops
+paying for the rows it does not use.** `kairos-form-stack--one-message`
+collapses the empty message row on every field inside it. It is for the form
+whose errors are about the whole form rather than any one field — a sign-in
+screen, where what is wrong is the username and password together. That form
+reserves its own row for the message, so the no-shift guarantee moves up a
+level rather than being given up: leave the form's row out and the shift comes
+back. A field that has a hint keeps it.
+
 **Ten is the boundary between the two chooseers, and it is a number rather than
 a judgement.** Ten options or fewer: the native `<select>`, which opens the
 platform picker on a phone, works before hydration, and costs nothing. More
@@ -403,7 +412,7 @@ often enough that writing them again is the likely mistake.
 | --- | --- | --- | --- |
 | `kairos-stack` | A vertical stack with one gap | Two blocks that want different gaps; nest instead | `--xs` `--sm` `--md` `--lg` `--xl` |
 | `kairos-split` | Two groups pushed to opposite ends of a row, wrapping | A grid of equal columns | `--sm` `--md` `--lg` `--baseline` `--top` `--end` |
-| `kairos-form-stack` | The fields inside one form section | Spacing between panels | — |
+| `kairos-form-stack` | The fields inside one form section | Spacing between panels | `--one-message` |
 | `kairos-grow` | The flex child that takes the remaining width and can still shrink | A fixed column | — |
 | `kairos-measure` | Prose at a readable width | A table | `-sm` `-lg` |
 | `kairos-code` | An identifier read or copied character by character | Body text | — |
