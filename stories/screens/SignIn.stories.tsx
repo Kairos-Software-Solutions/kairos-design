@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect, within } from 'storybook/test';
 import Button from '../../dist/react/Button';
 import InputField from '../../dist/react/Field';
 
@@ -24,16 +25,24 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-function AuthPanel() {
+function AuthPanel({ error = '' }: { error?: string }) {
   return (
     <div className="kairos-auth">
       <header className="kairos-auth-header">
         <h1 className="kairos-page-title">Paykit</h1>
         <p className="kairos-body-muted">Sign in to continue.</p>
       </header>
-      <form className="kairos-auth-form kairos-stack kairos-stack--md" onSubmit={(e) => e.preventDefault()}>
+      {/* `--one-message` because neither field carries a message of its own.
+          What is wrong on this screen is the email and the password together,
+          so the form says it once, in the row below — which is reserved
+          whether or not it is filled, so the button does not move when it is. */}
+      <form
+        className="kairos-auth-form kairos-form-stack kairos-form-stack--one-message"
+        onSubmit={(e) => e.preventDefault()}
+      >
         <InputField label="Email" type="email" defaultValue="ricardo@felixfam.com" />
         <InputField label="Password" type="password" defaultValue="hunter2hunter2" />
+        <p className="kairos-auth-error kairos-error-text" role="alert">{error}</p>
         <Button variant="primary" type="submit">Sign in</Button>
         <a className="kairos-auth-link" href="#">Forgotten your password?</a>
       </form>
@@ -48,6 +57,33 @@ export const Centred: Story = {
       <AuthPanel />
     </div>
   ),
+};
+
+/**
+ * The same screen with the sign-in refused, which must be the same screen.
+ *
+ * The pair of stories is the assertion. `--one-message` takes 23px of reserved
+ * message row off each field, and it is only allowed to because the form holds
+ * a row of its own for the one message it can produce. If that row were not
+ * reserved, this story's button would sit lower than the one above it, and a
+ * person who mistyped a password would find the button had moved out from
+ * under the pointer already on its way to it.
+ */
+export const Refused: Story = {
+  render: () => (
+    <div className="kairos-login-grid" style={{ minHeight: '100vh', padding: 'var(--kairos-space-xl)' }}>
+      <AuthPanel error="Those details do not match. Check them and try again." />
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('alert')).toHaveTextContent('Those details do not match');
+
+    // The empty rows are gone: a field is its label and its control, and
+    // nothing else, because nothing else can arrive in it.
+    const email = canvas.getByLabelText('Email').closest('.kairos-field');
+    await expect(email?.querySelector('.kairos-field-hint')).not.toBeVisible();
+  },
 };
 
 /**

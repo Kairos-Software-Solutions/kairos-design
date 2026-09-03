@@ -803,6 +803,27 @@ h6 {
   gap: var(--kairos-form-gap);
 }
 
+/* A form that carries one message for the whole form rather than one per
+   field, and reserves the row for it itself.
+
+   A field holds an empty message row so that an error arriving does not move
+   the button out from under the thumb reaching for it. That is worth 23px on
+   a form that validates field by field. On a sign-in form it is 23px twice
+   over for a message that can only ever appear in one place, and the place is
+   not either field: what is wrong with a username and password is the pair,
+   and the form says so once, above the button.
+
+   So this is not a density switch. It is the form stating that its fields
+   carry no message, and the guarantee survives because the form reserves its
+   own row instead — `kairos-auth-error` on a sign-in screen. Leave that row
+   out and the shift comes back, one level up.
+
+   A field that has a hint keeps it: the rule only collapses the row that is
+   empty, so the modifier cannot silently swallow something a reader needed. */
+.kairos-form-stack--one-message .kairos-field-hint:empty {
+  display: none;
+}
+
 .kairos-fit {
   width: fit-content;
 }
