@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ElementType, ReactNode } from 'react';
 
 export interface PanelProps {
   heading?: ReactNode;
@@ -30,6 +30,33 @@ export default function Panel({ heading, flush = false, children }: PanelProps) 
 }
 
 export interface PageHeaderProps {
+  /**
+   * The eyebrow over the title, and only where it names real nesting:
+   * `Invoices` above `Invoice INV-0042`. On a top-level screen the nav item
+   * repeated above the title is two lines of chrome carrying no information.
+   */
+  kicker?: ReactNode;
+  /**
+   * Where the kicker goes, when the screen above it is a real screen.
+   *
+   * This is the breadcrumb, and it is why a screen needs no `BACK TO …`
+   * button: navigation between pages is a link, and a bordered button in the
+   * header spends one of the two secondary action slots doing a link's job.
+   */
+  kickerHref?: string;
+  /**
+   * The link component to render `kickerHref` with. Defaults to `<a>`, which
+   * is a full page load in a routed app — pass the router's own link
+   * (`next/link`, `react-router`'s `Link`) to keep the soft navigation.
+   *
+   * A component rather than a node, because the class has to go on the anchor
+   * itself: `kairos-kicker-link` adds the underline and the 24px target to the
+   * eyebrow rank `kairos-kicker` sets, so the two are one element's class list
+   * and a call site handing in a finished node would be deciding that here.
+   * `EmptyState` takes a node for the opposite reason — an action is whatever
+   * the surface has, and three of the five have no router at all.
+   */
+  kickerAs?: ElementType;
   title: ReactNode;
   /** One sentence under the title: what this screen is for, or what it counts. */
   description?: ReactNode;
@@ -38,18 +65,42 @@ export interface PageHeaderProps {
 }
 
 /**
- * The page title row: title left, action group right, one line of supporting
- * copy under the title.
+ * The page title row: the kicker and title left, action group right, one line
+ * of supporting copy under the title.
  *
  * `kairos-page-header-description` has been in the stylesheet since the port
  * and this component never rendered it, so every app grew its own subtitle
  * class with its own measure and its own margin. It is one element; it belongs
  * to the header that owns the spacing above and below it.
+ *
+ * The kicker was the same story one step further along. It has to sit inside
+ * `kairos-page-header-body`, above the `h1` — a place a call site cannot reach
+ * from outside this component — so Paykit kept a second `PageHeader` for
+ * sixty-six screens that name a parent. Two components rendering one row is
+ * one of them drifting; this is the row.
  */
-export function PageHeader({ title, description, actions }: PageHeaderProps) {
+export function PageHeader({
+  kicker,
+  kickerHref,
+  kickerAs,
+  title,
+  description,
+  actions,
+}: PageHeaderProps) {
+  const KickerLink: ElementType = kickerAs ?? 'a';
+
   return (
     <header className="kairos-page-header">
       <div className="kairos-page-header-body">
+        {kicker
+          ? kickerHref
+            ? (
+              <KickerLink href={kickerHref} className="kairos-kicker kairos-kicker-link">
+                {kicker}
+              </KickerLink>
+            )
+            : <span className="kairos-kicker">{kicker}</span>
+          : null}
         <h1 className="kairos-page-title">{title}</h1>
         {description ? <p className="kairos-page-header-description">{description}</p> : null}
       </div>

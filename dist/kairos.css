@@ -608,6 +608,14 @@ h6 {
 
 .kairos-stack--xl { --stack-gap: var(--kairos-space-xl); }
 
+/* Where the items sit across the stack's own width. A stack is a grid, so its
+   children stretch to the column by default — which is right for a field and
+   wrong for a chip or a button, either of which then runs the full width and
+   reads as a fill rather than as a control. */
+.kairos-stack--start { justify-items: start; }
+
+.kairos-stack--end { justify-items: end; }
+
 /* The padding inside a panel or a card. The default is `--kairos-panel-pad`,
    which is the token the manifest has always pointed at and which nothing
    read: this class shipped `20px`, a value on no scale, while the token said
@@ -626,6 +634,15 @@ h6 {
 .kairos-field {
   display: grid;
   gap: var(--kairos-field-gap);
+}
+
+/* A field sized to what it holds rather than to its column: a two-digit day, a
+   short code, a reminder in days. Fields take the full width, which is right
+   for a name and leaves a number sitting in a box eight times its length. In
+   `kairos-form-grid` the track is the floor, so this is the field asking for
+   less than the grid's own `220px` minimum. */
+.kairos-field--narrow {
+  min-width: 11rem;
 }
 
 .kairos-field-hint,
@@ -742,6 +759,20 @@ h6 {
 .kairos-ruled-row {
   padding-bottom: var(--kairos-space-sm);
   border-bottom: var(--kairos-border-w) solid var(--kairos-border);
+}
+
+/* The same row closed from above.
+
+   `kairos-ruled-row` rules underneath, which is right for a panel heading over
+   its content and wrong for the last block in a panel — a totals list, a terms
+   note — where the rule belongs between it and what came before. Ruling below
+   there draws a second line beside the container's own border.
+
+   Subtle, because this rule separates two parts of one panel rather than two
+   records. */
+.kairos-ruled-top {
+  padding-top: var(--kairos-space-sm);
+  border-top: var(--kairos-border-w) solid var(--kairos-border-subtle);
 }
 
 .kairos-label-caps {
@@ -1783,6 +1814,17 @@ textarea.kairos-input-field {
   resize: vertical;
 }
 
+/* A select holding a name rather than a code: the business a person is working
+   in, an account, a sending domain. It is the same box; what changes is that
+   the shortest name in the list is not the width the control should be.
+
+   A modifier, because the app that needs it was reaching into `.kairos-select`
+   from its own stylesheet to get it — and an app rule about a registry class
+   is how a registry class ends up meaning two things. */
+.kairos-select--wide {
+  min-width: 200px;
+}
+
 .kairos-input-field:hover:not(:disabled),
 .kairos-select:hover:not(:disabled) {
   background: var(--kairos-elevated);
@@ -2319,8 +2361,24 @@ textarea.kairos-input-field {
   font-size: var(--kairos-text-input);
 }
 
+/* The ring is drawn inside the box rather than around it.
+
+   `outline: none` shipped here with nothing in its place, so the filter had no
+   visible focus at all once a keyboard user left it and came back — WCAG 2.2
+   SC 2.4.7, on the one control in this menu that is typed into. The reason the
+   outline was cancelled is real: the menu clips to `overflow: hidden` over
+   4px of padding, and the global ring sits 2px off the element at 2px wide, so
+   an outline around a full-width filter is drawn straight into the clip.
+
+   Two inset shadows put the same two-tone stamp on the inside edge — ink at
+   the boundary, amber just within it — where nothing can crop it. The second
+   is the wider of the two and paints behind the first, which is what leaves
+   the ink outermost and matches the ring every other control draws. */
 .kairos-combobox-filter:focus-visible {
   outline: none;
+  box-shadow:
+    inset 0 0 0 var(--kairos-border-w-strong) var(--kairos-focus),
+    inset 0 0 0 calc(var(--kairos-border-w-strong) + var(--kairos-focus-w)) var(--kairos-focus-inner);
 }
 
 /* The scrolling part, so the filter above it does not scroll with it. */
@@ -2347,9 +2405,24 @@ textarea.kairos-input-field {
 }
 
 /* `[data-highlighted]` and not `:hover`, because the keyboard and the pointer
-   have to leave the same mark. Radix sets it for both. */
+   have to leave the same mark. Radix sets it for both.
+
+   The tint cannot be the mark on its own. `--kairos-row-hover` against
+   `--kairos-surface` is 1.02:1 on the light theme — fine as a pointer hint,
+   where the pointer is already telling you the position, and not a keyboard
+   position a person can see. This is the one menu with that problem:
+   Radix's `DropdownMenu` moves DOM focus onto the item, so an overflow item
+   picks up the global `:focus-visible` ring, while `Select` keeps focus on the
+   filter and publishes the position as an attribute only.
+
+   So the attribute draws the ring the focus it stands for would have drawn,
+   inset for the same clipping reason as the filter above. The tint stays for
+   the pointer. */
 .kairos-combobox-item[data-highlighted] {
   background: var(--kairos-row-hover);
+  box-shadow:
+    inset 0 0 0 var(--kairos-border-w-strong) var(--kairos-focus),
+    inset 0 0 0 calc(var(--kairos-border-w-strong) + var(--kairos-focus-w)) var(--kairos-focus-inner);
 }
 
 /* The two signals every disabled control in this package takes, per ADR 0004:
@@ -2498,6 +2571,34 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   font-weight: 700;
 }
 
+/* A figure, anywhere.
+
+   `TTD 41,800.00` breaking after the decimal point puts `00` on the next line,
+   and two lines read as two numbers. On an invoice that is commercial risk, so
+   a figure holds one line and widens its column instead.
+
+   For three versions this rule existed only as `.kairos-table td.tabular` — a
+   selector scoped to a table, under a class name that predates the vocabulary
+   and that the manifest never documented. So the class the manifest does
+   document did the nowrap nowhere: every figure on a record card, in a
+   definition list, and in a summary row broke, because `base.css` sets
+   `overflow-wrap: anywhere` on `p`, `li`, `td`, `th`, `dd` and `dt` and there
+   was nothing to put it back. Paykit carried the missing rule in its own
+   stylesheet as the one `kairos-` class it wrote.
+
+   `overflow-wrap: normal` is the half that is easy to leave out. The space
+   after the currency code is non-breaking, which stops a break there and does
+   nothing about a break inside the digits — that is what `anywhere` does, and
+   only `normal` refuses it.
+
+   Unscoped, so the alignment and the weight below can stay a table's business:
+   a figure in a `<dd>` sits where its list puts it. */
+.kairos-figure {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
 /* A money or count cell. Right aligned so the digits line up down the column,
    and weighted because the figure is the data the row exists for. This was an
    inline textAlign plus fontWeight repeated at every call site; it is a
@@ -2536,13 +2637,6 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   white-space: nowrap;
 }
 
-/* A figure split across two lines is not a figure. Money and counts hold one
-   line and widen their column instead. */
-.kairos-table td.tabular,
-.kairos-table th.tabular {
-  white-space: nowrap;
-  overflow-wrap: normal;
-}
 
 /* Row hover and selection have their own tokens. `--kairos-elevated` already
    means panel header and Draft chip; reusing it here would give one value
@@ -3607,6 +3701,73 @@ th[aria-sort='descending'] .kairos-sort-header::after {
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
+
+  /* Chrome is not part of the document.
+
+     A sidebar, a bottom nav, a filter bar, a pager and a row of buttons are
+     how a person got to the figures; none of them is the thing being filed.
+     The amber nav is the loud one — it prints over the content of every page —
+     but a printed report carrying `Previous / Next` is as wrong, because the
+     paper has no next.
+
+     Anything the reader operates rather than reads goes here. What stays is
+     the masthead, the data, and the totals. */
+    .kairos-sidebar,
+    .kairos-topbar,
+    .kairos-bottom-nav,
+    .kairos-nav-sheet,
+    .kairos-skip-link,
+    .kairos-theme-toggle,
+    .kairos-filter-bar,
+    .kairos-page-header-actions,
+    .kairos-pagination,
+    .kairos-bulk-bar,
+    .kairos-button,
+    .kairos-overflow,
+    .kairos-inline-actions,
+    .kairos-columns-cell,
+    .kairos-selection-cell {
+      display: none !important;
+    }
+
+  /* Paper is not a phone.
+
+     A sheet of A4 is about 739px across once the margins are off it, which is
+     under the 768px table-to-card boundary — so a printed report came out as
+     the phone card list, and the payments report lost a column on the way to
+     it. The two classes are a matched pair on screen and they have to stay one
+     on paper: the table prints and the card list does not.
+
+     This is a width the media query cannot see, which is why the boundary
+     needs answering here rather than by adding an eighth breakpoint. */
+    .kairos-desktop-table {
+      display: block !important;
+    }
+
+  .kairos-record-list {
+      display: none !important;
+    }
+
+  /* The lockup follows the palette over.
+
+     `tokens.css` drops the dark overrides on paper, so a dark-theme reader
+     prints the light palette. The lockup cannot follow it there: the two
+     variants are different artwork rather than one mark in two colours, and
+     the switch is a `[data-theme]` selector in this file. Left alone it prints
+     the bone wordmark on a white sheet, which is a masthead that is not there.
+
+     Doubled selectors to clear `[data-theme='dark'] .kairos-lockup--*`, which
+     scores (0,2,0); `!important` alone would not, since that block could take
+     it too. */
+    [data-theme='dark'] .kairos-lockup--light,
+    [data-theme='dark'] .kairos-sidebar-brand .kairos-lockup--light {
+      display: block !important;
+    }
+
+  [data-theme='dark'] .kairos-lockup--dark,
+    [data-theme='dark'] .kairos-sidebar-brand .kairos-lockup--dark {
+      display: none !important;
+    }
 }
 
 /* ==========================================================================
@@ -3939,6 +4100,107 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-shadow: var(--kairos-shadow);
   --button-shadow-hover: var(--kairos-shadow-card);
   --button-shadow-active: var(--kairos-shadow-pressed);
+}
+
+/* --- Reading blocks and small layouts ------------------------------------
+   Promoted out of Paykit's own stylesheet, where each one was a `paykit-`
+   class with a comment explaining why the registry had no name for it. None
+   held a value of its own — every one is composed from tokens the package
+   already ships — and none was wired to Paykit's state, so by the reuse rule
+   they were registry classes filed in the wrong repo. An app that writes its
+   own measure, inset, or thumbnail has forked one of these. */
+
+/* Somebody else's words, shown verbatim: the customer's reason on a decision
+   screen, an upstream refusal quoted back to an operator.
+
+   A neutral rule rather than the accent one `kairos-banner--inline` draws,
+   because nothing here is a notice from the app — it is text the app is
+   carrying, and the rule says so without claiming a state. */
+.kairos-quoted {
+  padding-left: var(--kairos-space-md);
+  border-left: var(--kairos-border-w-strong) solid var(--kairos-border);
+}
+
+/* A read-only block inside a panel: a saved configuration, a granted scope, a
+   webhook that was accepted. Lighter than `kairos-subpanel`, which draws the
+   full container border and is for a block that groups several fields and
+   their own form. */
+.kairos-inset {
+  padding: var(--kairos-space-sm) var(--kairos-space-md);
+  border: var(--kairos-border-w) solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+}
+
+/* A label and its value on one line, the label sized to its own content so the
+   values line up down the column.
+
+   `kairos-definition-grid` stacks label over value, which is the detail-screen
+   shape — a record's fields, read one at a time. This is the operator-console
+   shape, where the labels are short and the values are the thing being
+   compared against each other. */
+.kairos-label-value-grid {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--kairos-space-sm) var(--kairos-space-md);
+}
+
+/* Machine output carrying its own line breaks, inside a block that is already
+   bordered. `kairos-code-block` draws the border, the ground and the mono
+   stack; this is the wrapping alone, for a value sitting inside something
+   else. */
+.kairos-prewrap {
+  white-space: pre-wrap;
+}
+
+/* The one line that says a check passed, in the settled ink.
+
+   Not `kairos-banner--success`: a banner is a box and one per screen, and this
+   is a sentence inside a panel that has already said what it is about. The
+   word carries the meaning; the colour agrees with it. */
+.kairos-settled-text {
+  color: var(--kairos-state-settled);
+}
+
+/* A count beside a label, in the row's own ink.
+
+   Not `kairos-state-chip`, which is a record's status: a count is neither a
+   status nor a category, and a screen where every number is a chip has no
+   chips. Padding only — the ink, the size and the weight are the row's. */
+.kairos-count {
+  padding: 0 var(--kairos-space-xs);
+}
+
+/* A screen that is one centred block: a payment hand-off, a return from a
+   gateway, a single prompt. `kairos-tool-surface` centres it in the viewport;
+   this is the block on it. */
+.kairos-centred-panel {
+  width: min(32rem, 100%);
+  padding: var(--kairos-space-2xl);
+  text-align: center;
+}
+
+.kairos-centred {
+  margin-inline: auto;
+}
+
+/* A narrow column of context beside a wider one: the totals beside a
+   document's line items, the review rail next to a recording.
+
+   `kairos-grid-auto` makes equal columns, which is wrong here — the main
+   column is the one that needs the room, and this block only needs enough for
+   a label and a figure. */
+.kairos-side-rail {
+  max-width: 22rem;
+  margin-left: auto;
+}
+
+/* A thumbnail of something a person uploaded: a receipt, a logo.
+
+   Cropped to fill rather than letterboxed, because the panel it sits in is a
+   fixed size and a letterboxed receipt is mostly ground. */
+.kairos-thumb {
+  object-fit: cover;
+  border-radius: var(--kairos-radius-input);
 }
 
 /* HMR probe */

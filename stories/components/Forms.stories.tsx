@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import InputField, { Field } from '../../dist/react/Field';
+import InputField, { Field, SelectField, Textarea } from '../../dist/react/Field';
 import Button from '../../dist/react/Button';
 import Segmented from '../../dist/react/Segmented';
 import { Page, Section } from '../Specimen';
@@ -43,21 +43,16 @@ export const States: Story = {
           error="Slugs cannot contain spaces. Try kairos-solutions."
         />
         <InputField label="Tenant" defaultValue="kairossolutionstt" disabled />
-        <Field label="Terms" hint="Shown at the foot of the invoice.">
-          {({ id, describedBy }) => (
-            <textarea id={id} aria-describedby={describedBy} className="kairos-input-field" rows={3} defaultValue="Net 30. Late payments attract 2% monthly." />
-          )}
-        </Field>
-        <Field label="Currency">
-          {({ id, describedBy }) => (
-            <span className="kairos-select-wrap">
-              <select id={id} aria-describedby={describedBy} className="kairos-select" defaultValue="TTD">
-                <option value="TTD">TTD</option>
-                <option value="USD">USD</option>
-              </select>
-            </span>
-          )}
-        </Field>
+        {/* These two were `Field` with a hand-assembled control inside it
+            until 0.8.0, which is what the two components are for. The select
+            is the one worth watching: the caret lives on
+            `kairos-select-wrap`, and the wrapper is the part hand-assembly
+            leaves out. */}
+        <Textarea label="Terms" hint="Shown at the foot of the invoice." rows={3} defaultValue="Net 30. Late payments attract 2% monthly." />
+        <SelectField label="Currency" defaultValue="TTD">
+          <option value="TTD">TTD</option>
+          <option value="USD">USD</option>
+        </SelectField>
       </div>
     </Page>
   ),

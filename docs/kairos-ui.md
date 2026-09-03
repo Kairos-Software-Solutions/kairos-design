@@ -219,7 +219,7 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-empty-state` | A list or table with no records | Errors; use `kairos-banner` | — |
 | `kairos-metric` | A single figure with its label | A figure inside a table cell | — |
 | `kairos-skeleton` | Loading placeholder shaped like its content | Empty states | `--line` `--heading` `--label` `--row` `--control` `--summary` |
-| `kairos-figure` | Money and any figure that must not break across lines | Text | — |
+| `kairos-figure` | Money and any figure that must not break across lines, anywhere — a cell, a card, a `<dd>`, a summary row. Tabular numerals plus `overflow-wrap: normal`, which is the half that gets left out: the space after the currency code is non-breaking and does nothing about a break inside the digits | Text | — |
 | `kairos-record-list` | The card list below `768px`. It is `display: none` above that width, so it is the pair to `kairos-desktop-table` and not a layout you reach for directly | A grid of cards on desktop | — |
 | `kairos-record-rows`, `kairos-record-row` | Records inside a panel as ruled rows rather than a table: a dashboard summary, a short related list | Repeating records with columns to compare; that is `kairos-table`. Fewer than three; write them out | — |
 | `kairos-record-open` | The whole-row target on a ruled row, with `-label` naming the record | A table row; the row handler and the identifier link do that | — |
@@ -325,9 +325,9 @@ judgement it leaves you is which action is primary on the screen.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-field` | Label, control, hint, and error as one unit | Read-only display of a value | — |
+| `kairos-field` | Label, control, hint, and error as one unit | Read-only display of a value | `--narrow` for a field sized to a day or a short code rather than to its column |
 | `kairos-input-field` | Text, number, textarea; 16px minimum | — | — |
-| `kairos-select` | Native select, styled; wrap in `kairos-select-wrap` for the caret. Also the combobox trigger, which is the same box | More than ten options — past that a person cannot see the list and needs to type, and this control cannot be typed into | — |
+| `kairos-select` | Native select, styled; wrap in `kairos-select-wrap` for the caret, which `SelectField` does for you. Also the combobox trigger, which is the same box | More than ten options — past that a person cannot see the list and needs to type, and this control cannot be typed into | `--wide` for one holding a name rather than a code |
 | `kairos-combobox` | The combobox trigger, beside `kairos-select` — adds the value/caret layout a button needs and a select does not | Ten options or fewer, where the native select opens the platform picker on a phone | — |
 | `kairos-combobox-menu` | The list a combobox opens, with `-filter`, `-list`, `-item`, `-tick` and `-empty` inside it | Row actions; that is `kairos-overflow-menu` | — |
 | `kairos-input-label` | The field label, uppercase and tracked | A heading | — |
@@ -410,7 +410,7 @@ often enough that writing them again is the likely mistake.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-stack` | A vertical stack with one gap | Two blocks that want different gaps; nest instead | `--xs` `--sm` `--md` `--lg` `--xl` |
+| `kairos-stack` | A vertical stack with one gap | Two blocks that want different gaps; nest instead | `--xs` `--sm` `--md` `--lg` `--xl`, and `--start` `--end` for where the items sit across its width |
 | `kairos-split` | Two groups pushed to opposite ends of a row, wrapping | A grid of equal columns | `--sm` `--md` `--lg` `--baseline` `--top` `--end` |
 | `kairos-form-stack` | The fields inside one form section | Spacing between panels | `--one-message` |
 | `kairos-grow` | The flex child that takes the remaining width and can still shrink | A fixed column | — |
@@ -428,6 +428,16 @@ often enough that writing them again is the likely mistake.
 | `kairos-grid-auto` | A tile or card grid, `auto-fit` from `200px`, no media query | Fields; that is `kairos-form-grid` | — |
 | `kairos-inline-pair` | A glyph and its label, or a value and its unit, as one unit on a line | A row of siblings; that is `kairos-chip-row` | — |
 | `kairos-ruled-row` | A row closed by a rule underneath: a panel heading over its content | Rows inside a list, which rule at the top so the first row does not double | — |
+| `kairos-ruled-top` | The last block in a panel, closed by a rule above it: a totals list, a terms note | A row in a list; that is `kairos-record-row`, which rules its own top | — |
+| `kairos-quoted` | Somebody else's words shown verbatim: a customer's reason, an upstream refusal quoted to an operator | A notice from the app; that is `kairos-banner--inline`, whose rule is the accent one and claims a state | — |
+| `kairos-inset` | A read-only block inside a panel: a saved configuration, a granted scope | A block grouping several fields and their own form; that is `kairos-subpanel` | — |
+| `kairos-label-value-grid` | A label and its value on one line, labels sized to their content so values line up: the operator-console shape | A record's fields on a detail screen, read one at a time; that is `kairos-definition-grid` | — |
+| `kairos-prewrap` | Machine output with its own line breaks, inside a block that is already bordered | Output that needs the border and the mono stack too; that is `kairos-code-block` | — |
+| `kairos-settled-text` | The one line saying a check passed, in the settled ink | A page-level result; that is `kairos-banner--success`, which is a box and one per screen | — |
+| `kairos-count` | A count beside a label, in the row's own ink | A status or a category; that is `kairos-state-chip` | — |
+| `kairos-centred`, `kairos-centred-panel` | A screen that is one centred block: a payment hand-off, a return from a gateway. The panel sits on `kairos-tool-surface` | A record screen, which has a shell | — |
+| `kairos-side-rail` | A narrow column of context beside a wider one: totals beside a document's lines, a review rail | Equal columns; that is `kairos-grid-auto` | — |
+| `kairos-thumb` | A thumbnail of something a person uploaded: a receipt, a logo. Cropped to fill | Artwork that must be seen whole, which a crop will cut | — |
 | `kairos-narrow` | A centred `42rem` column, wider than prose and narrower than the page | Prose; that is `kairos-measure` | — |
 | `kairos-fit`, `kairos-block` | Width to the content, and width to the container | Height. A control's height comes from its slot | — |
 | `kairos-break` | An identifier with no spaces that would otherwise overflow: a URL, a token, an API key | A figure. `kairos-figure` exists because `overflow-wrap` breaks a number into two numbers | — |
@@ -456,7 +466,6 @@ Claim one by building it. Add its row above in the same change.
 
 | Component | Needed for |
 | --- | --- |
-| `Textarea` | A named wrapper. `kairos-input-field` already styles a `<textarea>` — its own height, padding and `resize: vertical` — and `Field` takes one today through its render prop, so what is missing is only the component. Left open deliberately: it is not an overlay, and claiming it here would mean this change grew a component for no reason beyond sharing a table row with one. |
 | Rendered component tests | The contract tests are static. Nothing here has been rendered by a test runner, because the registry ships no build step — the first app to adopt it is what exercises the JSX. |
 | Visual regression | The preview is checked by hand. A screenshot diff per commit would catch what a reviewer will not. |
 
@@ -493,7 +502,7 @@ fails on it.
 | `Button` | Six ranks: `primary`, `secondary`, `tertiary`, `ghost`, `danger`, `dangerSolid`. Defaults to `type="button"`, because an untyped button in a form is a submit button. `loading` puts it mid-request: it keeps its rank and its box, turns the ring, announces itself busy, and swallows every further press — which is what stops a held Enter on a `type="submit"` sending two invoices. `loadingLabel` is what it says while working, and naming the work is the only part of the state that survives reduced motion. Passing either prop, even `loading={false}`, is what reserves the room; a button handed neither renders the markup it always did. |
 | `StateChip` | The four states, plus every app's old spelling as a deprecated alias so adoption is not one enormous commit |
 | `Segmented` | Filters, wizard steps, the theme choice |
-| `InputField`, `Field` | Label, control, hint, and error as one unit, with the empty rows held |
+| `InputField`, `Field`, `Textarea`, `SelectField` | Label, control, hint, and error as one unit, with the empty rows held. `SelectField` is the short chooser — ten options or fewer, the native control, and it writes the `kairos-select-wrap` that the caret needs and that hand-assembly leaves out |
 | `Banner` | `alert` for a failure, `status` otherwise |
 | `EmptyState` | Takes a `ReactNode` action, not an href: three of the five surfaces have no router |
 | `SortHeader`, `SortAnnouncer` | `aria-sort` plus the live region, because a redrawn table announces nothing |
@@ -508,7 +517,7 @@ fails on it.
 | `Toast`, `ToastRegion`, `TransientToast` | Transient confirmation |
 | `SectionTag` | The Brand Scale section transition. `as` renders the label as a heading, so a screen reader's heading list can carry the page |
 | `Panel` | Border, ground, and `kairos-pad`. `flush` drops the padding for a table that supplies its own |
-| `PageHeader` | Title, one-line `description`, and an action group. Pass `ActionSet` to `actions`; `PageHeader` owns the `kairos-page-header-actions` wrapper, so the `page` context renders the controls and nothing around them |
+| `PageHeader` | An optional `kicker`, the title, a one-line `description`, and an action group. Pass `ActionSet` to `actions`; `PageHeader` owns the `kairos-page-header-actions` wrapper, so the `page` context renders the controls and nothing around them. `kickerHref` makes the kicker the way back to the screen above, which is why no screen needs a `BACK TO …` button — and `kickerAs` renders it with the router's own link, since the default `<a>` is a full page load |
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
 

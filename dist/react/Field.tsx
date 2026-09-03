@@ -1,4 +1,11 @@
-import { type InputHTMLAttributes, type ReactNode, forwardRef, useId } from 'react';
+import {
+  type InputHTMLAttributes,
+  type ReactNode,
+  type SelectHTMLAttributes,
+  type TextareaHTMLAttributes,
+  forwardRef,
+  useId,
+} from 'react';
 
 export interface FieldProps {
   label: string;
@@ -87,3 +94,92 @@ const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function InputF
 });
 
 export default InputField;
+
+export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'id'> {
+  label: string;
+  hint?: ReactNode;
+  /** Why this value was refused. Empty or absent means it was not. */
+  error?: ReactNode;
+}
+
+/**
+ * A labelled `<textarea>`.
+ *
+ * `kairos-input-field` has styled a textarea since the port — its own height,
+ * its padding, and `resize: vertical` — and `Field` has taken one through its
+ * render prop for as long as it has had one, so what was missing here was only
+ * the name. This sat under "Not yet built" for three versions on the grounds
+ * that it is not an overlay and claiming it would have grown a component for
+ * no reason; the reason arrived when a consuming app wrote it, because the app
+ * that writes it is the app whose textarea will eventually disagree with
+ * everyone else's.
+ */
+const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
+  { label, hint, error, className, ...props },
+  ref
+) {
+  return (
+    <Field label={label} hint={hint} error={error}>
+      {({ id, describedBy }) => (
+        <textarea
+          ref={ref}
+          id={id}
+          aria-describedby={describedBy}
+          aria-invalid={error ? true : undefined}
+          className={['kairos-input-field', className].filter(Boolean).join(' ')}
+          {...props}
+        />
+      )}
+    </Field>
+  );
+});
+
+export { Textarea };
+
+export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectElement>, 'id'> {
+  label: string;
+  hint?: ReactNode;
+  /** Why this choice was refused. Empty or absent means it was not. */
+  error?: ReactNode;
+}
+
+/**
+ * A labelled native `<select>`, in its caret wrapper.
+ *
+ * This is the short chooser, and it is the one the manifest has always told
+ * people to reach for without giving them anything to call. `Select` is the
+ * other one: the combobox for a list past ten options, which grows a filter
+ * box because past ten a person can no longer see whether what they want is in
+ * the list. Ten or fewer, the native control wins on merit — it opens the
+ * platform picker on a phone, it works before hydration, and it costs nothing.
+ *
+ * With a row for the long list and no row for the short one, every app was
+ * hand-assembling `Field` around `kairos-select-wrap` around `kairos-select`,
+ * and the wrapper is the part that gets left out — without it the caret is
+ * gone and the box is a native select painted over.
+ */
+const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(function SelectField(
+  { label, hint, error, className, children, ...props },
+  ref
+) {
+  return (
+    <Field label={label} hint={hint} error={error}>
+      {({ id, describedBy }) => (
+        <span className="kairos-select-wrap">
+          <select
+            ref={ref}
+            id={id}
+            aria-describedby={describedBy}
+            aria-invalid={error ? true : undefined}
+            className={['kairos-select', className].filter(Boolean).join(' ')}
+            {...props}
+          >
+            {children}
+          </select>
+        </span>
+      )}
+    </Field>
+  );
+});
+
+export { SelectField };

@@ -184,15 +184,20 @@ export const Filtered: Story = {
     return (
       <AppShell product="Paykit" nav={PAYKIT_NAV}>
         <div className="kairos-stack kairos-stack--xl">
-          <div>
-            <span className="kairos-kicker">Angostura Holdings Limited</span>
-            <a className="kairos-kicker-link" href="#">All customers</a>
-            <PageHeader
-              title="Invoices"
-              description="5 open · TTD 4,342,550.00 outstanding."
-              actions={<Button variant="primary">New invoice</Button>}
-            />
-          </div>
+          {/* The kicker is `PageHeader`'s, not the screen's. Written by hand
+              here until 0.8.0, and written wrong: two elements above the
+              header rather than one inside `kairos-page-header-body`, and the
+              anchor carried `kairos-kicker-link` without `kairos-kicker`, so
+              it took the underline and missed the eyebrow rank the underline
+              is supposed to be added to. That is the drift a class a call site
+              has to assemble will always eventually take. */}
+          <PageHeader
+            kicker="All customers"
+            kickerHref="#"
+            title="Invoices"
+            description="5 open · TTD 4,342,550.00 outstanding."
+            actions={<Button variant="primary">New invoice</Button>}
+          />
 
           <form className="kairos-panel kairos-filter-bar" onSubmit={(e) => e.preventDefault()}>
             <div className="kairos-filter-bar-search">

@@ -134,62 +134,81 @@
   --kairos-shadow-lg: 8px 8px 0 var(--kairos-shadow-color);
 }
 
-[data-theme='dark'] {
-  color-scheme: dark;
+/* The dark palette is wrapped in `@media not print`, and that wrapper is the
+   whole forced-light print palette.
 
-  --kairos-bg: #1a1410;
-  --kairos-surface: #231e18;
-  --kairos-elevated: #2e2720;
-  --kairos-sidebar: #2e2720;
+   A dark-theme reader printing a report used to get bone text on a white
+   sheet: the print rules in `kairos.css` paint the shell white, and the tokens
+   stayed wherever the theme left them. Re-declaring every light value inside
+   `@media print` would work and would be about fifty lines of hex kept in step
+   by hand — the next colour token added to the light block above would simply
+   be missing from the paper copy, silently.
 
-  --kairos-border: #f5f1e8;
-  /* The same reasoning, the same way: hue 32deg and 15% saturation unchanged,
-     lightness lifted until the tightest ground clears. Dark was already closer
-     — 3.04 on the page but 2.75 on surface and 2.45 on elevated — so this moves
-     less far than light did. 3.77 / 3.41 / 3.04. */
-  --kairos-border-subtle: #7f6f5e;
+   Not applying the dark values on paper reaches the same place from the other
+   side. `:root` above is already the light palette, so with these overrides
+   out of the cascade it stands on its own, and a token added above is on paper
+   the moment it is on screen. There is nothing to keep in step.
 
-  --kairos-text: #f5f1e8;
-  --kairos-text-2: #e0d7c8;
-  --kairos-text-muted: #b9ae9c;
+   `kairos.css` turns the lockup back over with it: the artwork is two files
+   rather than one colour, so the token layer cannot switch it. */
+@media not print {
+  [data-theme='dark'] {
+    color-scheme: dark;
 
-  /* Amber is 11.67:1 on ink and needs no dark variant. Only the text-safe
-     value moves, because on the dark base amber clears 3:1 unaided. */
-  --kairos-accent: #ffc247;
-  --kairos-accent-hover: #e6a92d;
-  /* The same 70%, carried toward the dark page instead, so the desaturation
-     reads as the same gesture in both themes. Ink label at 6.26:1. */
-  --kairos-accent-disabled: #ba8e36;
-  --kairos-accent-text: #16110b;
-  --kairos-accent-on-light: #ffc247;
+    --kairos-bg: #1a1410;
+    --kairos-surface: #231e18;
+    --kairos-elevated: #2e2720;
+    --kairos-sidebar: #2e2720;
 
-  --kairos-invert-bg: #f5f1e8;
-  --kairos-invert-fg: #16110b;
+    --kairos-border: #f5f1e8;
+    /* The same reasoning, the same way: hue 32deg and 15% saturation unchanged,
+       lightness lifted until the tightest ground clears. Dark was already closer
+       — 3.04 on the page but 2.75 on surface and 2.45 on elevated — so this moves
+       less far than light did. 3.77 / 3.41 / 3.04. */
+    --kairos-border-subtle: #7f6f5e;
 
-  --kairos-focus: #ffc247;
-  --kairos-focus-inner: #16110b;
+    --kairos-text: #f5f1e8;
+    --kairos-text-2: #e0d7c8;
+    --kairos-text-muted: #b9ae9c;
 
-  --kairos-state-settled: #8fcba1;
-  --kairos-state-settled-tint: #1e2c22;
-  --kairos-state-overdue: #e9a08a;
-  --kairos-state-overdue-tint: #33201a;
-  --kairos-state-awaiting: #e5be71;
-  --kairos-state-awaiting-tint: #2e2415;
-  --kairos-state-draft: #e0d7c8;
-  --kairos-state-draft-tint: #2e2720;
+    /* Amber is 11.67:1 on ink and needs no dark variant. Only the text-safe
+       value moves, because on the dark base amber clears 3:1 unaided. */
+    --kairos-accent: #ffc247;
+    --kairos-accent-hover: #e6a92d;
+    /* The same 70%, carried toward the dark page instead, so the desaturation
+       reads as the same gesture in both themes. Ink label at 6.26:1. */
+    --kairos-accent-disabled: #ba8e36;
+    --kairos-accent-text: #16110b;
+    --kairos-accent-on-light: #ffc247;
 
-  --kairos-danger-solid: #e9a08a;
-  --kairos-danger-solid-fg: #16110b;
-  --kairos-danger-solid-hover: #f2b9a6;
+    --kairos-invert-bg: #f5f1e8;
+    --kairos-invert-fg: #16110b;
 
-  --kairos-row-hover: #2a231c;
-  --kairos-row-selected: #3a2f1e;
+    --kairos-focus: #ffc247;
+    --kairos-focus-inner: #16110b;
 
-  --kairos-skeleton-bg: #2e2720;
-  --kairos-skeleton-fg: #3a322a;
-  --kairos-overlay: rgba(0, 0, 0, 0.64);
+    --kairos-state-settled: #8fcba1;
+    --kairos-state-settled-tint: #1e2c22;
+    --kairos-state-overdue: #e9a08a;
+    --kairos-state-overdue-tint: #33201a;
+    --kairos-state-awaiting: #e5be71;
+    --kairos-state-awaiting-tint: #2e2415;
+    --kairos-state-draft: #e0d7c8;
+    --kairos-state-draft-tint: #2e2720;
 
-  --kairos-shadow-color: #f5f1e8;
+    --kairos-danger-solid: #e9a08a;
+    --kairos-danger-solid-fg: #16110b;
+    --kairos-danger-solid-hover: #f2b9a6;
+
+    --kairos-row-hover: #2a231c;
+    --kairos-row-selected: #3a2f1e;
+
+    --kairos-skeleton-bg: #2e2720;
+    --kairos-skeleton-fg: #3a322a;
+    --kairos-overlay: rgba(0, 0, 0, 0.64);
+
+    --kairos-shadow-color: #f5f1e8;
+  }
 }
 
 /* ==========================================================================
