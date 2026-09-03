@@ -83,6 +83,31 @@ export type { ToastProps } from './Toast';
 export { default as Panel, PageHeader, Metric, MetricRow, Skeleton, SkeletonStack } from './Panel';
 export type { PanelProps, PageHeaderProps, MetricProps } from './Panel';
 
+export { default as BrandLockup } from './BrandLockup';
+export type { BrandLockupProps } from './BrandLockup';
+
+export { default as AuthScreen, AuthForm, AuthLink } from './AuthScreen';
+export type { AuthScreenProps, AuthFormProps, AuthLinkProps } from './AuthScreen';
+
+export {
+  default as AppShell,
+  Sidebar,
+  NavGroup,
+  NavLink,
+  TopBar,
+  BottomNav,
+  BottomNavLink,
+} from './AppShell';
+export type {
+  AppShellProps,
+  SidebarProps,
+  NavGroupProps,
+  NavLinkProps,
+  TopBarProps,
+  BottomNavProps,
+  BottomNavLinkProps,
+} from './AppShell';
+
 export { default as SectionTag } from './SectionTag';
 export type { SectionTagProps } from './SectionTag';
 
