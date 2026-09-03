@@ -1361,3 +1361,110 @@ The forced-light print palette is the one change with reach beyond a call site:
 a surface that was somehow relying on dark tokens on paper is not, any more.
 That was the defect.
 
+
+## The composition an app could not get from the package, 0.9.0
+
+Two apps on this registry, both following the branding skill, shipped sign-in
+screens that did not look like each other. Neither had done anything wrong: the
+lockup, the fields, the button and the classes around them were all registry
+vocabulary, used as documented. What differed was the arrangement, and the
+arrangement was the one thing the package did not ship.
+
+Five divergences came out of one screen. Mailkit sized the lockup at the 190px
+`kairos.css` sets; Paykit's own `BrandLockup` passed `width: 260px` as an inline
+style, which outranks a stylesheet from a place the stylesheet cannot answer.
+Mailkit reserved a single error row; Paykit rendered a danger banner that only
+appears on failure, so its button sat at two heights. Mailkit put the theme
+toggle inline under the form; Paykit rendered a global floating one on every
+page. Mailkit put the fields on the page; Paykit put them in a panel. Neither
+wrote `--one-message`, so on both screens every field reserved a hint row it
+could never fill.
+
+The same thing had happened one level up, and had been invisible for longer.
+`AppShell` existed as `stories/screens/Shell.tsx` — a complete, correct frame
+that lived only in the workshop while both apps kept their own copy. Paykit's
+sidebar rendered one lockup variant instead of the pair, so the mark went
+invisible against its own plaque in one theme. Paykit's sidebar footer had no
+`ThemeSetting` at all, which is what the global floating toggle was
+compensating for. Paykit's `<main>` dropped `kairos-view`, so its pages measured
+wider than Mailkit's on every screen.
+
+None of that is catchable by a component story. Looking alike is a property of
+the composition, and the registry was shipping parts and a picture of the
+composition rather than the composition.
+
+### The screen story now renders the shipped code
+
+`Shell.tsx` and `SignIn.stories.tsx` no longer assemble anything out of raw
+classes. They import `AppShell` and `AuthScreen` from `dist/react` and pass
+props. A screen story that builds its own markup asserts that the markup it
+wrote renders, which is a fact about the story; there is no arrangement of
+class names it can fail on, because every arrangement is valid vocabulary. The
+story is only evidence about the apps if it is the same code as the apps.
+
+`Shell.tsx` keeps its flat `nav` array, because grouping a list is a shorthand
+worth having in a story and not worth shipping. Everything structural under it
+comes from the package.
+
+### The sign-in form takes the panel
+
+Paykit's spelling wins, against the composition the old story showed. The
+manifest already ranks `--kairos-shadow-card` at 6px as "a panel, and a filled
+button under the cursor", so a panel that stamps is what the registry
+documents; a sign-in is the one screen that is a single object on an otherwise
+empty page rather than a region of a composed one, which is the case the rank
+is for.
+
+Recorded because two other places in this repo argue the opposite in passing.
+The comment over `.kairos-panel` in `kairos.css` says a panel is the page and
+should not stamp, and `Panel.tsx`'s docstring opens "A bordered container. No
+shadow." Both describe a rule the rule under them does not implement —
+`.kairos-panel` has carried `box-shadow: var(--kairos-shadow-card)` throughout.
+The manifest and the stylesheet agree with each other and the two comments are
+stale. They are left alone here rather than corrected in a change about
+composition, because editing either one invites a later agent to "fix" the
+declaration to match the prose and restyle every panel on five surfaces.
+
+### `BrandLockup` takes no size
+
+There is no `width` prop and no `style`. Size belongs to the context the lockup
+is in, and `kairos.css` already sets it per context — `min(190px, 70%)` under
+`.kairos-auth-header`, 32px under `.kairos-topbar-brand`. The prop existed in
+Paykit's copy and is the entire reason the two sign-in screens had different
+logos, so shipping it here would ship the defect to three more surfaces.
+
+Both variants render with the same `alt` and neither is `aria-hidden`. Paykit's
+copy marked the dark one decorative, which leaves the visible logo unnamed for
+exactly the reader on the dark theme. The rule was already written over
+`.kairos-lockup` in `kairos.css`; nothing enforced it, because no component
+owned the pair.
+
+### `AuthForm` owns the error row
+
+It takes `error` as a value and renders the row itself, rather than accepting a
+row the call site composes. The row is reserved whether or not it carries a
+message, and `--one-message` is only allowed to strip the per-field hint rows
+*because* that row is reserved. Handing a call site both halves means a screen
+can take the class and skip the row, which is the arrangement where a refused
+sign-in moves the button out from under the thumb reaching for it.
+
+The submit button and anything after it are slots for the same reason the order
+is fixed: fields, message, button, footer is the order the guarantee depends
+on.
+
+### One theme control, decided by width
+
+`Sidebar` renders `ThemeSetting` in its footer by default and `AppShell` wraps
+the floating `ThemeToggle` in `.kairos-mobile-only`. That pairing is the whole
+policy: above 900px the sidebar's control is visible, below it the sidebar is
+gone and the floating one takes over, and neither width has two.
+
+`AuthScreen` carries an inline toggle because a signed-out screen has no shell
+and no settings row, which is the case `--inline` was added for. An app that
+renders its own floating toggle globally has to turn that one off, and the prop
+says so.
+
+`mobileThemeToggle` exists for the app that gives a phone a real settings
+screen — Mailkit's `/more` carries `ThemeSetting`, which is the placement the
+pattern asks for first, and a floating toggle beside it is the same control
+twice.

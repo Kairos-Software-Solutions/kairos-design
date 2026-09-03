@@ -1,5 +1,12 @@
 import type { ReactNode } from 'react';
-import ThemeToggle, { ThemeSetting } from '../../dist/react/theme';
+import ShippedAppShell, {
+  Sidebar,
+  NavGroup,
+  NavLink,
+  TopBar,
+  BottomNav,
+  BottomNavLink,
+} from '../../dist/react/AppShell';
 import Button from '../../dist/react/Button';
 
 /**
@@ -10,6 +17,14 @@ import Button from '../../dist/react/Button';
  * looking alike is a property of the composition: what the page header sits
  * against, how far the first panel is from it, whether the sidebar's active
  * row is the same weight as the primary button. That is what these render.
+ *
+ * This used to *be* the frame — a helper that lived only in the workshop while
+ * both React apps kept their own copy. That is exactly the arrangement a
+ * screen story exists to catch, and it could not catch it, because the story
+ * and the apps were different code. So the frame moved into `dist/react` and
+ * this is now a thin convenience over it: `nav` as a flat list is a shorthand
+ * worth having in a story and not worth shipping. Everything structural below
+ * comes from the package, so a story that renders is a package that works.
  */
 export interface NavItem {
   label: string;
@@ -45,100 +60,33 @@ export function AppShell({
   if (current && !bottom.includes(current)) bottom[BOTTOM_SLOTS - 1] = current;
 
   return (
-    <div className="kairos-app-shell">
-      <nav className="kairos-sidebar" aria-label="Primary">
-        {/* Both variants, with the same `alt`, and the stylesheet picks. The
-            plaque is inverted, so the lockup on it is whichever one the rest
-            of the page is hiding. Logos are linked from the CDN by URL and
-            never copied into a repo. */}
-        <div className="kairos-sidebar-brand">
-          <img
-            className="kairos-lockup kairos-lockup--light"
-            src="https://cdn.kairossolutionstt.com/ICON%20%2B%20WORDMARK.svg"
-            alt="Kairos Software Solutions"
-          />
-          <img
-            className="kairos-lockup kairos-lockup--dark"
-            src="https://cdn.kairossolutionstt.com/ICON%20%2B%20WORDMARK%20-%20DARK.svg"
-            alt="Kairos Software Solutions"
-          />
-          <span className="kairos-sidebar-product">{product}</span>
-        </div>
-        <div className="kairos-sidebar-nav">
+    <ShippedAppShell
+      sidebar={
+        <Sidebar product={product} footer={<Button variant="secondary">Sign out</Button>}>
           {groups.map((group, index) => (
-            <div className="kairos-sidebar-group" key={group.name ?? index}>
-              {group.name ? <span className="kairos-label-caps">{group.name}</span> : null}
+            <NavGroup label={group.name} key={group.name ?? index}>
               {group.items.map((item) => (
-                <a
-                  key={item.label}
-                  href="#"
-                  className="kairos-nav-link"
-                  aria-current={item.current ? 'page' : undefined}
-                >
+                <NavLink key={item.label} href="#" current={item.current}>
                   {item.label}
-                </a>
+                </NavLink>
               ))}
-            </div>
+            </NavGroup>
           ))}
-        </div>
-        <div className="kairos-sidebar-footer kairos-stack kairos-stack--sm">
-          <ThemeSetting />
-          <Button variant="secondary">Sign out</Button>
-        </div>
-      </nav>
-      <div className="kairos-shell-body">
-        {/* Inside the body column, not beside the sidebar: `.kairos-app-shell`
-            is a flex row, so a topbar placed as its direct child becomes a
-            third column and squeezes the view into what is left. It is
-            `position: sticky; top: 0` against this column.
-
-            Below 900px the sidebar is gone and this and the bottom nav replace
-            it. Neither had ever been rendered by a story, which is why a record
-            list on a phone was a screen with no way off it. */}
-        <header className="kairos-topbar">
-          <div className="kairos-topbar-brand">
-            <img
-              className="kairos-lockup kairos-lockup--light"
-              src="https://cdn.kairossolutionstt.com/ICON%20%2B%20WORDMARK.svg"
-              alt="Kairos Software Solutions"
-            />
-            <img
-              className="kairos-lockup kairos-lockup--dark"
-              src="https://cdn.kairossolutionstt.com/ICON%20%2B%20WORDMARK%20-%20DARK.svg"
-              alt="Kairos Software Solutions"
-            />
-            <span>{product}</span>
-          </div>
-        </header>
-        <main className="kairos-main">
-          <div className="kairos-view">{children}</div>
-        </main>
-      </div>
-
-      {/* The floating theme control, which no story had ever rendered — so the
-          `env(safe-area-inset-bottom) + 68px` offset it parks at, written to
-          clear the bottom nav, had never been checked against a bottom nav.
-          Mobile only: above 900px the sidebar's own `ThemeSetting` is visible
-          and two theme controls on one screen is worse than none. */}
-      <div className="kairos-mobile-only">
-        <ThemeToggle />
-      </div>
-
-      {/* `aria-current="page"`, which is the signal the rest of this stylesheet
-          reads. `.active` also works and is not what an app should write. */}
-      <nav className="kairos-bottom-nav" aria-label="Primary, compact">
-        {bottom.map((item) => (
-          <a
-            key={item.label}
-            href="#"
-            className="kairos-bottom-nav-link"
-            aria-current={item.current ? 'page' : undefined}
-          >
-            <span className="kairos-bottom-nav-label">{item.label}</span>
-          </a>
-        ))}
-      </nav>
-    </div>
+        </Sidebar>
+      }
+      topbar={<TopBar product={product} />}
+      bottomNav={
+        <BottomNav>
+          {bottom.map((item) => (
+            <BottomNavLink key={item.label} href="#" current={item.current}>
+              {item.label}
+            </BottomNavLink>
+          ))}
+        </BottomNav>
+      }
+    >
+      {children}
+    </ShippedAppShell>
   );
 }
 

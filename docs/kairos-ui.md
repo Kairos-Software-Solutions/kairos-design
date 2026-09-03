@@ -175,7 +175,7 @@ drawing its own boundary, and a stamp under it reads as a second border.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-app-shell` | App frame: sidebar or bottom nav plus main region | Brand Scale pages | — |
+| `kairos-app-shell` | App frame: sidebar or bottom nav plus main region. Write it through `AppShell`, which also places the body column, `kairos-view`, and the mobile-only theme toggle | Brand Scale pages; hand-assembling the frame, which is how two apps ended up with different `<main>` widths | — |
 | `kairos-sidebar` | 220px desktop nav | Mobile; use `kairos-bottom-nav` | — |
 | `kairos-sidebar-brand` | The lockup block at the top of the sidebar | A second logo anywhere else on the screen | — |
 | `kairos-bottom-nav` | Five-item mobile tab bar | More than five destinations | — |
@@ -195,7 +195,7 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-tabs-list`, `kairos-tab` | Tabs within one record, ruled underneath, active on `[data-state="active"]` | Filtering a list; that is `kairos-segmented`. Navigation between pages; that is `kairos-nav-link` | — |
 | `kairos-wizard-step` | One step in `kairos-wizard-steps`, with `[data-done]` and a `-marker` | A tab; a step has an order and a completion | — |
 | `kairos-tool-surface` | A one-panel screen centred in the viewport: sign-in, a not-found, a single prompt | An app screen with a shell; that is `kairos-app-shell` | — |
-| `kairos-sign-in`, `kairos-auth` | The panel on that surface, capped at `25rem` and `24rem` and never wider than the phone it is on | Two names for one thing in a new screen — pick `kairos-auth`, which carries the form, header and link elements | — |
+| `kairos-sign-in`, `kairos-auth` | The auth block on that surface, capped at `25rem` and `24rem` and never wider than the phone it is on. It sets a width and paints nothing; the form inside it carries `kairos-panel kairos-pad`, which `AuthForm` writes | Two names for one thing in a new screen — pick `kairos-auth`, which carries the form, header and link elements | — |
 | `kairos-login-grid` | The two-column sign-in layout, collapsing at `980px` | A content grid; that is `kairos-grid-auto` | — |
 | `kairos-setting-row` | A settings label and its control on one line, wrapping | A form field; that is `kairos-field` | — |
 
@@ -520,6 +520,9 @@ fails on it.
 | `PageHeader` | An optional `kicker`, the title, a one-line `description`, and an action group. Pass `ActionSet` to `actions`; `PageHeader` owns the `kairos-page-header-actions` wrapper, so the `page` context renders the controls and nothing around them. `kickerHref` makes the kicker the way back to the screen above, which is why no screen needs a `BACK TO …` button — and `kickerAs` renders it with the router's own link, since the default `<a>` is a full page load |
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
+| `BrandLockup` | The Kairos mark, both theme variants, same `alt` on each and neither `aria-hidden` — which one is visible depends on the surface, so marking either decorative leaves the visible logo unnamed on half the screens. `variant="icon"` is the mark alone for the top bar. It takes no size and no `style`: size belongs to the context, and `kairos.css` already sets it per context |
+| `AuthScreen`, `AuthForm`, `AuthLink` | The signed-out screen. `AuthScreen` owns the surface, the lockup, the `h1` and the theme toggle — the toggle is on by default because this screen has no shell to put a settings row in. `AuthForm` fixes the order that makes the layout hold: fields, the one reserved message row, the button, then `footer`. It writes `--one-message` and reserves that row itself, so the two cannot be separated by a call site |
+| `AppShell`, `Sidebar`, `NavGroup`, `NavLink`, `TopBar`, `BottomNav`, `BottomNavLink` | The app frame. `AppShell` places the sidebar, the body column, `<main>` and its centred `kairos-view`, the mobile-only floating theme toggle, and the bottom nav — a top bar passed as a direct child of the shell becomes a third flex column, which is why it is a slot rather than the app's to position. `Sidebar` carries `ThemeSetting` in its footer by default, and that is the desktop half of the theme pattern that lets the floating toggle stay mobile-only. `NavLink` marks the current screen with `aria-current="page"` only; `.active` is a deprecated alias. `BottomNavLink` with no `href` is the fifth slot that opens the rest as a sheet, and renders a button because it does not navigate |
 
 Radix is the one dependency, and only for what opens over the page. A modal has to trap
 focus, restore it, close on Escape, and mark the rest of the page inert; hand

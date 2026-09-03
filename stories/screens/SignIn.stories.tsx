@@ -1,21 +1,22 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, within } from 'storybook/test';
+import AuthScreen, { AuthForm, AuthLink } from '../../dist/react/AuthScreen';
 import Button from '../../dist/react/Button';
 import InputField from '../../dist/react/Field';
 
 /**
- * The signed-out screen, and the only place `.kairos-login-grid` is used.
+ * The signed-out screen.
  *
- * It exists here because the 980px breakpoint had nothing to act on in the
- * workshop, so a collapse of it could only be reasoned about. Rendering it is
- * how the width becomes checkable.
+ * This used to assemble the screen out of raw classes, which meant the
+ * workshop rendered one composition and the two React apps rendered two
+ * others: a different lockup size, an error row on one and a banner on the
+ * other, the theme control in two places, `--one-message` on none of them. A
+ * story built from the same classes as the apps cannot catch that, because
+ * every one of those was a valid use of the vocabulary.
  *
- * Note what the package actually owns. `.kairos-login-grid` is
- * `display: grid; place-items: center` and declares no columns at all — the
- * two-column split is the consuming app's, and `kairos.css` only carries the
- * `grid-template-columns: 1fr !important` that undoes it below 980px. So the
- * second story below supplies the app's half, because a rule written to
- * override something needs the something present before it means anything.
+ * So the composition moved into `AuthScreen` and this renders it. What the
+ * stories assert now is the behaviour the component promises rather than the
+ * markup a call site happened to write.
  */
 const meta: Meta = {
   title: 'Screens/Sign in',
@@ -25,38 +26,29 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
-function AuthPanel({ error = '' }: { error?: string }) {
+function SignIn({ error = '' }: { error?: string }) {
   return (
-    <div className="kairos-auth">
-      <header className="kairos-auth-header">
-        <h1 className="kairos-page-title">Paykit</h1>
-        <p className="kairos-body-muted">Sign in to continue.</p>
-      </header>
-      {/* `--one-message` because neither field carries a message of its own.
-          What is wrong on this screen is the email and the password together,
-          so the form says it once, in the row below — which is reserved
-          whether or not it is filled, so the button does not move when it is. */}
-      <form
-        className="kairos-auth-form kairos-form-stack kairos-form-stack--one-message"
+    <AuthScreen product="Paykit" tagline="Invoices, payments, and what has already settled.">
+      <AuthForm
+        error={error}
         onSubmit={(e) => e.preventDefault()}
+        submit={
+          <Button variant="primary" type="submit" className="kairos-block">
+            Sign in
+          </Button>
+        }
+        footer={<AuthLink href="#">Forgotten your password?</AuthLink>}
       >
         <InputField label="Email" type="email" defaultValue="ricardo@felixfam.com" />
         <InputField label="Password" type="password" defaultValue="hunter2hunter2" />
-        <p className="kairos-auth-error kairos-error-text" role="alert">{error}</p>
-        <Button variant="primary" type="submit">Sign in</Button>
-        <a className="kairos-auth-link" href="#">Forgotten your password?</a>
-      </form>
-    </div>
+      </AuthForm>
+    </AuthScreen>
   );
 }
 
-/** What this package defines: one centred column at every width. */
-export const Centred: Story = {
-  render: () => (
-    <div className="kairos-login-grid" style={{ minHeight: '100vh', padding: 'var(--kairos-space-xl)' }}>
-      <AuthPanel />
-    </div>
-  ),
+/** The screen at rest. */
+export const Default: Story = {
+  render: () => <SignIn />,
 };
 
 /**
@@ -68,13 +60,13 @@ export const Centred: Story = {
  * reserved, this story's button would sit lower than the one above it, and a
  * person who mistyped a password would find the button had moved out from
  * under the pointer already on its way to it.
+ *
+ * `AuthForm` writes both halves, so the two cannot come apart — which is the
+ * reason it takes `error` as a prop instead of letting the call site render
+ * the row wherever it likes.
  */
 export const Refused: Story = {
-  render: () => (
-    <div className="kairos-login-grid" style={{ minHeight: '100vh', padding: 'var(--kairos-space-xl)' }}>
-      <AuthPanel error="Those details do not match. Check them and try again." />
-    </div>
-  ),
+  render: () => <SignIn error="Those details do not match. Check them and try again." />,
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await expect(canvas.getByRole('alert')).toHaveTextContent('Those details do not match');
@@ -87,32 +79,25 @@ export const Refused: Story = {
 };
 
 /**
- * What an app builds on top, and the only arrangement the 980px rule changes.
+ * The lockup is the Kairos mark and the `h1` is the product, which is what a
+ * screen reader opens this screen with.
  *
- * The two columns are set inline here rather than in `kairos.css`, because that
- * is where they live in a real app — which is also why the override needs
- * `!important` to win.
+ * Both lockup variants render with the same `alt` and neither is
+ * `aria-hidden`, so the accessible name survives whichever one the theme
+ * hides. An app that wrote the pair by hand and marked the dark one decorative
+ * — which one of them did — leaves the visible logo unnamed in dark mode.
  */
-export const Split: Story = {
-  render: () => (
-    <div
-      className="kairos-login-grid"
-      style={{
-        minHeight: '100vh',
-        gridTemplateColumns: '1fr 1fr',
-        alignItems: 'center',
-        gap: 'var(--kairos-space-2xl)',
-        padding: 'var(--kairos-space-xl)',
-      }}
-    >
-      <div className="kairos-stack kairos-stack--md kairos-measure">
-        <h2 className="kairos-section-title">Every invoice, one ledger</h2>
-        <p className="kairos-body-muted">
-          Paykit tracks what you are owed, what you owe, and what has already settled — in one
-          place, in the currency you billed in.
-        </p>
-      </div>
-      <AuthPanel />
-    </div>
-  ),
+export const Landmarks: Story = {
+  render: () => <SignIn />,
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await expect(canvas.getByRole('heading', { level: 1 })).toHaveTextContent('Paykit');
+
+    const marks = canvas.getAllByAltText('Kairos Software Solutions');
+    await expect(marks).toHaveLength(2);
+
+    // The theme control is here because the screen has no shell to put a
+    // settings row in. It is the one placement the pattern allows.
+    await expect(canvas.getByRole('button', { name: /theme/i })).toBeInTheDocument();
+  },
 };
