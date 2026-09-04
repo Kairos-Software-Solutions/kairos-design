@@ -1468,3 +1468,31 @@ says so.
 screen — Mailkit's `/more` carries `ThemeSetting`, which is the placement the
 pattern asks for first, and a floating toggle beside it is the same control
 twice.
+
+### The theme toggle is 44px, and not behind a flag
+
+Its padding drew a 38px box. The branding skill's floor for a tap target is
+44px in both dimensions, so it was short in one of them on every screen it
+appeared on, and it appeared on the screens least able to afford it: a customer
+opening a quote on their phone to accept or decline it, a return from a payment
+gateway, a not-found, a sign-in, Ricardo's card.
+
+Two narrower fixes were considered and both are worse.
+
+A `--theme-toggle-height` hook, mirroring `--button-height` on the button,
+moves the decision to every app that consumes this one. Card would have been
+the only caller that ever set it, which leaves the same defect on every other
+surface and calls it configuration.
+
+A `@media (pointer: coarse)` guard is more principled and less checkable. It
+does not fire reliably on a touchscreen laptop, and it is invisible to whoever
+opens the preview on a desktop, sees 38px, and cannot tell whether the fix
+landed. A rule you cannot check by looking is a rule that rots.
+
+So it is unconditional, and the reason it can be is that no pointer-driven
+screen renders this class. `AppShell` wraps it in `.kairos-mobile-only`; above
+900px the sidebar's `ThemeSetting` is the control and it is a `Segmented` in a
+settings row. A toggle hung beside a shell is hidden outright. Every remaining
+placement is a screen with no chrome, which is a phone. `contract.test.mjs`
+asserts each of those, so the day one of them changes, the height gets
+reconsidered rather than silently kept.

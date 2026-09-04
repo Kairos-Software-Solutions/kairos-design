@@ -230,7 +230,19 @@ h6 {
    Fixed bottom-right on every screen, because not every screen has a header
    to put it in. It clears the mobile bottom navigation, which is fixed to the
    same corner, and sits under the skip link's z-index so a keyboard user's
-   first stop is still the skip link. */
+   first stop is still the skip link.
+
+   It takes the touch height rather than the Product Scale one, and takes it
+   unconditionally. The padding alone drew a 38px box, under the 44px floor the
+   branding skill puts on a tap target in both dimensions.
+
+   Unconditionally, because there is no pointer-driven screen to protect. This
+   button reaches a reader two ways and both are a thumb: on a screen with no
+   chrome at all, which is a public page read on a phone, or inside a shell
+   below 900px, where `AppShell` wraps it in `.kairos-mobile-only`. Above that
+   width the sidebar's `ThemeSetting` is the control, and it is a settings row
+   around a `Segmented`, not this class. So no hook and no `pointer: coarse`
+   query — a rule you cannot check by looking is a rule that rots. */
 
 .kairos-theme-toggle {
   position: fixed;
@@ -240,6 +252,7 @@ h6 {
   display: inline-flex;
   align-items: center;
   gap: var(--kairos-space-sm);
+  min-height: var(--kairos-control-h-touch);
   padding: var(--kairos-space-sm) var(--kairos-space-md);
   border: var(--kairos-border-w-strong) solid var(--kairos-border);
   border-radius: var(--kairos-radius-input);
