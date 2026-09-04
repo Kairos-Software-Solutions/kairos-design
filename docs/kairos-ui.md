@@ -162,6 +162,12 @@ nobody has to decide. Two stamps stacked read as a printing error rather than
 as depth, and `kairos.css` enforces it — `.kairos-panel .kairos-panel`,
 `.kairos-card`, and `.kairos-subpanel` all drop to `none`.
 
+That guard is written against this package's classes and so cannot see an
+app's. A `kairos-panel` inside a surface's own stamped block is nested to the
+reader and top-level to the selector, which is how the card's QR frame came to
+stamp `6px` inside a face already stamping `8px`. Where the enclosing block is
+an app's class, the call site says it: `kairos-panel--flat`.
+
 Only the filled button ranks carry a stamp at all. An outline button is already
 drawing its own boundary, and a stamp under it reads as a second border.
 
@@ -214,7 +220,7 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-record-card` | The same records below 768px | Desktop lists | `--inert` |
 | `kairos-collapsible-card` | Detail-heavy cards, collapsed by default | Cards of 3 fields or fewer | — |
 | `kairos-state-chip` | Status of a record | Counts, labels, categories | `--settled` `--overdue` `--awaiting` `--draft` `--neutral` |
-| `kairos-panel` | Bordered container, no shadow. Ground and border only — pair it with `kairos-pad` | A shadowed featured panel; that is Brand Scale | — |
+| `kairos-panel` | Bordered container: ground, border, radius, and the `6px` stamp — pair it with `kairos-pad` | A panel nested in another one, which is flat; take `--flat` where the enclosing block is an app's own class | `--flat` |
 | `kairos-pad` | The padding inside a panel or card | Spacing between blocks; that is `kairos-stack` | `--xs` `--sm` `--lg` |
 | `kairos-empty-state` | A list or table with no records | Errors; use `kairos-banner` | — |
 | `kairos-metric` | A single figure with its label | A figure inside a table cell | — |

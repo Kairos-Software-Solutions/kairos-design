@@ -539,3 +539,40 @@ test('the copy control is a control at rest', () => {
   // The tick is not the confirmation; the tick is what a sighted reader gets.
   assert.match(source, /role="status"/, 'a copy is announced, not only drawn');
 });
+
+/**
+ * The cycling toggle drew a 38px box from its padding, under the 44px floor
+ * the branding skill puts on a tap target in both dimensions.
+ *
+ * It can take the touch height unconditionally, rather than behind a hook or a
+ * `pointer: coarse` query, because of the facts asserted below: inside a shell
+ * `AppShell` renders it mobile-only, above 900px the control is `ThemeSetting`
+ * instead, and an app that hangs its own toggle beside a shell gets it hidden.
+ * Every way this class reaches a reader is a thumb. Break one of those and the
+ * height needs rethinking rather than preserving.
+ */
+test('the theme toggle is a tap target on the phone screens it appears on', () => {
+  // The class is also the last selector in the appearance reset, so a plain
+  // match finds that four-line block instead. The base rule is the one that
+  // places the button.
+  const blocks = [...css.matchAll(/\n\.kairos-theme-toggle \{([\s\S]*?)\n\}/g)].map((m) => m[1]);
+  const rule = blocks.find((b) => /position:\s*fixed/.test(b));
+
+  assert.ok(rule, '.kairos-theme-toggle has a base rule');
+  assert.match(rule, /min-height:\s*var\(--kairos-control-h-touch\)/,
+    'it clears the tap-target floor rather than resting on its padding');
+
+  assert.match(css, /\.kairos-app-shell ~ \.kairos-theme-toggle \{[^}]*display:\s*none/,
+    'a toggle hung beside a shell is hidden rather than doubling the one inside it');
+
+  // The shell renders it too, but only under 900px.
+  const shell = readFileSync(join(ROOT, 'dist', 'react', 'AppShell.tsx'), 'utf8');
+  assert.match(shell, /kairos-mobile-only"?\s*>\s*\n?\s*<ThemeToggle/,
+    'inside a shell the floating toggle is mobile-only');
+
+  // Above it, the control is a different component wearing different classes.
+  const theme = readFileSync(join(ROOT, 'dist', 'react', 'theme.tsx'), 'utf8');
+  const setting = theme.slice(theme.indexOf('export function ThemeSetting'));
+  assert.doesNotMatch(setting.slice(0, setting.indexOf('\n}')), /kairos-theme-toggle/,
+    'the desktop control is the settings row, not this button');
+});
