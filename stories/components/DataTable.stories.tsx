@@ -81,6 +81,61 @@ export const Invoices: StoryObj = {
   ),
 };
 
+/**
+ * A server-backed table keeps the complete count and sort state outside the
+ * component. The story slices the fixture to stand in for the server and
+ * proves that paging and sorting callbacks are the only way the table moves
+ * through that dataset.
+ */
+export const ControlledServerTable: StoryObj = {
+  render: function ControlledServerTableStory() {
+    const [pageIndex, setPageIndex] = useState(0);
+    const defaultSort = { key: 'reference', direction: 'ascending' as const };
+    const [sort, setSort] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
+    const pageSize = 5;
+    const effectiveSort = sort ?? defaultSort;
+    const rows = manyInvoices
+      .slice()
+      .sort((a, b) => {
+        const left = a[effectiveSort.key as keyof Invoice];
+        const right = b[effectiveSort.key as keyof Invoice];
+        if (typeof left === 'number' && typeof right === 'number') return effectiveSort.direction === 'ascending' ? left - right : right - left;
+        return effectiveSort.direction === 'ascending' ? String(left).localeCompare(String(right), 'en', { numeric: true }) : String(right).localeCompare(String(left), 'en', { numeric: true });
+      });
+    const page = rows.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+
+    return (
+      <DataTable
+          label="Server invoices"
+          rows={page}
+          columns={invoiceColumns}
+          getKey={(row) => row.id}
+          empty={<EmptyState message="No invoices yet." />}
+          defaultSort={defaultSort}
+          sort={sort}
+          onSortChange={(next) => { setSort(next); setPageIndex(0); }}
+          manualSorting
+          pageIndex={pageIndex}
+          onPageChange={setPageIndex}
+          manualPagination
+          rowCount={rows.length}
+          pageSize={pageSize}
+        />
+    );
+  },
+  play: async ({ canvas, userEvent }) => {
+    const next = canvas.getByRole('button', { name: 'Next' });
+    await userEvent.click(next);
+    await waitFor(() => expect(canvas.getByText('Showing 6 to 10 of 100')).toBeInTheDocument());
+    const total = canvas.getByRole('button', { name: 'Total' });
+    await userEvent.click(total);
+    await waitFor(() => expect(canvas.getByText('Showing 1 to 5 of 100')).toBeInTheDocument());
+    await userEvent.click(total);
+    await userEvent.click(total);
+    await waitFor(() => expect(canvas.getByText('Sorted by Reference, ascending.')).toBeInTheDocument());
+  },
+};
+
 /** The Mailkit accounts screen, which is the table this workshop was built to compare against. */
 export const Accounts: StoryObj = {
   render: () => (

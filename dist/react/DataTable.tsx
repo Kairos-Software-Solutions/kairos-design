@@ -273,19 +273,26 @@ export interface DataTableProps<Row> {
   label: string;
   /** Records per page. 25 unless a screen has a reason. */
   pageSize?: number;
+  /** Controlled page index for a server-backed table. */
+  pageIndex?: number;
+  /** Called when the table pager requests another server page. */
+  onPageChange?: (pageIndex: number) => void;
   /**
    * The rows are one page fetched from somewhere else, and this component is
    * not to slice them.
    *
-   * Reachable rather than specified. Every Kairos table today fits in memory,
-   * so a server-side contract would be a guess: the app also needs a way to
-   * hear that the page changed and to refetch, and what that looks like is the
-   * decision the first app with a large table gets to make. Turning this on
-   * without `rowCount` leaves the sentence counting the page it can see.
+   * Pair with `pageIndex` and `onPageChange` when the caller owns the page
+   * request. Without `rowCount`, the sentence counts only the rows supplied.
    */
   manualPagination?: boolean;
   /** The total behind a `manualPagination` table, which it alone knows. */
   rowCount?: number;
+  /** Controlled sort for a server-backed table. */
+  sort?: { key: string; direction: SortDirection } | null;
+  /** Called when a sortable header requests a new server sort. */
+  onSortChange?: (sort: { key: string; direction: SortDirection } | null) => void;
+  /** Keep the requested sort out of the local row model. */
+  manualSorting?: boolean;
   /**
    * Records can be picked out and acted on together.
    *
@@ -360,8 +367,13 @@ export default function DataTable<Row>({
   defaultSort,
   label,
   pageSize = DEFAULT_PAGE_SIZE,
+  pageIndex: controlledPageIndex,
+  onPageChange,
   manualPagination,
   rowCount,
+  sort: controlledSort,
+  onSortChange,
+  manualSorting,
   selectable,
   onSelectionChange,
   selectionActions,
@@ -376,11 +388,14 @@ export default function DataTable<Row>({
   // The cycle is ours: the library's own toggle is a two-state flip, which
   // leaves a user who sorted by mistake no way back short of reloading.
   const [override, setOverride] = useState<{ key: string; direction: SortDirection } | null>(null);
-  const sort = override ?? defaultSort ?? null;
+  // A controlled `null` is the same third-press reset as the uncontrolled
+  // state: it drops the override and returns to the screen's default.
+  const sort = (controlledSort !== undefined ? controlledSort : override) ?? defaultSort ?? null;
 
   // The page is ours and the size is the screen's, so a screen that changes
   // its page size does not have to remount the table to be believed.
-  const [pageIndex, setPageIndex] = useState(0);
+  const [uncontrolledPageIndex, setUncontrolledPageIndex] = useState(0);
+  const pageIndex = controlledPageIndex ?? uncontrolledPageIndex;
 
   // Keyed by the caller's own row id, which is what makes the selection
   // survive a sort and a page change: the rows move, their ids do not.
@@ -418,10 +433,12 @@ export default function DataTable<Row>({
     // a reader on page 4 of a list that now has two.
     onPaginationChange: (updater: Updater<PaginationState>) => {
       const next = typeof updater === 'function' ? updater(pagination) : updater;
-      setPageIndex(next.pageIndex);
+      onPageChange?.(next.pageIndex);
+      if (controlledPageIndex === undefined) setUncontrolledPageIndex(next.pageIndex);
     },
     manualPagination,
     rowCount,
+    manualSorting,
     // Off unless the screen asked, so a table that does not select cannot be
     // read as holding an empty selection.
     enableRowSelection: Boolean(selectable),
@@ -443,7 +460,11 @@ export default function DataTable<Row>({
   });
 
   function toggle(key: string) {
-    setOverride((current) => nextSort(current ?? defaultSort ?? null, key, defaultSort ?? null));
+    const next = nextSort(sort, key, defaultSort ?? null);
+    onSortChange?.(next);
+    if (controlledSort === undefined) setOverride(next);
+    onPageChange?.(0);
+    if (controlledPageIndex === undefined) setUncontrolledPageIndex(0);
   }
 
   // The whole selection, not the part of it on the page in view. A reader who
