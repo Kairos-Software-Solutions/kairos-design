@@ -175,6 +175,28 @@ export function formatMoney(amount: number | string, currency: string = DEFAULT_
   }
 }
 
+/**
+ * Format a decimal received from a source such as a statement or payment
+ * gateway without converting it through Number. Source values may be larger
+ * than a JavaScript safe integer and may carry up to six decimal places.
+ */
+export function formatSourceMoney(decimal: string, currency: string = DEFAULT_CURRENCY): string {
+  const validated = validateCurrency(currency);
+  if (typeof decimal !== 'string' || decimal.length > 80) {
+    throw new Error(`Invalid monetary amount '${decimal}'.`);
+  }
+
+  const match = decimal.trim().match(/^([+-]?)(\d+)(?:\.(\d{1,6}))?$/);
+  if (!match) throw new Error(`Invalid monetary amount '${decimal}'.`);
+
+  const [, sign, wholeDigits, fraction = ''] = match;
+  const grouped = wholeDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  const minimumFractionDigits = MINOR_UNITS[validated];
+  const shownFraction = fraction.padEnd(minimumFractionDigits, '0');
+  const value = `${validated}\u00a0${grouped}${shownFraction ? `.${shownFraction}` : ''}`;
+  return sign === '-' ? `-${value}` : value;
+}
+
 /** `TTD 8,500.00` from integer minor units, which is how amounts are stored. */
 export function formatMinor(minor: number, currency: string = DEFAULT_CURRENCY): string {
   return formatMoney(fromMinor(minor, currency), currency);

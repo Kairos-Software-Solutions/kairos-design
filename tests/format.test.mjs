@@ -36,6 +36,17 @@ test('money', async (t) => {
     assert.match(m.formatMoney(8500), /^TTD 8,500\.00$/);
   });
 
+  await t.test('formats source decimals exactly without Number rounding', () => {
+    assert.equal(m.formatSourceMoney('999999999999999.999999').replace(/ /g, ' '), 'TTD 999,999,999,999,999.999999');
+    assert.equal(m.formatSourceMoney('1.000001').replace(/ /g, ' '), 'TTD 1.000001');
+    assert.equal(m.formatSourceMoney('-1.2', 'USD').replace(/ /g, ' '), ' -USD 1.20'.trimStart());
+    assert.equal(m.formatSourceMoney('0', 'JPY').replace(/ /g, ' '), 'JPY 0');
+    assert.throws(() => m.formatSourceMoney('Infinity'), /Invalid monetary amount/);
+    assert.throws(() => m.formatSourceMoney('1e3'), /Invalid monetary amount/);
+    assert.throws(() => m.formatSourceMoney('1.1234567'), /Invalid monetary amount/);
+    assert.throws(() => m.formatSourceMoney('1', 'XYZ'), /no minor-unit entry/);
+  });
+
   await t.test('holds exact amounts in minor units', () => {
     assert.equal(m.toMinor('8500.00'), 850000);
     assert.equal(m.toMinor('0.01'), 1);

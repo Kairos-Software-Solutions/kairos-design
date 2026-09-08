@@ -81,6 +81,36 @@ export const Invoices: StoryObj = {
   ),
 };
 
+/** The opt-in row destination and the full detail card share one identifier link. */
+export const RowNavigationAndCollapsibleCards: StoryObj = {
+  render: () => (
+    <DataTable
+      label="Statement entries"
+      rows={[invoices[0]]}
+      columns={invoiceColumns}
+      getKey={(row) => row.id}
+      rowNavigation={{
+        getHref: (row) => `/statements/${row.id}`,
+        getAccessibleName: (row) => `Open statement entry ${row.reference}`,
+      }}
+      collapsibleCards
+      empty={<EmptyState message="No statement entries yet." />}
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const disclosure = canvasElement.querySelector('summary');
+    if (!disclosure) throw new Error('collapsed record summary is missing');
+    await expect(disclosure).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(disclosure);
+    await expect(disclosure).toHaveAttribute('aria-expanded', 'true');
+    const card = within(disclosure.parentElement as HTMLElement);
+    await expect(card.getByText('Customer')).toBeInTheDocument();
+    await expect(card.getByText('Due')).toBeInTheDocument();
+    await expect(card.getByText('Total')).toBeInTheDocument();
+  },
+};
+
 /**
  * A server-backed table keeps the complete count and sort state outside the
  * component. The story slices the fixture to stand in for the server and
@@ -116,7 +146,12 @@ export const ControlledServerTable: StoryObj = {
           onSortChange={(next) => { setSort(next); setPageIndex(0); }}
           manualSorting
           pageIndex={pageIndex}
-          onPageChange={setPageIndex}
+          onPageChange={(nextPage) => {
+            // A URL-backed page callback carries the current sort as well.
+            // Emitting it after onSortChange would restore the stale sort.
+            setSort(sort);
+            setPageIndex(nextPage);
+          }}
           manualPagination
           rowCount={rows.length}
           pageSize={pageSize}
@@ -130,6 +165,7 @@ export const ControlledServerTable: StoryObj = {
     const total = canvas.getByRole('button', { name: 'Total' });
     await userEvent.click(total);
     await waitFor(() => expect(canvas.getByText('Showing 1 to 5 of 100')).toBeInTheDocument());
+    await waitFor(() => expect(canvas.getByText('Sorted by Total, ascending.')).toBeInTheDocument());
     await userEvent.click(total);
     await userEvent.click(total);
     await waitFor(() => expect(canvas.getByText('Sorted by Reference, ascending.')).toBeInTheDocument());

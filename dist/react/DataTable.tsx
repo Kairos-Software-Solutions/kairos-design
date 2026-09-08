@@ -2,6 +2,7 @@
 
 import {
   type ChangeEvent,
+  type MouseEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -34,6 +35,7 @@ import {
 import Button from './Button';
 import EmptyState from './EmptyState';
 import OverflowMenu from './OverflowMenu';
+import CollapsibleCard from './CollapsibleCard';
 import SortHeader, { type SortDirection, SortAnnouncer } from './SortHeader';
 import { compare, nextSort, type Sortable } from './sort';
 
@@ -350,6 +352,15 @@ export interface DataTableProps<Row> {
    * the identifier and the actions.
    */
   hideableColumns?: boolean;
+  /** Opt-in destination for a row. The identifier anchor remains the native link. */
+  rowNavigation?: {
+    getHref: (row: Row) => string;
+    getAccessibleName: (row: Row) => string;
+  };
+  /** Opt-in detail cards for dense records below the table breakpoint. */
+  collapsibleCards?: boolean;
+  /** Plain record name for the collapsed summary; never a sort surrogate. */
+  getRowLabel?: (row: Row) => string;
 }
 
 /**
@@ -382,6 +393,9 @@ export default function DataTable<Row>({
   filterActive,
   onClearFilters,
   hideableColumns,
+  rowNavigation,
+  collapsibleCards = false,
+  getRowLabel,
 }: DataTableProps<Row>) {
   // The user's override, separate from the screen's default, so the third
   // press on a header can drop back to the default rather than to no sort.
@@ -463,7 +477,11 @@ export default function DataTable<Row>({
     const next = nextSort(sort, key, defaultSort ?? null);
     onSortChange?.(next);
     if (controlledSort === undefined) setOverride(next);
-    onPageChange?.(0);
+    // A controlled sort transition belongs to the caller. Calling the page
+    // callback as a second event lets a URL-backed screen write its stale sort
+    // state after it has just written the new one. The caller resets its page
+    // with the same sort update; the local path still resets here.
+    if (!onSortChange) onPageChange?.(0);
     if (controlledPageIndex === undefined) setUncontrolledPageIndex(0);
   }
 
@@ -554,6 +572,14 @@ export default function DataTable<Row>({
   const rowName = (row: Row): string => {
     const value = identifier?.sortValue?.(row);
     return typeof value === 'string' || typeof value === 'number' ? String(value) : getKey(row);
+  };
+
+  const rowClick = (event: MouseEvent<HTMLTableRowElement>, row: Row) => {
+    if (!rowNavigation || event.defaultPrevented || event.button !== 0) return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const target = event.target as Element | null;
+    if (target?.closest('a,button,input,select,textarea,summary,[role="button"]')) return;
+    window.location.assign(rowNavigation.getHref(row));
   };
 
   const total = table.getRowCount();
@@ -661,7 +687,13 @@ export default function DataTable<Row>({
                 // The stylesheet already reads this attribute; nothing set it
                 // until now, which is why the selected-row ground shipped for
                 // three releases and never painted.
-                <tr key={modelRow.id} aria-selected={selectable ? modelRow.getIsSelected() : undefined}>
+                <tr
+                  key={modelRow.id}
+                  aria-selected={selectable ? modelRow.getIsSelected() : undefined}
+                  aria-label={rowNavigation?.getAccessibleName(modelRow.original as Row)}
+                  onClick={(event) => rowClick(event, modelRow.original as Row)}
+                  data-row-link={rowNavigation ? 'true' : undefined}
+                >
                   {selectable ? (
                     <td className="kairos-selection-cell">
                       <SelectionCheckbox
@@ -692,29 +724,56 @@ export default function DataTable<Row>({
       {/* Below 768px. Condensed on purpose: scanning is what the list is for,
           and reading is what the detail screen is for. */}
       <div className="kairos-record-list">
-        {modelRows.map((modelRow) => (
-          <div className="kairos-record-card" key={modelRow.id}>
+        {modelRows.map((modelRow) => {
+          const row = modelRow.original as Row;
+          const summary = (
             <span className="kairos-record-card-top">
-              <span className="kairos-record-card-identifier">
-                {identifier ? identifier.cell(modelRow.original as Row) : null}
+              <span className="kairos-record-card-identifier kairos-record-card-identifier--full">
+                {getRowLabel?.(row) ?? rowNavigation?.getAccessibleName(row) ?? rowName(row)}
               </span>
-              {status ? status.cell(modelRow.original as Row) : null}
+              {status ? status.cell(row) : null}
             </span>
-            <span className="kairos-record-card-bottom">
-              <span className="kairos-record-card-meta">
-                {cardMeta.map((column) => (
-                  <span key={column.key}>{column.cell(modelRow.original as Row)}</span>
-                ))}
-              </span>
-              {cardFigure ? (
-                <span className="kairos-record-card-figure kairos-figure">
-                  {cardFigure.cell(modelRow.original as Row)}
+          );
+          if (collapsibleCards) {
+            return (
+              <CollapsibleCard key={modelRow.id} summary={summary}>
+                <div className="kairos-record-card-details">
+                  {leafColumns.map((column) => (
+                    <div className="kairos-record-card-detail" key={column.key}>
+                      <span className="kairos-record-card-detail-label">{column.label}</span>
+                      <span className={column.role === 'figure' ? 'kairos-figure' : undefined}>
+                        {column.cell(row)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CollapsibleCard>
+            );
+          }
+          return (
+            <div className="kairos-record-card" key={modelRow.id}>
+              <span className="kairos-record-card-top">
+                <span className="kairos-record-card-identifier">
+                  {identifier ? identifier.cell(row) : null}
                 </span>
-              ) : null}
-            </span>
-            {actions ? actions.cell(modelRow.original as Row) : null}
-          </div>
-        ))}
+                {status ? status.cell(row) : null}
+              </span>
+              <span className="kairos-record-card-bottom">
+                <span className="kairos-record-card-meta">
+                  {cardMeta.map((column) => (
+                    <span key={column.key}>{column.cell(row)}</span>
+                  ))}
+                </span>
+                {cardFigure ? (
+                  <span className="kairos-record-card-figure kairos-figure">
+                    {cardFigure.cell(row)}
+                  </span>
+                ) : null}
+              </span>
+              {actions ? actions.cell(row) : null}
+            </div>
+          );
+        })}
       </div>
 
       {/* One pager for both renderings, under both of them.

@@ -3232,6 +3232,53 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   white-space: nowrap;
 }
 
+.kairos-record-card-identifier--full {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.kairos-record-card-details {
+  display: grid;
+  gap: var(--kairos-space-md);
+  min-width: 0;
+}
+
+.kairos-record-card-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--kairos-space-md);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.kairos-record-card-detail > :last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.kairos-record-card-detail .kairos-figure {
+  font-size: var(--kairos-text-sm);
+  text-align: right;
+}
+
+.kairos-collapsible-card-summary > .kairos-record-card-top {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: var(--kairos-space-sm);
+  justify-items: start;
+}
+
+.kairos-record-card-detail-label {
+  color: var(--kairos-text-muted);
+  font-size: var(--kairos-text-xs);
+  font-weight: 800;
+  letter-spacing: var(--kairos-track-label);
+  text-transform: uppercase;
+}
+
 .kairos-record-card-figure {
   flex: 0 0 auto;
   font-size: var(--kairos-text-lg);
