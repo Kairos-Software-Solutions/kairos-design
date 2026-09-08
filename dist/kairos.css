@@ -1955,6 +1955,7 @@ textarea.kairos-input-field {
   left: 50%;
   transform: translate(-50%, -50%);
   width: min(560px, calc(100vw - 32px));
+  min-width: 0;
   max-height: calc(100vh - 48px);
   overflow-y: auto;
   background: var(--kairos-surface);
@@ -1968,10 +1969,20 @@ textarea.kairos-input-field {
   gap: var(--kairos-space-xl);
 }
 
+/* Dialog content has to take the width its viewport allows. Flex children
+   otherwise keep their min-content width, which lets a long record name push
+   the modal past the 320px page boundary. */
+.kairos-dialog-content > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .kairos-dialog-title {
   margin: 0;
+  min-width: 0;
   font-size: var(--kairos-text-heading);
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* Icon-only actions need a 36px minimum hit area. The glyph inside stays
@@ -1997,6 +2008,7 @@ textarea.kairos-input-field {
   
   .kairos-dialog-actions > .kairos-button {
       width: 100%;
+      min-width: 0;
     }
 }
 
