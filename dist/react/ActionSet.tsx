@@ -140,7 +140,7 @@ export interface DestructiveAction extends ActionBase {
    * handler ignoring the argument still assigns, so an action with no
    * `typeToConfirm` and no `requireReason` is written exactly as before.
    */
-  onSelect: (details: ConfirmDetails) => void;
+  onSelect: (details: ConfirmDetails) => void | Promise<void>;
   href?: never;
   external?: never;
   destructive: Destructive;
@@ -408,7 +408,10 @@ export default function ActionSet(props: ActionSetProps) {
       typeToConfirm={pending.destructive.typeToConfirm}
       requireReason={pending.destructive.requireReason}
       reasonHint={pending.destructive.reasonHint}
-      onConfirm={pending.onSelect}
+      onConfirm={async (details) => {
+        await pending.onSelect(details);
+        setPending(null);
+      }}
       onClose={() => setPending(null)}
       restoreFocusTo={trigger}
     />

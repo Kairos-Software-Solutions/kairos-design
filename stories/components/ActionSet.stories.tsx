@@ -218,6 +218,7 @@ export const EveryContext: Story = {
     const second = await screen.findByRole('dialog');
     await userEvent.click(within(second).getByRole('button', { name: 'Delete' }));
     await waitFor(() => expect(canvas.getByText('Delete ran')).toBeVisible());
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
   },
 };
 
