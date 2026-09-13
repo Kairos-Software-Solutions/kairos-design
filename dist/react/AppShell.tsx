@@ -1,7 +1,7 @@
 'use client';
 
 import type { ElementType, ReactNode } from 'react';
-import BrandLockup from './BrandLockup';
+import ProductLockup from './ProductLockup';
 import ThemeToggle, { ThemeSetting } from './theme';
 
 /**
@@ -133,12 +133,11 @@ export function Sidebar({
 }: SidebarProps) {
   return (
     <aside className="kairos-sidebar">
-      {/* The plaque is inverted against the page, so the lockup on it is
+      {/* The plaque is inverted against the page, so the mark on it is
           whichever variant the rest of the page is hiding. `BrandLockup`
           renders both and the stylesheet picks. */}
       <div className="kairos-sidebar-brand">
-        <BrandLockup />
-        <span className="kairos-sidebar-product">{product}</span>
+        <ProductLockup product={product} />
       </div>
 
       <nav className="kairos-sidebar-nav" aria-label={label}>
@@ -217,16 +216,15 @@ export interface TopBarProps {
 /**
  * The mobile brand row, below 900px.
  *
- * It carries the lockup as well as the product name, because below 900px the
- * sidebar is gone and this is the only Kairos mark on the screen. A bar that
- * printed the product name alone left a phone with no brand on it at all.
+ * It carries the whole product lockup, because below 900px the sidebar is
+ * gone and this is the only Kairos mark on the screen. A bar that printed the
+ * product name alone left a phone with no brand on it at all.
  */
 export function TopBar({ product, switcher }: TopBarProps) {
   return (
     <header className={['kairos-topbar', switcher && 'kairos-topbar--switcher'].filter(Boolean).join(' ')}>
       <span className="kairos-topbar-brand">
-        <BrandLockup variant="icon" />
-        {product}
+        <ProductLockup product={product} />
       </span>
       {switcher}
     </header>

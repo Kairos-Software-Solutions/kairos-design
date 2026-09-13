@@ -86,6 +86,9 @@ export type { PanelProps, PageHeaderProps, MetricProps } from './Panel';
 export { default as BrandLockup } from './BrandLockup';
 export type { BrandLockupProps } from './BrandLockup';
 
+export { default as ProductLockup } from './ProductLockup';
+export type { ProductLockupProps } from './ProductLockup';
+
 export { default as AuthScreen, AuthForm, AuthLink } from './AuthScreen';
 export type { AuthScreenProps, AuthFormProps, AuthLinkProps } from './AuthScreen';
 

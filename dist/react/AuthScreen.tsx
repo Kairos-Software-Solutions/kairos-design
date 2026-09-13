@@ -1,7 +1,7 @@
 'use client';
 
 import type { ElementType, FormHTMLAttributes, ReactNode } from 'react';
-import BrandLockup from './BrandLockup';
+import ProductLockup from './ProductLockup';
 import ThemeToggle from './theme';
 
 /**
@@ -24,8 +24,9 @@ export interface AuthScreenProps {
   /**
    * The product name, and the page's `h1`.
    *
-   * The lockup above it is the Kairos mark, not a heading — without this a
-   * screen reader opens the sign-in with nothing to announce.
+   * It renders inside the product lockup, beside the mark, rather than as a
+   * second brand object under it. The mark is not a heading, so without this
+   * a screen reader opens the sign-in with nothing to announce.
    */
   product: ReactNode;
   /**
@@ -57,14 +58,17 @@ export default function AuthScreen({
     <main id="main-content" tabIndex={-1} className="kairos-tool-surface">
       <div className="kairos-auth">
         <header className="kairos-auth-header">
-          <BrandLockup />
-          <h1 className="kairos-page-title">{product}</h1>
+          <ProductLockup product={product} as="h1" />
           {tagline ? <p className="kairos-body-muted">{tagline}</p> : null}
         </header>
 
         {children}
 
         {themeToggle ? <ThemeToggle inline /> : null}
+
+        {/* Not a prop. Every Kairos sign-in credits the company in writing
+            once, and a screen that could turn it off is a screen that will. */}
+        <p className="kairos-auth-credit">Kairos Software Solutions</p>
       </div>
     </main>
   );

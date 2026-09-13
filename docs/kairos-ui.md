@@ -183,9 +183,9 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | --- | --- | --- | --- |
 | `kairos-app-shell` | App frame: sidebar or bottom nav plus main region. Write it through `AppShell`, which also places the body column, `kairos-view`, and the mobile-only theme toggle | Brand Scale pages; hand-assembling the frame, which is how two apps ended up with different `<main>` widths | — |
 | `kairos-sidebar` | 220px desktop nav | Mobile; use `kairos-bottom-nav` | — |
-| `kairos-sidebar-brand` | The lockup block at the top of the sidebar | A second logo anywhere else on the screen | — |
+| `kairos-sidebar-brand` | The inverted plaque at the top of the sidebar. It holds one `kairos-product-lockup` and sets `color`, which is what the lockup's rule follows | A second logo anywhere else on the screen; stacking a mark over a separate product name, which is what it used to do | — |
 | `kairos-bottom-nav` | Five-item mobile tab bar | More than five destinations | — |
-| `kairos-topbar` | Mobile brand row | Desktop | `--switcher` |
+| `kairos-topbar` | Mobile brand row. `kairos-topbar-brand` holds the product lockup and nothing else | Desktop; setting type on the brand row, which is the per-context invention the lockup replaces | `--switcher` |
 | `kairos-page-header` | 56px row: title left, actions right | A second header inside a panel | — |
 | `kairos-page-title` | The one Bebas element on the screen, 24px | Any other heading | — |
 | `kairos-page-header-description` | One line of supporting copy under the title. `PageHeader` renders it from its `description` prop | A paragraph; keep it to a sentence | — |
@@ -384,7 +384,8 @@ action.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-lockup` | The CDN wordmark, theme-switched | A redrawn or recoloured logo | `--light` `--dark` |
+| `kairos-product-lockup` | Naming a Kairos app: the icon, a 2px rule, the product name in Bebas. Every place a tool says which app it is — sign-in, sidebar plaque, mobile top bar | A Brand Scale page, where the full lockup carries the company; setting its size at the call site | — |
+| `kairos-lockup` | The CDN artwork, theme-switched. Inside a tool this is the `icon` variant, placed by `kairos-product-lockup` | A redrawn or recoloured logo; the full wordmark beside a product name set in Bebas, which puts two wordmarks on one screen | `--light` `--dark` |
 | `kairos-wordmark` | Text wordmark where the image will not fit | Replacing the lockup on a login screen | — |
 | `kairos-section-tag` | Opening a section on a Brand Scale page: a label, then a rule to the edge | A heading inside a panel; that is `kairos-section-title` | — |
 | `kairos-kicker` | The eyebrow over a page title, and only where it names real nesting: `Invoices` above `Invoice INV-0042` | A top-level screen, where the nav item repeated above the title is two lines of chrome carrying no information | — |
@@ -401,8 +402,24 @@ the section tag, and `kairos-section-title` is the Epilogue heading inside a
 `kairos-section` panel. Brand Scale and Product Scale, and they are never
 interchangeable.
 
+The product lockup is the object a tool names itself with, and the three
+sizes come from the context rather than from a prop: `--kairos-product-mark`,
+`--kairos-product-rule` and `--kairos-product-name` default to the shell's
+28px mark, and `.kairos-auth-header` raises them to 44px. Two rules hold it
+together. The mark is always the icon, because `ICON + WORDMARK` contains the
+word KAIROS and a product name in Bebas beside it is a second wordmark. And
+the product name is type, never artwork, so a new Kairos app ships its
+identity by passing a string. Product names are one word at ten characters or
+fewer: the sidebar plaque has 196px of usable width at `--kairos-sidebar-w`,
+and a brand name that truncates is a different brand name.
+
+The full `ICON + WORDMARK` belongs to Brand Scale — a site, an email header, a
+PDF, a deck — where the reader may not know who Kairos is. A tool's sign-in
+credits the company in writing instead, through `kairos-auth-credit`, which
+`AuthScreen` renders and no prop turns off.
+
 `kairos-sidebar-brand` is the exception worth knowing. It is an inverted
-plaque, ink under a light page and bone under a dark one, so the lockup on it
+plaque, ink under a light page and bone under a dark one, so the mark on it
 is whichever variant the rest of the page is hiding. The markup is the same
 two images; the stylesheet flips them. Do not set `display` on a lockup from
 an app rule — a selector like `.my-brand img` outranks the lockup's own and
@@ -526,8 +543,9 @@ fails on it.
 | `PageHeader` | An optional `kicker`, the title, a one-line `description`, and an action group. Pass `ActionSet` to `actions`; `PageHeader` owns the `kairos-page-header-actions` wrapper, so the `page` context renders the controls and nothing around them. `kickerHref` makes the kicker the way back to the screen above, which is why no screen needs a `BACK TO …` button — and `kickerAs` renders it with the router's own link, since the default `<a>` is a full page load |
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements |
-| `BrandLockup` | The Kairos mark, both theme variants, same `alt` on each and neither `aria-hidden` — which one is visible depends on the surface, so marking either decorative leaves the visible logo unnamed on half the screens. `variant="icon"` is the mark alone for the top bar. It takes no size and no `style`: size belongs to the context, and `kairos.css` already sets it per context |
-| `AuthScreen`, `AuthForm`, `AuthLink` | The signed-out screen. `AuthScreen` owns the surface, the lockup, the `h1` and the theme toggle — the toggle is on by default because this screen has no shell to put a settings row in. `AuthForm` fixes the order that makes the layout hold: fields, the one reserved message row, the button, then `footer`. It writes `--one-message` and reserves that row itself, so the two cannot be separated by a call site |
+| `BrandLockup` | The Kairos mark, both theme variants, same `alt` on each and neither `aria-hidden` — which one is visible depends on the surface, so marking either decorative leaves the visible logo unnamed on half the screens. `variant="icon"` is the mark alone. It takes no size and no `style`: size belongs to the context, and `kairos.css` already sets it per context |
+| `ProductLockup` | How a tool names itself: the icon, the rule, and `product` set in Bebas. `AuthScreen`, `Sidebar` and `TopBar` all render it, which is what makes three screens open the same way. `as="h1"` where the name is the page's heading, which is the sign-in and nowhere else. No size prop, for `BrandLockup`'s reason |
+| `AuthScreen`, `AuthForm`, `AuthLink` | The signed-out screen. `AuthScreen` owns the surface, the product lockup carrying the `h1`, the theme toggle and the written company credit — the toggle is on by default because this screen has no shell to put a settings row in. `AuthForm` fixes the order that makes the layout hold: fields, the one reserved message row, the button, then `footer`. It writes `--one-message` and reserves that row itself, so the two cannot be separated by a call site |
 | `AppShell`, `Sidebar`, `NavGroup`, `NavLink`, `TopBar`, `BottomNav`, `BottomNavLink` | The app frame. `AppShell` places the sidebar, the body column, `<main>` and its centred `kairos-view`, the mobile-only floating theme toggle, and the bottom nav — a top bar passed as a direct child of the shell becomes a third flex column, which is why it is a slot rather than the app's to position. `Sidebar` carries `ThemeSetting` in its footer by default, and that is the desktop half of the theme pattern that lets the floating toggle stay mobile-only. `NavLink` marks the current screen with `aria-current="page"` only; `.active` is a deprecated alias. `BottomNavLink` with no `href` is the fifth slot that opens the rest as a sheet, and renders a button because it does not navigate |
 
 Radix is the one dependency, and only for what opens over the page. A modal has to trap

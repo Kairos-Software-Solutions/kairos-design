@@ -18,6 +18,47 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
+## Upgrading to 0.11.0
+
+A tool names itself with one object from 0.11.0: `ProductLockup`, the icon mark
+plus a rule plus the product name in Bebas. `AuthScreen`, `Sidebar` and `TopBar`
+render it already, so an app using all three upgrades by bumping the version.
+See [adr/0009](adr/0009-name-a-product-with-one-lockup.md) for why.
+
+What an app has to change is anything that named itself by hand.
+
+**A sidebar plaque built from the artwork plus a name:**
+
+```diff
+  <div className="kairos-sidebar-brand">
+-   <img src="https://cdn.kairossolutionstt.com/ICON%20%2B%20WORDMARK%20-%20DARK.svg" alt="Kairos Software Solutions" />
+-   <span className="kairos-sidebar-product">Paykit control</span>
++   <ProductLockup product="Paykit" />
+  </div>
+```
+
+`kairos-sidebar-product` is **removed**, not deprecated. It styled a product
+name that is no longer a separate element, and leaving it in would leave the
+old composition buildable. Grep for it before upgrading.
+
+**A top bar built the same way:** replace the `BrandLockup` and the bare name
+with one `ProductLockup`. `kairos-topbar-brand` no longer sets type, because the
+`11px` tracked caps that lived there were the top bar's own reading of the
+product name.
+
+**A screen putting the full lockup over a Bebas title:** that composition is two
+wordmarks on one screen and is what this release removes. Use `ProductLockup`
+and let the `h1` name the state the reader is in, which is what Mailkit's
+not-found does.
+
+**Product names are one word, ten characters or fewer.** The plaque has `196px`
+of usable width. `product="Paykit control plane"` fitted nothing and is now
+`product="Paykit"`, with `Control plane` in the tagline on the sign-in and as
+the nav group label in the shell.
+
+An app that only consumes the stylesheets re-emits them and gets the new rules
+with nothing else to do.
+
 ## Upgrading to 0.4.0
 
 `DataTable` runs on TanStack Table from 0.4.0. Install it beside the package:

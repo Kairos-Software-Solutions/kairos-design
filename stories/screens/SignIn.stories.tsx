@@ -79,8 +79,8 @@ export const Refused: Story = {
 };
 
 /**
- * The lockup is the Kairos mark and the `h1` is the product, which is what a
- * screen reader opens this screen with.
+ * The lockup is the Kairos mark and the `h1` is the product name inside it,
+ * which is what a screen reader opens this screen with.
  *
  * Both lockup variants render with the same `alt` and neither is
  * `aria-hidden`, so the accessible name survives whichever one the theme
@@ -95,6 +95,19 @@ export const Landmarks: Story = {
 
     const marks = canvas.getAllByAltText('Kairos Software Solutions');
     await expect(marks).toHaveLength(2);
+
+    // The icon, not `ICON + WORDMARK`. That artwork carries the word KAIROS,
+    // so putting it above a product name set in Bebas opens the screen with
+    // two display wordmarks and the vendor outranking the app. It was this
+    // screen's composition until 0.11.0, and it is the regression worth
+    // asserting by URL rather than by element.
+    for (const mark of marks) {
+      await expect(mark.getAttribute('src')).not.toContain('WORDMARK');
+    }
+
+    // The company's written name, once, at the foot. It is what lets the mark
+    // above be the icon alone.
+    await expect(canvas.getByText('Kairos Software Solutions', { selector: 'p' })).toBeInTheDocument();
 
     // The theme control is here because the screen has no shell to put a
     // settings row in. It is the one placement the pattern allows.

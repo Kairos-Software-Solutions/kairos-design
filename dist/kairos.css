@@ -226,6 +226,65 @@ h6 {
   display: none;
 }
 
+/* Product lockup ----------------------------------------------------------
+   The Kairos mark, a 2px ink rule, and the product name. One object, used at
+   the sign-in, on the sidebar plaque and in the mobile top bar, so the three
+   places a Kairos app names itself name it the same way.
+
+   The mark is always the icon. `ICON + WORDMARK` carries the word KAIROS
+   already, and setting the product name in Bebas underneath it puts two
+   display wordmarks on one screen. The full lockup is a Brand Scale asset.
+
+   Size comes from the context, through the three custom properties below,
+   which is the rule `.kairos-lockup` follows for the same reason. The values
+   here are the shell size; `.kairos-auth-header` raises them.
+
+   The rule takes `currentColor` deliberately. It is the one part of the
+   object whose colour is not a token, so it follows the name onto the
+   inverted sidebar plaque with nothing said there about it. */
+
+.kairos-product-lockup {
+  --kairos-product-mark: 28px;
+  --kairos-product-rule: 20px;
+  --kairos-product-name: 22px;
+
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kairos-space-md);
+  min-width: 0;
+}
+
+/* Sizing only, never `display`: this selector is (0,2,0) against the lockup's
+   own (0,1,0), so a `display` here would outrank the hide and paint both
+   variants at once. The `.kairos-sidebar-brand img` bug in 0.2.2, again. */
+.kairos-product-lockup .kairos-lockup {
+  flex: none;
+  width: var(--kairos-product-mark);
+  height: var(--kairos-product-mark);
+  margin: 0;
+  object-fit: contain;
+}
+
+.kairos-product-lockup-rule {
+  flex: none;
+  width: var(--kairos-border-w-strong);
+  height: var(--kairos-product-rule);
+  background: currentColor;
+}
+
+.kairos-product-name {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--kairos-display);
+  font-size: var(--kairos-product-name);
+  /* Bebas has no descenders to clear at these sizes, and the object is
+     centred on the mark rather than on a text baseline. */
+  line-height: 0.9;
+  letter-spacing: var(--kairos-track-display);
+  text-transform: uppercase;
+  color: inherit;
+}
+
 /* Theme toggle -----------------------------------------------------------
    Fixed bottom-right on every screen, because not every screen has a header
    to put it in. It clears the mobile bottom navigation, which is fixed to the
@@ -364,14 +423,15 @@ h6 {
   border-right: var(--kairos-border-w) solid var(--kairos-border);
 }
 
-/* The logo block, capped so it stays a mark rather than a banner. */
-/* The App Shell Contract caps the logo block at 64px. Left to scale on its
-   own the lockup took 119px, which is a fifth of the room the nav has for
-   destinations at a 768px viewport height. */
+/* The logo block, capped so it stays a mark rather than a banner. The App
+   Shell Contract puts that cap at 64px: left to scale on its own the lockup
+   took 119px, a fifth of the room the nav has for destinations at a 768px
+   viewport height. One `ProductLockup` at the 28px mark plus this padding
+   draws 52px, and the block no longer stacks two brand objects to do it. */
 .kairos-sidebar-brand {
   display: flex;
-  flex-direction: column;
-  gap: var(--kairos-space-2xs);
+  align-items: center;
+  justify-content: center;
   padding: var(--kairos-space-md) var(--kairos-space-xl) var(--kairos-space-md);
   /* The inverted pair, not `--kairos-text` over `--kairos-bg`. Those land
      within a step of these today, but the pair is the one that names the
@@ -379,28 +439,10 @@ h6 {
      out and says the sidebar brand block is what it is for. The lockup rules
      below are written against that. */
   background: var(--kairos-invert-bg);
-}
-
-/* Sizing only. `display` is the lockup's to set: this selector is (0,1,1) and
-   `.kairos-lockup--dark { display: none }` is (0,1,0), so a `display` here
-   outranks the hide and paints the light lockup on top of the dark one's
-   cream tile. */
-.kairos-sidebar-brand img {
-  width: 100%;
-  max-width: 150px;
-  max-height: 34px;
-  height: auto;
-  object-fit: contain;
-  margin: 0 auto;
-}
-
-.kairos-sidebar-product {
+  /* Set here rather than on the name, so the rule inside the lockup picks it
+     up through `currentColor` and the plaque stays the only place that knows
+     it is inverted. */
   color: var(--kairos-invert-fg);
-  text-align: center;
-  font-size: var(--kairos-text-xs);
-  font-weight: 700;
-  letter-spacing: var(--kairos-track-button);
-  text-transform: uppercase;
 }
 
 .kairos-sidebar-nav {
@@ -1231,23 +1273,21 @@ h6 {
   z-index: 3;
 }
 
-/* Size only. See the note on `.kairos-auth-header .kairos-lockup`. */
-.kairos-topbar-brand .kairos-lockup {
-  width: 32px;
-  height: var(--kairos-control-h-sm);
-  object-fit: contain;
-}
-
+/* The brand row is one `ProductLockup` and nothing else, so this class
+   positions it and says nothing about type. The 11px tracked caps that used
+   to live here were the top bar's own reading of the product name, which is
+   exactly the per-context invention the lockup replaces. */
 .kairos-topbar-brand {
   display: flex;
   align-items: center;
-  gap: var(--kairos-space-md);
   min-width: 0;
-  font-family: var(--kairos-body);
-  font-size: var(--kairos-text-xs);
-  font-weight: 600;
-  letter-spacing: var(--kairos-track-button);
-  text-transform: uppercase;
+}
+
+/* Slightly shorter rule than the shell default, because the bar is 44px and
+   the object has to sit inside it without touching the border. */
+.kairos-topbar-brand .kairos-product-lockup {
+  --kairos-product-rule: 18px;
+  --kairos-product-name: 20px;
 }
 
 /* Bottom navigation ------------------------------------------------------ */
@@ -1405,22 +1445,34 @@ h6 {
   text-align: center;
 }
 
-/* Size only, never `display`. Which variant shows is the lockup's own
-   decision, and a rule here that set `display` would outrank it and paint
-   both — the bug that shipped in 0.2.2 against `.kairos-sidebar-brand img`. */
-.kairos-auth-header .kairos-lockup {
-  width: min(190px, 70%);
-  height: auto;
-  margin: 0 auto var(--kairos-space-lg);
+/* The sign-in is the one screen where the lockup is the biggest thing on it,
+   so it is the one context that raises the three size properties. Size only,
+   never `display`: which variant shows is the lockup's own decision, and a
+   rule here that set `display` would outrank it and paint both — the bug that
+   shipped in 0.2.2 against `.kairos-sidebar-brand img`. */
+.kairos-auth-header .kairos-product-lockup {
+  --kairos-product-mark: 44px;
+  --kairos-product-rule: 30px;
+  --kairos-product-name: 34px;
 }
 
+/* The sign-in's heading is inside the lockup, so this is for the other screen
+   that uses this header: a not-found, where the lockup names the app and the
+   title names the state the reader is in. */
 .kairos-auth-header .kairos-page-title,
 .kairos-auth-header .kairos-body-muted {
-  margin: 0;
+  margin: var(--kairos-space-md) 0 0;
 }
 
-.kairos-auth-header .kairos-body-muted {
-  margin-top: var(--kairos-space-xs);
+/* The vendor's full name, once, at the foot of the screen. The lockup above
+   says Kairos with the mark; this is the written form the copy rules ask for
+   on a first mention, and it is the reason the sign-in does not need the
+   `ICON + WORDMARK` artwork to carry the company name. */
+.kairos-auth-credit {
+  margin: var(--kairos-space-xl) 0 0;
+  text-align: center;
+  font-size: var(--kairos-text-sm);
+  color: var(--kairos-text-muted);
 }
 
 .kairos-auth-form {
