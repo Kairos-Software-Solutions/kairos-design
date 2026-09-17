@@ -576,3 +576,28 @@ test('the theme toggle is a tap target on the phone screens it appears on', () =
   assert.doesNotMatch(setting.slice(0, setting.indexOf('\n}')), /kairos-theme-toggle/,
     'the desktop control is the settings row, not this button');
 });
+
+/**
+ * The icon-only variant drops the word, which is the thing that was holding the
+ * button open horizontally. A 44px floor in one dimension is not a tap target.
+ */
+test('the icon-only theme toggle keeps the tap target in both dimensions', () => {
+  const rule = css.match(/\n\.kairos-theme-toggle--icon \{([\s\S]*?)\n\}/)?.[1];
+
+  assert.ok(rule, '.kairos-theme-toggle--icon has a rule');
+  assert.match(rule, /min-width:\s*var\(--kairos-control-h-touch\)/,
+    'with the word gone, the width is held by the token rather than by padding');
+
+  const theme = readFileSync(join(ROOT, 'dist', 'react', 'theme.tsx'), 'utf8');
+  const toggle = theme.slice(theme.indexOf('export default function ThemeToggle'));
+
+  assert.match(toggle, /labelled \? <span className="kairos-theme-toggle-text">/,
+    'the word is what the variant drops');
+  assert.match(toggle, /labelled = true/,
+    'the labelled form stays the default, because a lone glyph is ambiguous');
+
+  // The ambiguity the word carried has to be carried by something. Both
+  // attributes name the current theme and the next one, in both variants.
+  assert.match(toggle, /title=\{description\}/, 'the title survives the variant');
+  assert.match(toggle, /aria-label=\{description\}/, 'the accessible name survives the variant');
+});

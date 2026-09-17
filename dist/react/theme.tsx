@@ -212,8 +212,19 @@ export function ThemeSetting() {
  * shell is present, use `ThemeSetting` on the settings screen instead and hide
  * this one in CSS — two theme controls on one screen is the drift the registry
  * exists to stop.
+ *
+ * `labelled` defaults to true and should stay that way wherever the control
+ * stands on its own, because a lone sun or moon does not say whether it shows
+ * the theme you have or the one you would get. Pass `labelled={false}` only
+ * where the control sits in a row of other controls and the word would outrank
+ * them: a marketing header reading `SYSTEM` in a bordered pill beside the
+ * page's one call to action is the case this exists for. The title and the
+ * accessible name still state both halves either way. See ADR 0010.
  */
-export default function ThemeToggle({ inline = false }: { inline?: boolean } = {}) {
+export default function ThemeToggle({
+  inline = false,
+  labelled = true,
+}: { inline?: boolean; labelled?: boolean } = {}) {
   const [theme, choose] = useThemePreference();
   const upcoming = nextTheme(theme);
 
@@ -221,16 +232,24 @@ export default function ThemeToggle({ inline = false }: { inline?: boolean } = {
   // is usable without seeing which icon is showing.
   const description = `${LABELS[theme]}. Switch to ${upcoming === 'system' ? 'your device setting' : upcoming}.`;
 
+  const className = [
+    'kairos-theme-toggle',
+    inline ? 'kairos-theme-toggle--inline' : '',
+    labelled ? '' : 'kairos-theme-toggle--icon',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <button
       type="button"
-      className={inline ? 'kairos-theme-toggle kairos-theme-toggle--inline' : 'kairos-theme-toggle'}
+      className={className}
       title={description}
       aria-label={description}
       onClick={() => choose(upcoming)}
     >
       {ICONS[theme]}
-      <span className="kairos-theme-toggle-text">{SHORT_LABELS[theme]}</span>
+      {labelled ? <span className="kairos-theme-toggle-text">{SHORT_LABELS[theme]}</span> : null}
     </button>
   );
 }

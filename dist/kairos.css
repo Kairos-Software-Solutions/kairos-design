@@ -327,11 +327,28 @@ h6 {
   transition: background-color var(--kairos-duration-fast) var(--kairos-ease), border-color var(--kairos-duration-fast) var(--kairos-ease);
 }
 
-/* The word always ships with the glyph. A lone sun or moon is the most
+/* The word ships with the glyph by default. A lone sun or moon is the most
    commonly misread control in this class, because it is ambiguous about
    whether it shows the current theme or the one you would get. */
 .kairos-theme-toggle-text {
   white-space: nowrap;
+}
+
+/* `labelled={false}`: the glyph alone, in a square box. For a control sitting
+   in a row of other controls, where the word outranks them — a marketing header
+   whose most prominent element reads `SYSTEM` beside the page's one call to
+   action. The ambiguity above is real and is carried by the title and the
+   accessible name, which state the current theme and the next one in both
+   variants.
+
+   `min-width` as well as `min-height`, because with the word gone the padding
+   alone draws a box under the 44px floor in the dimension that no longer has
+   text holding it open. */
+.kairos-theme-toggle--icon {
+  justify-content: center;
+  gap: 0;
+  min-width: var(--kairos-control-h-touch);
+  padding-inline: var(--kairos-space-sm);
 }
 
 .kairos-theme-toggle:hover {
