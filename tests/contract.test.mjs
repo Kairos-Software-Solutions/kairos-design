@@ -78,6 +78,30 @@ test('every deprecated state alias maps to a canonical variant', () => {
   }
 });
 
+/**
+ * A component that attaches a handler or holds client state has to say
+ * `'use client'`. Without it, an app that renders the component from a server
+ * component gets a render error rather than a warning: React refuses to
+ * serialise the handler. `Button` shipped that way through 0.12.0 — it always
+ * attaches its own `onClick` to refuse a busy press — and every server-rendered
+ * Paykit page with a filter form failed.
+ */
+test('a component with handlers or client state declares the client boundary', () => {
+  const serverSafeHooks = new Set(['useId', 'useMemo', 'useCallback', 'useDebugValue']);
+  const missing = [];
+
+  for (const { name, source } of reactFiles) {
+    const body = source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+    if (/^\s*['"]use client['"]/.test(body)) continue;
+    const handler = /\son[A-Z][A-Za-z]*=\{/.test(body);
+    const hooks = [...new Set([...body.matchAll(/\b(use[A-Z][A-Za-z]*)\(/g)].map((m) => m[1]))]
+      .filter((hook) => !serverSafeHooks.has(hook));
+    if (handler || hooks.length) missing.push(`${name}${handler ? ' attaches a handler' : ''}${hooks.length ? ` calls ${hooks.join(', ')}` : ''}`);
+  }
+
+  assert.deepEqual(missing, []);
+});
+
 test('every button variant the component maps has a rule', () => {
   const source = readFileSync(join(ROOT, 'dist', 'react', 'Button.tsx'), 'utf8');
   const modifiers = [...source.matchAll(/'(kairos-button--[a-z-]+)'/g)].map((m) => m[1]);
