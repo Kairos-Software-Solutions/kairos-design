@@ -1,6 +1,6 @@
 'use client';
 
-import { type RefObject, useState } from 'react';
+import { type ReactNode, type RefObject, useState } from 'react';
 import Button from './Button';
 import Dialog from './Dialog';
 import InputField, { Field } from './Field';
@@ -22,8 +22,12 @@ export interface ConfirmDialogProps {
    * What will actually happen, in plain language. Say the consequence and say
    * what survives it, because the thing a person is checking for at this
    * moment is usually what they are *not* about to lose.
+   *
+   * A string is one paragraph. Pass a node when the consequence needs a link
+   * beside it, such as a "What does this do?" help page; it is placed in a
+   * block, so it may hold its own paragraphs.
    */
-  message: string;
+  message: ReactNode;
   /** The verb, not "OK": "Delete company", "End plan", "Suspend tenant". */
   confirmLabel: string;
   /**
@@ -148,7 +152,7 @@ export default function ConfirmDialog({
 
   return (
     <Dialog open={open} onClose={close} title={title} restoreFocusTo={restoreFocusTo}>
-      <p className="kairos-body">{message}</p>
+      {typeof message === 'string' ? <p className="kairos-body">{message}</p> : <div className="kairos-body">{message}</div>}
 
       {/* The gate's own fields, in the order the person works through them:
           name the record, then say why. Both are ordinary fields, so each

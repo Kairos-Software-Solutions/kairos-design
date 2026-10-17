@@ -514,6 +514,19 @@ test('every class has a manifest row, or a documented block', () => {
 });
 
 /**
+ * A confirmation's message can carry a link.
+ *
+ * The consequence is the thing being read, and the place a person most wants
+ * "What does this do?" is the dialog that is about to do it. A node is put in
+ * a block, because a paragraph cannot hold the paragraphs a node may bring.
+ */
+test('a confirmation message is a string paragraph or a node in a block', () => {
+  const source = readFileSync(join(ROOT, 'dist', 'react', 'ConfirmDialog.tsx'), 'utf8');
+  assert.match(source, /message: ReactNode;/, 'message accepts a node');
+  assert.match(source, /typeof message === 'string' \? <p className="kairos-body">\{message\}<\/p> : <div className="kairos-body">\{message\}<\/div>/, 'a string stays one paragraph and a node gets a block');
+});
+
+/**
  * The gate is wired to the button that commits.
  *
  * A `typeToConfirm` prop that renders a field and does not gate the confirm is
