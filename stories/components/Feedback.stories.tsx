@@ -127,7 +127,12 @@ export const Dialogs: Story = {
           open={significant}
           destructive={false}
           title="Send INV-2026-0184?"
-          message="The invoice is emailed to accounts@angostura.com and can no longer be edited. You can still record a payment or void it."
+          message={(
+            <>
+              The invoice is emailed to accounts@angostura.com and can no longer be edited. You can still record a payment or void it.{' '}
+              <a href="#help-send-invoice">What does this do?</a>
+            </>
+          )}
           confirmLabel="Send invoice"
           onConfirm={() => setSignificant(false)}
           onClose={() => setSignificant(false)}
