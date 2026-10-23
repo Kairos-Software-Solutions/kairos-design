@@ -300,7 +300,8 @@ export const RelatedSections: Story = {
     const summary = invoices.querySelector('summary') as HTMLElement;
     await userEvent.click(summary);
     await waitFor(() => expect(summary).toHaveAttribute('aria-expanded', 'true'));
-    await expect(canvas.getByText(/INV-0041, INV-0039/)).toBeVisible();
+    // The body fades in over the disclosure's motion, from opacity 0.
+    await waitFor(() => expect(canvas.getByText(/INV-0041, INV-0039/)).toBeVisible());
 
     // A section with an id remembers a choice that differs from its default,
     // and forgets one that matches it.
