@@ -84,7 +84,9 @@ export default function Dialog({ open, onClose, title, children, restoreFocusTo 
             target.focus();
           }}
         >
-          <div className="kairos-split kairos-split--baseline">
+          {/* A grid rather than `kairos-split`, which wraps: a two-line title
+              used to push the close control onto a line of its own. */}
+          <div className="kairos-dialog-head">
             <RadixDialog.Title className="kairos-dialog-title">{title}</RadixDialog.Title>
             <RadixDialog.Close asChild>
               <button type="button" onClick={onClose} className="kairos-icon-action" aria-label="Close">

@@ -131,6 +131,7 @@ h6 {
 .kairos-section-title,
 .kairos-record-row-title,
 .kairos-tile-heading,
+.kairos-disclosure-title,
 .kairos-dialog-title {
   font-family: var(--kairos-body);
   letter-spacing: var(--kairos-track-display);
@@ -656,6 +657,25 @@ h6 {
   margin-bottom: var(--kairos-space-md);
 }
 
+/* A panel heading with the panel's help at the right end of its row. The one
+   place a section's ⓘ goes, so it is in the same place on every panel that has
+   one: not after the heading's last word, where its position moved with the
+   length of the heading, and never inside a label or a sentence. */
+.kairos-panel-heading-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--kairos-space-sm);
+}
+
+.kairos-panel-heading-row:not(:last-child) {
+  margin-bottom: var(--kairos-space-md);
+}
+
+.kairos-panel-heading-row > .kairos-panel-heading {
+  margin-bottom: 0;
+}
+
 /* Vertical stacks. The gap is a token choice, so it lives here rather than at
    the call site. */
 /* One modifier per step of the space scale, and the modifier's name is the
@@ -754,6 +774,54 @@ h6 {
    call site needing both visible composes them into the error content. */
 .kairos-field:has(.kairos-field-error:not(:empty)) .kairos-field-hint {
   display: none;
+}
+
+/* An amount and its unit as one control: `10` and `%`, `250` and `TTD`.
+
+   Two fields side by side in a grid separate the moment the grid wraps — a
+   discount's amount landed on one row and what it was measured in on the
+   next. Here the unit is a suffix inside the same box: the input takes the
+   width, the suffix takes what it needs, and the two share the border between
+   them, so they cannot be laid out apart. The suffix is a `kairos-select` in
+   its wrap, which needs its own `aria-label`, or a word in
+   `kairos-affix-text`. */
+.kairos-affix {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+}
+
+.kairos-affix > .kairos-input-field {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.kairos-affix > .kairos-select-wrap > .kairos-select,
+.kairos-affix > .kairos-affix-text {
+  margin-left: calc(var(--kairos-border-w-strong) * -1);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.kairos-affix-text {
+  display: inline-flex;
+  align-items: center;
+  height: var(--kairos-control-h);
+  padding: 0 var(--kairos-space-md);
+  border: var(--kairos-border-w-strong) solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-bg);
+  color: var(--kairos-text-2);
+  font-size: var(--kairos-text-input);
+  white-space: nowrap;
+}
+
+/* A focused half draws its ring over its neighbour's shared border, not under
+   it. */
+.kairos-affix > :focus-visible,
+.kairos-affix > .kairos-select-wrap:focus-within {
+  position: relative;
+  z-index: 1;
 }
 
 /* A row of actions. Never more than three bordered buttons in one group. */
@@ -1085,10 +1153,16 @@ h6 {
   list-style: none;
 }
 
+/* A step keeps its label on one line and its own width. As a shrinking flex
+   item the rail squeezed every step to fit the row, and a label broke one
+   letter per line inside a box the width of its marker. The rail scrolls
+   sideways instead, which it was already set up to do. */
 .kairos-wizard-step {
   display: inline-flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: var(--kairos-space-sm);
+  white-space: nowrap;
   min-height: var(--kairos-control-h);
   padding: var(--kairos-space-sm) var(--kairos-space-md);
   border: var(--kairos-border-w) solid var(--kairos-border-subtle);
@@ -1116,6 +1190,162 @@ h6 {
 .kairos-wizard-step[data-done='true'] {
   border-width: var(--kairos-border-w-strong);
   border-color: var(--kairos-border);
+}
+
+/* --------------------------------------------------------------------------
+   Steps: a sequence on one row
+   --------------------------------------------------------------------------
+   The row at the top of a composer or an import: one bordered row, shared
+   dividers, the current step in ink. It never wraps. Below the width its
+   names need, every step but the current one drops to its number and gives
+   its width to the one that kept its name, so a phone reads `1  2 ITEMS  3  4`
+   rather than four boxes with their labels broken a letter per line.
+
+   The width is the row's own, through a container query, because one viewport
+   holds the row in panels of different widths. The names that drop are hidden
+   the way `kairos-visually-hidden` hides, so a screen reader still hears every
+   step. The current step is ink, not amber: the screen's Continue is its one
+   amber action, and a marker is not an action.
+
+   Each count folds at about seven rem a step, and four and six were measured
+   at their widest names (27 and 42rem). */
+.kairos-steps {
+  container-type: inline-size;
+  min-width: 0;
+}
+
+.kairos-steps-list {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: var(--kairos-border-w) solid var(--kairos-border);
+  border-radius: var(--kairos-radius-input);
+  overflow: hidden;
+  background: var(--kairos-surface);
+}
+
+.kairos-steps-item {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.kairos-steps-item + .kairos-steps-item {
+  border-left: var(--kairos-border-w) solid var(--kairos-border-subtle);
+}
+
+.kairos-step {
+  appearance: none;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kairos-space-xs);
+  min-width: var(--kairos-control-h);
+  min-height: var(--kairos-control-h);
+  padding: 0 var(--kairos-space-md);
+  border: 0;
+  background: transparent;
+  color: var(--kairos-text-muted);
+  font-family: inherit;
+  font-size: var(--kairos-text-sm);
+  font-weight: 600;
+  letter-spacing: var(--kairos-track-button);
+  text-transform: uppercase;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+button.kairos-step {
+  cursor: pointer;
+}
+
+/* Passed reads as ink and ahead stays muted, so the row says how far along
+   the work is without a second marker. */
+.kairos-step[data-done='true'] {
+  color: var(--kairos-text-2);
+}
+
+.kairos-step[aria-current='step'] {
+  background: var(--kairos-invert-bg);
+  color: var(--kairos-invert-fg);
+  font-weight: 800;
+}
+
+.kairos-step:focus-visible {
+  outline: var(--kairos-border-w-strong) solid var(--kairos-focus);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 var(--kairos-focus-w) var(--kairos-focus-inner);
+}
+
+.kairos-step-number {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (pointer: coarse) {
+  button.kairos-step {
+    min-width: var(--kairos-control-h-touch);
+    min-height: var(--kairos-control-h-touch);
+  }
+}
+
+@container (max-width: 14rem) {
+  .kairos-steps[data-count='2'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
+  .kairos-steps[data-count='2'] .kairos-steps-item:not([data-current]) .kairos-step-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+@container (max-width: 21rem) {
+  .kairos-steps[data-count='3'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
+  .kairos-steps[data-count='3'] .kairos-steps-item:not([data-current]) .kairos-step-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+@container (max-width: 27rem) {
+  .kairos-steps[data-count='4'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
+  .kairos-steps[data-count='4'] .kairos-steps-item:not([data-current]) .kairos-step-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+@container (max-width: 35rem) {
+  .kairos-steps[data-count='5'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
+  .kairos-steps[data-count='5'] .kairos-steps-item:not([data-current]) .kairos-step-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+@container (max-width: 42rem) {
+  .kairos-steps[data-count='6'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
+  .kairos-steps[data-count='6'] .kairos-steps-item:not([data-current]) .kairos-step-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+@container (max-width: 49rem) {
+  .kairos-steps[data-count='7'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
+  .kairos-steps[data-count='7'] .kairos-steps-item:not([data-current]) .kairos-step-label {
+    position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+  }
+}
+
+/* A phone-width row of four or more. Five numbers at a full control's width,
+   or at the 44px a touch screen gives a button, left the current step too
+   little room for its own name, and it was clipped mid-word. A step that has
+   dropped to its number is a number's width here, still above the 24px a
+   target needs, and the current step takes the rest. */
+@container (max-width: 20rem) {
+  .kairos-steps:not([data-count='2'], [data-count='3']) .kairos-steps-item:not([data-current]) .kairos-step {
+    min-width: calc(var(--kairos-control-h) - var(--kairos-space-sm));
+    padding: 0;
+  }
+
+  .kairos-steps:not([data-count='2'], [data-count='3']) .kairos-steps-item[data-current] .kairos-step {
+    padding: 0 var(--kairos-space-sm);
+  }
 }
 
 /* The sign-in column: one card, centred, capped so the fields stay a
@@ -1261,6 +1491,133 @@ h6 {
 @keyframes disclose {
   from { grid-template-rows: 0fr; opacity: 0; }
   to { grid-template-rows: 1fr; opacity: 1; }
+}
+
+/* --------------------------------------------------------------------------
+   Disclosure sections
+   --------------------------------------------------------------------------
+   A section of a screen that is closed until it is wanted: a record's related
+   invoices, a form's optional group, the rare things at the bottom. Closed, it
+   is one row — the caret, the heading, one line saying what is inside, and the
+   count — so a record screen reads as a list of what it holds rather than as
+   every list it holds, open, one after another.
+
+   On `<details>` like `kairos-collapsible-card`, so it opens before hydration,
+   prints, and is found by in-page search. Standing alone it is a panel. Inside
+   `kairos-disclosure-group` the sections share one panel and are ruled apart,
+   which is the shape for a record's related lists: one stamp, not six. */
+.kairos-disclosure {
+  min-width: 0;
+  background: var(--kairos-surface);
+  border: var(--kairos-border-w) solid var(--kairos-border);
+  border-radius: var(--kairos-radius-panel);
+  box-shadow: var(--kairos-shadow-card);
+}
+
+.kairos-disclosure-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-md);
+  min-height: var(--kairos-row-h);
+  padding: var(--kairos-space-md) var(--kairos-panel-pad);
+  border-radius: inherit;
+  list-style: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.kairos-disclosure-summary::-webkit-details-marker {
+  display: none;
+}
+
+.kairos-disclosure-summary:hover {
+  background: var(--kairos-row-hover);
+}
+
+.kairos-disclosure-summary:focus-visible {
+  outline: var(--kairos-border-w-strong) solid var(--kairos-focus);
+  outline-offset: -2px;
+  box-shadow: inset 0 0 0 var(--kairos-focus-w) var(--kairos-focus-inner);
+}
+
+/* The caret turns rather than swapping glyphs, so the row does not change
+   shape when it opens. */
+.kairos-disclosure-caret {
+  flex: none;
+  color: var(--kairos-text-2);
+  transition: transform var(--kairos-duration) var(--kairos-ease);
+}
+
+.kairos-disclosure[open] > .kairos-disclosure-summary .kairos-disclosure-caret {
+  transform: rotate(90deg);
+}
+
+.kairos-disclosure-heading {
+  display: grid;
+  flex: 1 1 auto;
+  gap: var(--kairos-space-3xs);
+  min-width: 0;
+}
+
+.kairos-disclosure-title {
+  margin: 0;
+  font-size: var(--kairos-text-heading);
+  font-weight: 600;
+}
+
+/* What is inside, without opening it: `3 unpaid · TTD 536.72 outstanding`.
+   It wraps rather than truncating, because a summary cut off mid-word is a
+   summary that says less than it was written to. */
+.kairos-disclosure-meta {
+  color: var(--kairos-text-2);
+  font-size: var(--kairos-text-meta);
+  line-height: 1.45;
+}
+
+.kairos-disclosure-count {
+  flex: none;
+  min-width: 2ch;
+  color: var(--kairos-text-2);
+  font-size: var(--kairos-text-meta);
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+  text-align: right;
+}
+
+.kairos-disclosure-body {
+  display: grid;
+  gap: var(--kairos-space-md);
+  min-width: 0;
+  padding: 0 var(--kairos-panel-pad) var(--kairos-panel-pad);
+  animation: disclose var(--kairos-duration) var(--kairos-ease);
+}
+
+.kairos-disclosure-group {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--kairos-surface);
+  border: var(--kairos-border-w) solid var(--kairos-border);
+  border-radius: var(--kairos-radius-panel);
+  box-shadow: var(--kairos-shadow-card);
+}
+
+.kairos-disclosure-group > .kairos-disclosure {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.kairos-disclosure-group > .kairos-disclosure + .kairos-disclosure {
+  border-top: var(--kairos-border-w) solid var(--kairos-border-subtle);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kairos-disclosure-caret,
+  .kairos-disclosure-body {
+    animation: none;
+    transition: none;
+  }
 }
 
 /* A single-column screen: a boundary message, a sign-in card. */
@@ -1568,6 +1925,140 @@ h6 {
 .kairos-app-shell .kairos-page-header {
   min-height: var(--kairos-page-header-h);
 }
+
+/* The title and the one help control a screen title may carry. The help sits
+   in the title's row, after it, and nowhere else in the header: an ⓘ placed by
+   hand drifted into value labels and sentences, so a person looking for the
+   explanation found it in a different place on every screen. */
+.kairos-page-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-xs);
+  min-width: 0;
+}
+
+/* One outline action beside the primary, until the header runs out of room.
+   Below the sidebar boundary it folds into the header's menu, where
+   `ActionSet` has already put a copy of it marked `--folded`. Hidden only
+   here, never removed: the copy in the menu is the same action, so a phone
+   loses a button and keeps the action. */
+@media (max-width: 899px) {
+  .kairos-page-header-actions .kairos-page-header-secondary {
+    display: none;
+  }
+}
+
+/* A row of actions on a phone: the slot decides the shape, not the labels.
+
+   A wrapping flex row let its content decide the layout. Two long labels and a
+   menu trigger wrapped into two ragged rows with the trigger alone on the
+   second, and a page header's actions stacked one full-width button per row,
+   menu trigger included. Below 768px a page header's actions are a grid, and
+   below 640px (where `--equal` already stacks) so is every action row, and
+   every arrangement either can hold has one shape:
+
+   - The primary leads, on a row of its own and the full width, whatever order
+     the markup wrote it in.
+   - Every other action takes the full width under it, one per row, so two
+     outline buttons are one width and not two.
+   - A menu trigger takes a narrow column at the end, beside the first action
+     under the primary. With nothing else but one action, it sits beside that
+     action, so primary-and-menu is one row.
+
+   `dense` is what lets the trigger, which sorts last, take the end column of
+   the first row that has one free. A folded secondary is not counted: it is
+   `display: none` at these widths and holds no cell.
+
+   `--equal` keeps its own rule above, where both columns are already the same
+   width and the ranks stack in reading order. */
+@media (max-width: 767px) {
+  .kairos-page-header-actions {
+    display: grid;
+    flex: 1 1 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+
+  .kairos-page-header-actions > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .kairos-page-header-actions > :is(.kairos-button, .kairos-submit-wrap),
+  .kairos-page-header-actions > .kairos-submit-wrap > .kairos-button {
+    width: 100%;
+  }
+
+  .kairos-page-header-actions > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    order: -1;
+  }
+
+  .kairos-page-header-actions:has(> .kairos-overflow-trigger) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .kairos-page-header-actions:has(> .kairos-overflow-trigger) > * {
+    grid-column: 1;
+  }
+
+  .kairos-page-header-actions > .kairos-overflow-trigger {
+    grid-column: 2;
+    order: 1;
+  }
+
+  /* Three or more counted children: the primary has an action to share the
+     next row with the menu, so it takes the whole of its own. */
+  .kairos-page-header-actions:has(> .kairos-overflow-trigger):has(> :nth-child(3 of :not(.kairos-page-header-secondary)))
+    > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .kairos-action-row:not(.kairos-action-row--equal) {
+    display: grid;
+    flex: 1 1 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > :is(.kairos-button, .kairos-submit-wrap),
+  .kairos-action-row:not(.kairos-action-row--equal) > .kairos-submit-wrap > .kairos-button {
+    width: 100%;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    order: -1;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger) > * {
+    grid-column: 1;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > .kairos-overflow-trigger {
+    grid-column: 2;
+    order: 1;
+  }
+
+  /* Three or more counted children: the primary has an action to share the
+     next row with the menu, so it takes the whole of its own. */
+  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger):has(> :nth-child(3 of :not(.kairos-page-header-secondary)))
+    > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    grid-column: 1 / -1;
+  }
+}
+
 
 /* Bebas Neue ships one weight. Asking for 900 makes the browser synthesise a
    bold by smearing the outline, which thickens the stems unevenly and closes
@@ -2054,6 +2545,25 @@ textarea.kairos-input-field {
   overflow-wrap: anywhere;
 }
 
+/* The title and the close control. A grid, not a wrapping row: as
+   `kairos-split` it was a flex row that wraps, so a title long enough for two
+   lines pushed the close button onto a line of its own under it. The title
+   now wraps inside its own column and the close holds the top-right corner at
+   every width. The close is pulled up by half the difference between its box
+   and the title's first line, so the glyph sits level with that line rather
+   than below it. */
+.kairos-dialog-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--kairos-space-md);
+}
+
+.kairos-dialog-head > .kairos-icon-action {
+  margin-top: calc(var(--kairos-space-sm) * -1);
+  margin-right: calc(var(--kairos-space-sm) * -1);
+}
+
 /* Icon-only actions need a 36px minimum hit area. The glyph inside stays
    small; the target around it is what has to be reachable. */
 /* The dialog's action row. The committing button carries a 4px stamp, so the
@@ -2211,6 +2721,81 @@ textarea.kairos-input-field {
   text-underline-offset: 3px;
 }
 
+/* --------------------------------------------------------------------------
+   Sub-navigation
+   --------------------------------------------------------------------------
+   The pages inside one area — Sales: Overview, Quotes, Invoices, Recurring,
+   Products — as one row of links under the page header. Navigation, so each is
+   a link with `aria-current="page"` on the one you are on, not a tab and not a
+   filter.
+
+   One row at every width. It scrolls sideways rather than wrapping, because a
+   second row of links reads as a second, lower level of navigation that is not
+   there. The current page is ink with an ink rule under it: amber is the
+   sidebar's mark for the area, and a second amber mark one level down would
+   say the area twice. */
+.kairos-subnav {
+  min-width: 0;
+  max-width: 100%;
+  margin-bottom: var(--kairos-space-xl);
+  border-bottom: var(--kairos-border-w) solid var(--kairos-border-subtle);
+}
+
+.kairos-subnav-list {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: var(--kairos-space-lg);
+  margin: 0;
+  padding: 0;
+  overflow-x: auto;
+  list-style: none;
+  scrollbar-width: none;
+}
+
+.kairos-subnav-list::-webkit-scrollbar {
+  display: none;
+}
+
+.kairos-subnav-list > li {
+  display: flex;
+  flex: 0 0 auto;
+}
+
+.kairos-subnav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kairos-space-xs);
+  min-height: var(--kairos-row-h);
+  color: var(--kairos-text-2);
+  font-size: var(--kairos-text-sm);
+  font-weight: 700;
+  letter-spacing: var(--kairos-track-button);
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  touch-action: manipulation;
+}
+
+.kairos-subnav-link:hover {
+  color: var(--kairos-text);
+}
+
+.kairos-subnav-link[aria-current='page'] {
+  color: var(--kairos-text);
+  font-weight: 800;
+  box-shadow: inset 0 calc(var(--kairos-rule-w) * -1) 0 var(--kairos-border);
+}
+
+.kairos-subnav-link:focus-visible {
+  outline: var(--kairos-border-w-strong) solid var(--kairos-focus);
+  outline-offset: -2px;
+}
+
+.kairos-subnav-count {
+  color: var(--kairos-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
 /* Overflow menu -----------------------------------------------------------
    Rank 5. One per row, at the end of the row, holding everything that is not
    the record's own linked identifier. The trigger carries a subtle border at
@@ -2356,6 +2941,21 @@ textarea.kairos-input-field {
 .kairos-overflow-item--destructive[data-disabled] {
   color: var(--kairos-text-muted);
   font-weight: inherit;
+}
+
+/* A page header's secondary action, folded into its menu.
+
+   `ActionSet` renders the secondary twice: as the outline button beside the
+   primary, which `kairos-page-header-secondary` hides below 900px, and as the
+   first item of the menu, which this hides from 900px up. One of the two is
+   on the screen at any width, so the action never goes missing and never
+   shows twice. A menu holding nothing but folded items has nothing to offer
+   on a wide screen, so its trigger goes with them. */
+@media (min-width: 900px) {
+  .kairos-overflow-item--folded,
+  .kairos-overflow-trigger--folded {
+    display: none;
+  }
 }
 
 /* Combobox, tooltip, popover.
@@ -3551,20 +4151,6 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   
   .kairos-page-header {
       align-items: stretch !important;
-    }
-  
-  .kairos-page-header-actions {
-      display: grid !important;
-      grid-template-columns: minmax(0, 1fr);
-      width: 100%;
-    }
-  
-  .kairos-page-header-actions > .kairos-button {
-      width: 100%;
-    }
-  
-  .kairos-page-header-primary {
-      order: -1;
     }
   
   .payments-page-actions {

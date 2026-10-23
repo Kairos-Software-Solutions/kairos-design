@@ -1,6 +1,6 @@
 'use client';
 
-import { type RefObject } from 'react';
+import { type ElementType, type RefObject } from 'react';
 import { DropdownMenu } from 'radix-ui';
 
 export interface OverflowItem {
@@ -30,6 +30,14 @@ export interface OverflowItem {
    * controls where it sits and how it reads.
    */
   destructive?: boolean;
+  /**
+   * The item is a page header's secondary action, which is a button beside the
+   * primary from 900px up and an item in this menu below that. The menu shows
+   * it only where the button is gone. `ActionSet` sets it; a call site
+   * assembling a header by hand sets it on the copy of the button it puts here
+   * and gives the button `kairos-page-header-secondary`.
+   */
+  folded?: boolean;
 }
 
 export interface OverflowMenuProps {
@@ -50,6 +58,13 @@ export interface OverflowMenuProps {
    * the same ref to `ConfirmDialog`, which restores to it.
    */
   triggerRef?: RefObject<HTMLButtonElement | null>;
+  /**
+   * The link component for items with an `href`. Defaults to `<a>`, which is
+   * a full page load in a routed app; pass the router's own (`next/link`) to
+   * keep the soft navigation. It has to forward its ref and props, which the
+   * router links do, because the menu item is rendered through it.
+   */
+  linkAs?: ElementType;
 }
 
 /** The gap between the trigger and the menu, and the menu and the viewport. */
@@ -78,7 +93,8 @@ const VIEWPORT_PADDING = 8;
  * so an app stylesheet writing a rule about our class can no longer put the
  * clipping back.
  */
-export default function OverflowMenu({ items, label, context = 'row', triggerRef }: OverflowMenuProps) {
+export default function OverflowMenu({ items, label, context = 'row', triggerRef, linkAs }: OverflowMenuProps) {
+  const ItemLink: ElementType = linkAs ?? 'a';
 
   // A trigger that opens an empty menu is a dead control. Render nothing.
   if (items.length === 0) return null;
@@ -96,6 +112,10 @@ export default function OverflowMenu({ items, label, context = 'row', triggerRef
   // keyboard and not to a click is worse than one that says it is unavailable.
   const allDisabled = items.every((item) => item.disabled);
 
+  // A menu holding only a header's folded secondary has nothing to offer from
+  // 900px up, where the secondary is a button, so the trigger goes too.
+  const allFolded = items.every((item) => item.folded);
+
   // Destructive items sit last, behind a rule.
   const ordered = [...items.filter((i) => !i.destructive), ...items.filter((i) => i.destructive)];
   const firstDestructive = ordered.findIndex((i) => i.destructive);
@@ -111,7 +131,13 @@ export default function OverflowMenu({ items, label, context = 'row', triggerRef
         <button
           ref={triggerRef}
           type="button"
-          className={`kairos-overflow-trigger${context === 'header' ? ' kairos-overflow-trigger--header' : ''}`}
+          className={[
+            'kairos-overflow-trigger',
+            context === 'header' && 'kairos-overflow-trigger--header',
+            allFolded && 'kairos-overflow-trigger--folded',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           aria-label={`Actions for ${label}`}
           disabled={allDisabled}
         >
@@ -144,6 +170,7 @@ export default function OverflowMenu({ items, label, context = 'row', triggerRef
               'kairos-overflow-item',
               item.destructive && 'kairos-overflow-item--destructive',
               startsDestructive && 'kairos-overflow-item--divided',
+              item.folded && 'kairos-overflow-item--folded',
             ]
               .filter(Boolean)
               .join(' ');
@@ -151,14 +178,22 @@ export default function OverflowMenu({ items, label, context = 'row', triggerRef
             if (item.href) {
               return (
                 <DropdownMenu.Item asChild key={item.label} disabled={item.disabled}>
-                  <a
-                    className={className}
-                    href={item.disabled ? undefined : item.href}
-                    target={item.external && !item.disabled ? '_blank' : undefined}
-                    rel={item.external && !item.disabled ? 'noreferrer' : undefined}
-                  >
-                    {item.label}
-                  </a>
+                  {/* A disabled item is a plain anchor with no href whatever
+                      `linkAs` is: a router link requires one. */}
+                  {item.disabled || item.external ? (
+                    <a
+                      className={className}
+                      href={item.disabled ? undefined : item.href}
+                      target={item.external && !item.disabled ? '_blank' : undefined}
+                      rel={item.external && !item.disabled ? 'noreferrer' : undefined}
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    <ItemLink className={className} href={item.href}>
+                      {item.label}
+                    </ItemLink>
+                  )}
                 </DropdownMenu.Item>
               );
             }

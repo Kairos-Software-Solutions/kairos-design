@@ -66,6 +66,16 @@ export type { DataTableProps, Column, ColumnRole, Selection } from './DataTable'
 export { default as CollapsibleCard } from './CollapsibleCard';
 export type { CollapsibleCardProps } from './CollapsibleCard';
 
+export { default as DisclosureSection, DisclosureGroup } from './DisclosureSection';
+export type { DisclosureSectionProps, DisclosureGroupProps } from './DisclosureSection';
+export { useRememberedOpen, setDisclosureStoragePrefix } from './remember';
+
+export { default as SubNav } from './SubNav';
+export type { SubNavProps, SubNavItem } from './SubNav';
+
+export { default as Steps } from './Steps';
+export type { StepsProps } from './Steps';
+
 export { default as Dialog } from './Dialog';
 export type { DialogProps } from './Dialog';
 

@@ -18,6 +18,36 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
+## Upgrading to 0.14.0
+
+The density release. Nothing is removed and no prop changes meaning; what
+changes is what some rows look like on a phone. See
+[adr/0011](adr/0011-let-the-slot-decide-a-rows-shape.md).
+
+**Action rows and page header actions are grids at narrow widths.** Below
+`640px` a `kairos-action-row` (not `--equal`), and below `768px` a page
+header's actions, put the primary first at full width, every other action full
+width under it, and a menu trigger in a narrow column at the end beside the
+first of them. Check any screen that relied on a narrow action row staying
+inline; if it should, it is `kairos-inline-actions`.
+
+**A page header's secondary folds into its menu below 900px** when it comes
+from `ActionSet`. Nothing to change. A header assembled by hand gets the same by
+putting `kairos-page-header-secondary` on the secondary button and passing a
+copy of it to the header's `OverflowMenu` with `folded: true`.
+
+**`Dialog` renders `kairos-dialog-head`** instead of `kairos-split`. An app rule
+reaching into the dialog's first row through `kairos-split` stops matching.
+
+**New:** `DisclosureSection` and `DisclosureGroup` (a section closed until
+wanted, remembered per device), `SubNav` (an area's pages as one row of
+links), `Steps` (a sequence on one row that folds to numbers), `Field`'s
+`suffix` (an amount and its unit in one box), `Panel`'s and `PageHeader`'s
+`help` (the one place a section's or a screen's help goes), and `linkAs` on
+`OverflowMenu` and `ActionSet` for the router's link. Call
+`setDisclosureStoragePrefix()` once if the app keeps its device preferences
+under its own prefix.
+
 ## Upgrading to 0.11.0
 
 A tool names itself with one object from 0.11.0: `ProductLockup`, the icon mark

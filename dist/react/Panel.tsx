@@ -2,6 +2,12 @@ import type { ElementType, ReactNode } from 'react';
 
 export interface PanelProps {
   heading?: ReactNode;
+  /**
+   * The section's help control — an app's ⓘ — placed at the right end of the
+   * heading row. The one place a section's help goes, so it is in the same
+   * place on every panel that has one. Needs `heading`.
+   */
+  help?: ReactNode;
   /** Removes the panel's own padding, for a table that supplies its own. */
   flush?: boolean;
   children: ReactNode;
@@ -18,12 +24,18 @@ export interface PanelProps {
  * component whose `flush` prop promises to remove padding has to have applied
  * some.
  */
-export default function Panel({ heading, flush = false, children }: PanelProps) {
+export default function Panel({ heading, help, flush = false, children }: PanelProps) {
+  // Epilogue 600, not Bebas. Bebas is the page title and nothing else in a
+  // tool, and a panel heading in it reads as a second page title.
+  const title = heading ? <h2 className="kairos-panel-heading">{heading}</h2> : null;
   return (
     <section className={['kairos-panel', !flush && 'kairos-pad'].filter(Boolean).join(' ')}>
-      {/* Epilogue 600, not Bebas. Bebas is the page title and nothing else in
-          a tool, and a panel heading in it reads as a second page title. */}
-      {heading ? <h2 className="kairos-panel-heading">{heading}</h2> : null}
+      {title && help ? (
+        <div className="kairos-panel-heading-row">
+          {title}
+          {help}
+        </div>
+      ) : title}
       {children}
     </section>
   );
@@ -58,9 +70,26 @@ export interface PageHeaderProps {
    */
   kickerAs?: ElementType;
   title: ReactNode;
-  /** One sentence under the title: what this screen is for, or what it counts. */
+  /**
+   * The screen's help control — an app's ⓘ — in the title's row, after the
+   * title. One per screen, and only here: help placed by hand ended up after
+   * headings, inside value labels and inside sentences, so it was somewhere
+   * different on every screen.
+   */
+  help?: ReactNode;
+  /**
+   * One sentence under the title, and only when it is an instruction the
+   * person acts on now: `Choose a customer to start`. A sentence explaining
+   * what the screen is belongs in the screen's help.
+   */
   description?: ReactNode;
-  /** One primary action. Emphasis is a budget. */
+  /**
+   * One primary action, at most one outline secondary, and one menu. Pass
+   * `ActionSet` with `context="page"`, which folds the secondary into the menu
+   * below the sidebar boundary, so a phone shows the primary and the menu on
+   * one row. Below 768px the group is a grid whatever it holds: the primary
+   * leads at full width and the menu takes a narrow column at the end.
+   */
   actions?: ReactNode;
 }
 
@@ -84,10 +113,12 @@ export function PageHeader({
   kickerHref,
   kickerAs,
   title,
+  help,
   description,
   actions,
 }: PageHeaderProps) {
   const KickerLink: ElementType = kickerAs ?? 'a';
+  const heading = <h1 className="kairos-page-title">{title}</h1>;
 
   return (
     <header className="kairos-page-header">
@@ -101,7 +132,12 @@ export function PageHeader({
             )
             : <span className="kairos-kicker">{kicker}</span>
           : null}
-        <h1 className="kairos-page-title">{title}</h1>
+        {help ? (
+          <div className="kairos-page-title-row">
+            {heading}
+            {help}
+          </div>
+        ) : heading}
         {description ? <p className="kairos-page-header-description">{description}</p> : null}
       </div>
       {actions ? <div className="kairos-page-header-actions">{actions}</div> : null}
