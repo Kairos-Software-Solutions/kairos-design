@@ -1966,6 +1966,9 @@ button.kairos-step {
 .kairos-panel .kairos-subpanel,
 .kairos-subpanel,
 .kairos-dialog-content .kairos-panel,
+.kairos-disclosure .kairos-panel,
+.kairos-disclosure .kairos-disclosure,
+.kairos-panel .kairos-disclosure,
 .kairos-panel--flat {
   box-shadow: none;
 }
