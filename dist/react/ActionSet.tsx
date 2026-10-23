@@ -1,6 +1,6 @@
 'use client';
 
-import { type ReactNode, useRef, useState } from 'react';
+import { type ElementType, type ReactNode, useRef, useState } from 'react';
 import Button, { type ButtonVariant } from './Button';
 import ConfirmDialog, { type ConfirmDetails } from './ConfirmDialog';
 import OverflowMenu, { type OverflowItem } from './OverflowMenu';
@@ -223,6 +223,11 @@ interface Menued {
    * card it stays in the menu, because a row carries no buttons at all.
    */
   more?: Action[];
+  /**
+   * The link component for actions with an `href`. Defaults to `<a>`, which
+   * is a full page load in a routed app; pass the router's own (`next/link`).
+   */
+  linkAs?: ElementType;
 }
 
 export type ActionSetProps =
@@ -237,7 +242,13 @@ export type ActionSetProps =
        * talking and names no budget. The budget is here because this is what
        * an author writing the third one is looking at.
        *
-       * Past two, the extra actions belong in `more`.
+       * Past two, the extra actions belong in `more`. One is the shape a
+       * screen should have; the second is for the screen that cannot.
+       *
+       * Below 900px a secondary folds into the menu: it stays a button from
+       * the sidebar boundary up, and becomes the first item in the menu below
+       * it, so a phone shows the primary and the menu on one row and nothing
+       * is lost. Both copies are rendered and the stylesheet shows one.
        */
       secondary?: SecondaryActions;
     })
@@ -258,6 +269,7 @@ export type ActionSetProps =
       context: 'dialog';
       primary?: RankedAction;
       secondary?: SecondaryActions;
+      linkAs?: ElementType;
     }
   | (Menued & {
       context: 'row' | 'card';
@@ -282,15 +294,41 @@ type Rank = 'primary' | 'secondary' | 'tertiary';
  * up the moment a declared action needed a pending state, because the state
  * was already built one file away and unreachable from here.
  */
-function Ranked({ action, rank }: { action: RankedAction; rank: Rank }) {
+function Ranked({
+  action,
+  rank,
+  folds = false,
+  linkAs,
+}: {
+  action: RankedAction;
+  rank: Rank;
+  /** A page header's secondary, which the menu carries below 900px. */
+  folds?: boolean;
+  linkAs?: ElementType;
+}) {
+  const className = [`kairos-button kairos-button--${rank}`, folds && 'kairos-page-header-secondary']
+    .filter(Boolean)
+    .join(' ');
+
   if (action.href !== undefined) {
+    // The router's link only for an enabled, internal destination: a
+    // disabled one has no href to give it, and an external one is a full
+    // load by definition.
+    if (linkAs && !action.disabled && !action.external) {
+      const RouterLink = linkAs;
+      return (
+        <RouterLink className={className} href={action.href}>
+          {action.label}
+        </RouterLink>
+      );
+    }
     // No `href` when disabled, matching `OverflowMenu`: an anchor has no
     // `disabled` attribute, and one that keeps its href is still followable
     // by keyboard however it is painted. `aria-disabled` is what carries the
     // state to assistive technology once the href is gone.
     return (
       <a
-        className={`kairos-button kairos-button--${rank}`}
+        className={className}
         href={action.disabled ? undefined : action.href}
         aria-disabled={action.disabled || undefined}
         target={action.external && !action.disabled ? '_blank' : undefined}
@@ -304,6 +342,7 @@ function Ranked({ action, rank }: { action: RankedAction; rank: Rank }) {
   return (
     <Button
       variant={rank satisfies ButtonVariant}
+      className={folds ? 'kairos-page-header-secondary' : undefined}
       disabled={action.disabled}
       // Named only when the action names it, so an action that cannot be in
       // flight renders the markup it always did. See `Button`.
@@ -348,13 +387,18 @@ export default function ActionSet(props: ActionSetProps) {
     props.context === 'page' || props.context === 'dialog' ? props.secondary : undefined;
   const more = props.context === 'dialog' ? undefined : props.more;
   const label = props.context === 'dialog' ? '' : props.label;
+  const linkAs = props.linkAs;
+
+  // In a page header a secondary folds into the menu below 900px. A dialog
+  // footer has no menu to fold into, so its secondaries stay buttons.
+  const folds = props.context === 'page';
 
   const ranked = (
     <>
       {secondary?.map((action, index) => (
-        <Ranked key={`secondary-${index}`} action={action} rank="secondary" />
+        <Ranked key={`secondary-${index}`} action={action} rank="secondary" folds={folds} linkAs={linkAs} />
       ))}
-      {primary ? <Ranked action={primary} rank="primary" /> : null}
+      {primary ? <Ranked action={primary} rank="primary" linkAs={linkAs} /> : null}
     </>
   );
 
@@ -366,36 +410,50 @@ export default function ActionSet(props: ActionSetProps) {
   }
 
   const entries = more ?? [];
+  const folded = folds ? (secondary ?? []) : [];
 
   // A destructive entry's `onSelect` is not the one the call site wrote. It
   // opens the confirmation, and the confirmation runs the real one. There is
   // no path from the menu to the action that skips this, which is the whole
   // reason the confirmation lives here rather than at the call site.
-  const items: OverflowItem[] = entries.map((action) => ({
-    label: action.label,
-    href: action.href,
-    external: action.external,
-    disabled: action.disabled,
-    destructive: action.destructive !== undefined,
-    onSelect: action.destructive
-      ? () => setPending(action)
-      : (action.onSelect ?? undefined),
-  }));
+  const items: OverflowItem[] = [
+    ...folded.map((action) => ({
+      label: action.label,
+      href: action.href,
+      external: action.external,
+      disabled: action.disabled,
+      onSelect: action.onSelect ?? undefined,
+      folded: true,
+    })),
+    ...entries.map((action) => ({
+      label: action.label,
+      href: action.href,
+      external: action.external,
+      disabled: action.disabled,
+      destructive: action.destructive !== undefined,
+      onSelect: action.destructive
+        ? () => setPending(action)
+        : (action.onSelect ?? undefined),
+    })),
+  ];
 
   // A page header collapses a lone routine action into a tertiary button
   // rather than a menu holding one item. A destructive one does not collapse:
-  // a button is a rank, and the rank a destructive action gets is none.
+  // a button is a rank, and the rank a destructive action gets is none. Nor
+  // does one beside a folding secondary, because below 900px the menu exists
+  // anyway and the lone action belongs in it.
   const lone = entries.length === 1 && entries[0].destructive === undefined ? entries[0] : null;
-  const collapse = props.context === 'page' && lone !== null;
+  const collapse = props.context === 'page' && lone !== null && folded.length === 0;
 
   const menu = collapse ? (
-    <Ranked action={lone} rank="tertiary" />
+    <Ranked action={lone} rank="tertiary" linkAs={linkAs} />
   ) : (
     <OverflowMenu
       items={items}
       label={label}
       context={props.context === 'page' ? 'header' : 'row'}
       triggerRef={trigger}
+      linkAs={linkAs}
     />
   );
 
@@ -422,7 +480,7 @@ export default function ActionSet(props: ActionSetProps) {
   // on last, and the primary keeps the right-hand end.
   return (
     <>
-      {entries.length > 0 ? menu : null}
+      {items.length > 0 ? menu : null}
       {props.context === 'page' ? ranked : null}
       {confirmation}
     </>

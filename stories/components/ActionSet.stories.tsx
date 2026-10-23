@@ -160,22 +160,35 @@ export const EveryContext: Story = {
     await expect(canvas.getByRole('button', { name: 'Send invoice' })).toHaveClass(
       'kairos-button kairos-button--primary'
     );
-    await expect(canvas.getByRole('button', { name: 'Record payment' })).toHaveClass(
-      'kairos-button kairos-button--secondary'
-    );
-
-    // The primary keeps the right-hand end of the group, whatever else is in
-    // it. Comparing positions rather than DOM order, because the arrangement
-    // is what the rule is about.
     const group = canvasElement.querySelector('.kairos-page-header-actions') as HTMLElement;
+    const secondary = group.querySelector('.kairos-page-header-secondary') as HTMLElement;
+    await expect(secondary).toHaveClass('kairos-button kairos-button--secondary');
+    await expect(secondary).toHaveTextContent('Record payment');
     const box = (selector: string) =>
       (group.querySelector(selector) as HTMLElement).getBoundingClientRect();
-    await expect(box('.kairos-button--primary').right).toBeGreaterThan(
-      box('.kairos-button--secondary').right
-    );
-    await expect(box('.kairos-button--secondary').right).toBeGreaterThan(
-      box('.kairos-overflow-trigger').right
-    );
+
+    if (window.innerWidth >= 900) {
+      // The primary keeps the right-hand end of the group, whatever else is
+      // in it. Comparing positions rather than DOM order, because the
+      // arrangement is what the rule is about.
+      await expect(secondary).toBeVisible();
+      await expect(box('.kairos-button--primary').right).toBeGreaterThan(
+        box('.kairos-button--secondary').right
+      );
+      await expect(box('.kairos-button--secondary').right).toBeGreaterThan(
+        box('.kairos-overflow-trigger').right
+      );
+    } else {
+      // Below the sidebar boundary the secondary folds into the menu, and the
+      // primary and the menu share one row.
+      await expect(secondary).not.toBeVisible();
+      await expect(Math.abs(box('.kairos-button--primary').top - box('.kairos-overflow-trigger').top)).toBeLessThan(1);
+      await userEvent.click(group.querySelector('.kairos-overflow-trigger') as HTMLElement);
+      const folded = await screen.findByRole('menuitem', { name: 'Record payment' });
+      await expect(folded).toHaveClass(/kairos-overflow-item--folded/);
+      await userEvent.keyboard('{Escape}');
+      await waitFor(() => expect(screen.queryByRole('menu')).toBeNull());
+    }
 
     // Destructive sorts to the bottom of the menu behind the rule that
     // already existed as a modifier. No new class was added for it.

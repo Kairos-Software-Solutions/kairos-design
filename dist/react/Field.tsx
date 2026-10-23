@@ -13,6 +13,15 @@ export interface FieldProps {
   hint?: ReactNode;
   /** Plain language saying what to do next, not a validator's output. */
   error?: ReactNode;
+  /**
+   * What the value is measured in, inside the same box as the control: a
+   * `kairos-select` in its wrap (`Percent` / `Amount`), or a word in
+   * `kairos-affix-text` (`TTD`, `days`). An amount and its unit laid out as two
+   * fields separate the moment their grid wraps; as one control they cannot.
+   * A select here needs its own `aria-label`, because the field's label names
+   * the amount.
+   */
+  suffix?: ReactNode;
   children: (ids: { id: string; describedBy: string | undefined }) => ReactNode;
 }
 
@@ -37,7 +46,7 @@ export interface FieldProps {
  * A call site needing the hint visible alongside an error composes both into
  * the error content. There is no arrangement where they stack.
  */
-export function Field({ label, hint, error, children }: FieldProps) {
+export function Field({ label, hint, error, suffix, children }: FieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -52,7 +61,12 @@ export function Field({ label, hint, error, children }: FieldProps) {
       <label className="kairos-input-label" htmlFor={id}>
         {label}
       </label>
-      {children({ id, describedBy })}
+      {suffix ? (
+        <div className="kairos-affix">
+          {children({ id, describedBy })}
+          {suffix}
+        </div>
+      ) : children({ id, describedBy })}
       <p className="kairos-field-hint" id={hintId}>
         {hint}
       </p>
@@ -67,6 +81,8 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
   label: string;
   hint?: ReactNode;
   error?: ReactNode;
+  /** The unit, inside the input's box. See `Field`. */
+  suffix?: ReactNode;
 }
 
 /**
@@ -74,11 +90,11 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
  * control is something else.
  */
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function InputField(
-  { label, hint, error, className, ...props },
+  { label, hint, error, suffix, className, ...props },
   ref
 ) {
   return (
-    <Field label={label} hint={hint} error={error}>
+    <Field label={label} hint={hint} error={error} suffix={suffix}>
       {({ id, describedBy }) => (
         <input
           ref={ref}
