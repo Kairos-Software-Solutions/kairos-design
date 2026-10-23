@@ -1283,13 +1283,6 @@ button.kairos-step {
   font-variant-numeric: tabular-nums;
 }
 
-@media (pointer: coarse) {
-  button.kairos-step {
-    min-width: var(--kairos-control-h-touch);
-    min-height: var(--kairos-control-h-touch);
-  }
-}
-
 @container (max-width: 14rem) {
   .kairos-steps[data-count='2'] .kairos-steps-item:not([data-current]) { flex: 0 0 auto; }
   .kairos-steps[data-count='2'] .kairos-steps-item:not([data-current]) .kairos-step-label {
@@ -1610,14 +1603,6 @@ button.kairos-step {
 
 .kairos-disclosure-group > .kairos-disclosure + .kairos-disclosure {
   border-top: var(--kairos-border-w) solid var(--kairos-border-subtle);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .kairos-disclosure-caret,
-  .kairos-disclosure-body {
-    animation: none;
-    transition: none;
-  }
 }
 
 /* A single-column screen: a boundary message, a sign-in card. */
@@ -1947,118 +1932,6 @@ button.kairos-step {
     display: none;
   }
 }
-
-/* A row of actions on a phone: the slot decides the shape, not the labels.
-
-   A wrapping flex row let its content decide the layout. Two long labels and a
-   menu trigger wrapped into two ragged rows with the trigger alone on the
-   second, and a page header's actions stacked one full-width button per row,
-   menu trigger included. Below 768px a page header's actions are a grid, and
-   below 640px (where `--equal` already stacks) so is every action row, and
-   every arrangement either can hold has one shape:
-
-   - The primary leads, on a row of its own and the full width, whatever order
-     the markup wrote it in.
-   - Every other action takes the full width under it, one per row, so two
-     outline buttons are one width and not two.
-   - A menu trigger takes a narrow column at the end, beside the first action
-     under the primary. With nothing else but one action, it sits beside that
-     action, so primary-and-menu is one row.
-
-   `dense` is what lets the trigger, which sorts last, take the end column of
-   the first row that has one free. A folded secondary is not counted: it is
-   `display: none` at these widths and holds no cell.
-
-   `--equal` keeps its own rule above, where both columns are already the same
-   width and the ranks stack in reading order. */
-@media (max-width: 767px) {
-  .kairos-page-header-actions {
-    display: grid;
-    flex: 1 1 100%;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-flow: row dense;
-    align-items: start;
-  }
-
-  .kairos-page-header-actions > * {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
-  .kairos-page-header-actions > :is(.kairos-button, .kairos-submit-wrap),
-  .kairos-page-header-actions > .kairos-submit-wrap > .kairos-button {
-    width: 100%;
-  }
-
-  .kairos-page-header-actions > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
-    order: -1;
-  }
-
-  .kairos-page-header-actions:has(> .kairos-overflow-trigger) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .kairos-page-header-actions:has(> .kairos-overflow-trigger) > * {
-    grid-column: 1;
-  }
-
-  .kairos-page-header-actions > .kairos-overflow-trigger {
-    grid-column: 2;
-    order: 1;
-  }
-
-  /* Three or more counted children: the primary has an action to share the
-     next row with the menu, so it takes the whole of its own. */
-  .kairos-page-header-actions:has(> .kairos-overflow-trigger):has(> :nth-child(3 of :not(.kairos-page-header-secondary)))
-    > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 640px) {
-  .kairos-action-row:not(.kairos-action-row--equal) {
-    display: grid;
-    flex: 1 1 100%;
-    grid-template-columns: minmax(0, 1fr);
-    grid-auto-flow: row dense;
-    align-items: start;
-  }
-
-  .kairos-action-row:not(.kairos-action-row--equal) > * {
-    grid-column: 1 / -1;
-    min-width: 0;
-  }
-
-  .kairos-action-row:not(.kairos-action-row--equal) > :is(.kairos-button, .kairos-submit-wrap),
-  .kairos-action-row:not(.kairos-action-row--equal) > .kairos-submit-wrap > .kairos-button {
-    width: 100%;
-  }
-
-  .kairos-action-row:not(.kairos-action-row--equal) > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
-    order: -1;
-  }
-
-  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger) > * {
-    grid-column: 1;
-  }
-
-  .kairos-action-row:not(.kairos-action-row--equal) > .kairos-overflow-trigger {
-    grid-column: 2;
-    order: 1;
-  }
-
-  /* Three or more counted children: the primary has an action to share the
-     next row with the menu, so it takes the whole of its own. */
-  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger):has(> :nth-child(3 of :not(.kairos-page-header-secondary)))
-    > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
-    grid-column: 1 / -1;
-  }
-}
-
 
 /* Bebas Neue ships one weight. Asking for 900 makes the browser synthesise a
    bold by smearing the outline, which thickens the stems unevenly and closes
@@ -2955,6 +2828,117 @@ textarea.kairos-input-field {
   .kairos-overflow-item--folded,
   .kairos-overflow-trigger--folded {
     display: none;
+  }
+}
+
+/* A row of actions on a phone: the slot decides the shape, not the labels.
+
+   A wrapping flex row let its content decide the layout. Two long labels and a
+   menu trigger wrapped into two ragged rows with the trigger alone on the
+   second, and a page header's actions stacked one full-width button per row,
+   menu trigger included. Below 768px a page header's actions are a grid, and
+   below 640px (where `--equal` already stacks) so is every action row, and
+   every arrangement either can hold has one shape:
+
+   - The primary leads, on a row of its own and the full width, whatever order
+     the markup wrote it in.
+   - Every other action takes the full width under it, one per row, so two
+     outline buttons are one width and not two.
+   - A menu trigger takes a narrow column at the end, beside the first action
+     under the primary. With nothing else but one action, it sits beside that
+     action, so primary-and-menu is one row.
+
+   `dense` is what lets the trigger, which sorts last, take the end column of
+   the first row that has one free. A folded secondary is not counted: it is
+   `display: none` at these widths and holds no cell.
+
+   `--equal` keeps its own rule above, where both columns are already the same
+   width and the ranks stack in reading order. */
+@media (max-width: 767px) {
+  .kairos-page-header-actions {
+    display: grid;
+    flex: 1 1 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+
+  .kairos-page-header-actions > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .kairos-page-header-actions > :is(.kairos-button, .kairos-submit-wrap),
+  .kairos-page-header-actions > .kairos-submit-wrap > .kairos-button {
+    width: 100%;
+  }
+
+  .kairos-page-header-actions > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    order: -1;
+  }
+
+  .kairos-page-header-actions:has(> .kairos-overflow-trigger) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .kairos-page-header-actions:has(> .kairos-overflow-trigger) > * {
+    grid-column: 1;
+  }
+
+  .kairos-page-header-actions > .kairos-overflow-trigger {
+    grid-column: 2;
+    order: 1;
+  }
+
+  /* Three or more counted children: the primary has an action to share the
+     next row with the menu, so it takes the whole of its own. */
+  .kairos-page-header-actions:has(> .kairos-overflow-trigger):has(> :nth-child(3 of :not(.kairos-page-header-secondary)))
+    > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 640px) {
+  .kairos-action-row:not(.kairos-action-row--equal) {
+    display: grid;
+    flex: 1 1 100%;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-flow: row dense;
+    align-items: start;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > * {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > :is(.kairos-button, .kairos-submit-wrap),
+  .kairos-action-row:not(.kairos-action-row--equal) > .kairos-submit-wrap > .kairos-button {
+    width: 100%;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    order: -1;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger) > * {
+    grid-column: 1;
+  }
+
+  .kairos-action-row:not(.kairos-action-row--equal) > .kairos-overflow-trigger {
+    grid-column: 2;
+    order: 1;
+  }
+
+  /* Three or more counted children: the primary has an action to share the
+     next row with the menu, so it takes the whole of its own. */
+  .kairos-action-row:not(.kairos-action-row--equal):has(> .kairos-overflow-trigger):has(> :nth-child(3 of :not(.kairos-page-header-secondary)))
+    > :is(.kairos-button--primary, .kairos-page-header-primary, :has(> .kairos-button--primary, > .kairos-page-header-primary)) {
+    grid-column: 1 / -1;
   }
 }
 
@@ -4127,6 +4111,12 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   .kairos-input-field,
     .kairos-select {
       min-height: var(--kairos-row-h);
+    }
+
+  /* A step that can be chosen is a button, and takes a button's target. */
+  button.kairos-step {
+      min-width: var(--kairos-control-h-touch);
+      min-height: var(--kairos-control-h-touch);
     }
 }
 
