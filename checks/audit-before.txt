@@ -1,0 +1,32 @@
+# Task 1.2 baseline (f565e34 lockfile)
+
+$ node checks/scripts/advisory-scan.mjs   (exit 1)
+advisory-scan: package-lock.json
+  storybook (vulnerable >=10.0.0 <10.6.2): node_modules/storybook@10.5.10
+  @storybook/addon-vitest (vulnerable >=10.0.0 <10.6.2): node_modules/@storybook/addon-vitest@10.5.10
+  vite (vulnerable >=7.0.0 <=7.3.6): node_modules/vite@7.3.6
+  brace-expansion (vulnerable >=4.0.0 <5.0.12): node_modules/brace-expansion@5.0.9
+  source-map-js (vulnerable >=1.0.0 <1.2.2): node_modules/source-map-js@1.2.1
+  @vitest/mocker (vulnerable >=2.1.0-beta.7 <4.1.12): node_modules/@vitest/mocker@4.1.11
+  glob (vulnerable >=9.0.0 <=14.0.1): node_modules/glob@13.0.6
+  minimatch (vulnerable >=7.0.0 <11.0.1): node_modules/minimatch@10.2.6
+
+FAIL: 8 lockfile entries in a vulnerable range
+  node_modules/@storybook/addon-vitest 10.5.10 (vulnerable >=10.0.0 <10.6.2)
+  node_modules/@vitest/mocker 4.1.11 (vulnerable >=2.1.0-beta.7 <4.1.12)
+  node_modules/brace-expansion 5.0.9 (vulnerable >=4.0.0 <5.0.12)
+  node_modules/glob 13.0.6 (vulnerable >=9.0.0 <=14.0.1)
+  node_modules/minimatch 10.2.6 (vulnerable >=7.0.0 <11.0.1)
+  node_modules/source-map-js 1.2.1 (vulnerable >=1.0.0 <1.2.2)
+  node_modules/storybook 10.5.10 (vulnerable >=10.0.0 <10.6.2)
+  node_modules/vite 7.3.6 (vulnerable >=7.0.0 <=7.3.6)
+packages: 8 — @storybook/addon-vitest, @vitest/mocker, brace-expansion, glob, minimatch, source-map-js, storybook, vite
+
+$ npm audit --json   (exit 1) — severity totals (metadata.vulnerabilities)
+  critical: 2
+  high: 3
+  moderate: 8
+  low: 0
+  info: 0
+  total: 13
+  packages reported: @joshwooding/vite-plugin-react-docgen-typescript (moderate), @storybook/addon-vitest (critical, direct), @storybook/react-vite (moderate, direct), @vitest/browser (moderate), @vitest/browser-playwright (moderate, direct), @vitest/mocker (moderate), brace-expansion (high), glob (moderate), minimatch (moderate), source-map-js (high), storybook (critical, direct), vite (high, direct), vitest (moderate, direct)
