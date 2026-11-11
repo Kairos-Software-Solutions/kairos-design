@@ -1,5 +1,5 @@
 # Pack compare: working tree (kairos-design-0.14.0.tgz) vs registry kairos-design@0.14.0 (kairos-design-0.14.0.tgz)
-# 2026-11-11T15:43:13.801Z
+# 2026-11-11T15:52:15.441Z
 
 package/README.md  branch=69cd76438fbd79f023b0829b854101fa1e3bebfa847f99a6c29edeabc547d367  registry=69cd76438fbd79f023b0829b854101fa1e3bebfa847f99a6c29edeabc547d367  same
 package/bin/kairos-design.mjs  branch=c1608dac3b946f9592796e6b9f5517eafef24ac728068ecac1a4c475d0af72f6  registry=c1608dac3b946f9592796e6b9f5517eafef24ac728068ecac1a4c475d0af72f6  same
@@ -42,7 +42,7 @@ package/dist/react/sort.ts  branch=52067483ef9859a71a0e7aae6cac77d7f05fa61089132
 package/dist/react/theme.tsx  branch=513ff69e36691476bb1858acad67e4fe88812075e9eaedcad02cd7ac48afd118  registry=513ff69e36691476bb1858acad67e4fe88812075e9eaedcad02cd7ac48afd118  same
 package/dist/tokens.css  branch=336b55c1038a1ca160d945f93243058ee7ba44ae1fa66ae4aafb6a6fd5d8311d  registry=336b55c1038a1ca160d945f93243058ee7ba44ae1fa66ae4aafb6a6fd5d8311d  same
 package/docs/kairos-ui.md  branch=4b067b37d1b5fa38c459ad5691b5d58670dbb0cd921626ff128b2ee9866a9040  registry=4b067b37d1b5fa38c459ad5691b5d58670dbb0cd921626ff128b2ee9866a9040  same
-package/package.json  branch=1360bf4dc327d0bcde185b4b4270cbe69b1ad936be73114f1c56dfd446dcb678  registry=1360bf4dc327d0bcde185b4b4270cbe69b1ad936be73114f1c56dfd446dcb678  same
+package/package.json  branch=e2879eb5a7f62201d13a6629d473fb3fa7e86c141f71ac0db42f2847fc2510d8  registry=1360bf4dc327d0bcde185b4b4270cbe69b1ad936be73114f1c56dfd446dcb678  differs (allowed: package.json, see manifest)
 
 files: branch 42, registry 42; path lists same
 

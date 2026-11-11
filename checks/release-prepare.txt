@@ -1,5 +1,5 @@
 # "Prepare the release" from .github/workflows/publish.yml, run with GITHUB_REF_TYPE=branch GITHUB_REF_NAME=main
-# 2026-11-11T15:43:13.953Z
+# 2026-11-11T15:52:15.657Z
 
 --- extracted script ---
 set -euo pipefail
