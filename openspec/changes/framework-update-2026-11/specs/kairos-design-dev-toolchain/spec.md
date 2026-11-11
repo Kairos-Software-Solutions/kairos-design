@@ -38,9 +38,9 @@ After the change, no package version named in the stack-watch advisory list of 1
 - **CHECK** `checks/audit-after.md` holds the severity totals from `npm audit --json` (expected all 0) and any remaining advisory with its reason
 
 #### Scenario: The glob override reaches the docgen plugin
-- **WHEN** `npm ls glob minimatch brace-expansion source-map-js @vitest/mocker --all` runs
-- **THEN** it shows glob 14.0.4 or later (marked overridden), minimatch 11.0.1 or later, brace-expansion 5.0.12 or later, source-map-js 1.2.2 or later, and @vitest/mocker 4.1.12 or later, and no other copy of any of them
-- **CHECK** `checks/overrides.txt` holds that output
+- **WHEN** `npm ls glob minimatch brace-expansion source-map-js @vitest/mocker --all` and `npm explain glob` run
+- **THEN** `npm ls` shows glob 14.0.4 or later, minimatch 11.0.1 or later, brace-expansion 5.0.12 or later, source-map-js 1.2.2 or later, and @vitest/mocker 4.1.12 or later, and no other copy of any of them; `npm explain glob` shows the docgen plugin's glob as `overridden glob@"^14.0.4"` (npm ls marks an override only when the rule is an exact version, and this rule is a range)
+- **CHECK** `checks/overrides.txt` holds both outputs
 
 ### Requirement: The workshop checks pass on the new toolchain
 The four checks CI runs (`npm test`, `npm run typecheck`, `npm run build-storybook`, `npm run test-stories`) SHALL pass after the change, with no fewer tests or stories than before it and no test skipped that ran before.
