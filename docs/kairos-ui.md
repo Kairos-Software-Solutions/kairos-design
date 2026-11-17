@@ -10,6 +10,7 @@ next agent.
 ```
 Tokens      dist/tokens.css        --kairos-*, light and dark
 Base        dist/base.css          element defaults, optional
+Brand       dist/brand.css         the Brand Scale, optional; on with <html data-scale="brand">
 Components  dist/kairos.css        the kairos-* class vocabulary
 Money       dist/format/money.ts   TTD 8,500.00
 Dates       dist/format/dates.ts   24 Aug 2026
@@ -19,7 +20,8 @@ Emit        kairos-design emit     writes the CSS into a surface with no bundler
 ```
 
 Everything above is reachable as `kairos-design/<name>` once the package is
-installed. Import order is tokens, base, components.
+installed. Import order is tokens, base (optional), brand (optional),
+components.
 
 `base.css` sets the page: ground, ink, body type, the 320px floor, and the
 `[hidden]` reset. Import it and an app needs no stylesheet of its own to render
@@ -86,7 +88,7 @@ half-pixel ones.
 | `--kairos-text-body` | 0.875rem | Body, table cells |
 | `--kairos-text-lg` | 16px | Panel headings, and every text input |
 | `--kairos-text-xl` | 20px | A large figure |
-| `--kairos-text-title` | 24px | The page title, in Bebas, once per screen |
+| `--kairos-text-title` | 24px | The page title, in the display family (Archivo), once per screen |
 
 Role aliases: `--kairos-text-heading`, `--kairos-text-label`,
 `--kairos-text-chip`, `--kairos-text-button`, `--kairos-text-meta`,
@@ -187,7 +189,7 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-bottom-nav` | Five-item mobile tab bar | More than five destinations | — |
 | `kairos-topbar` | Mobile brand row. `kairos-topbar-brand` holds the product lockup and nothing else | Desktop; setting type on the brand row, which is the per-context invention the lockup replaces | `--switcher` |
 | `kairos-page-header` | 56px row: title left, actions right. Below `768px` the actions take their own row as a grid: the primary first, the menu in a narrow end column beside it | A second header inside a panel | — |
-| `kairos-page-title` | The one Bebas element on the screen, 24px | Any other heading | — |
+| `kairos-page-title` | The one display-family element on the screen, 24px | Any other heading | — |
 | `kairos-page-header-description` | One line under the title, and only an instruction the person acts on now: `Choose a customer to start`. `PageHeader` renders it from its `description` prop | Explaining what the screen is; that belongs in the screen's help | — |
 | `kairos-page-title-row` | The title and the screen's one help control, in that order. `PageHeader` writes it when it has `help` | Any other control beside the title | — |
 | `kairos-page-header-secondary` | The one outline action beside the primary, hidden below `900px` where its copy in the menu (`kairos-overflow-item--folded`) takes over. `ActionSet` writes both | A second secondary, or one with no copy in the menu, which would leave a phone without the action | — |
@@ -392,8 +394,8 @@ action.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-product-lockup` | Naming a Kairos app: the icon, a 2px rule, the product name in Bebas. Every place a tool says which app it is — sign-in, sidebar plaque, mobile top bar | A Brand Scale page, where the full lockup carries the company; setting its size at the call site | — |
-| `kairos-lockup` | The CDN artwork, theme-switched. Inside a tool this is the `icon` variant, placed by `kairos-product-lockup` | A redrawn or recoloured logo; the full wordmark beside a product name set in Bebas, which puts two wordmarks on one screen | `--light` `--dark` |
+| `kairos-product-lockup` | Naming a Kairos app: the icon, a 2px rule, the product name in the display family. Every place a tool says which app it is — sign-in, sidebar plaque, mobile top bar | A Brand Scale page, where the full lockup carries the company; setting its size at the call site | — |
+| `kairos-lockup` | The CDN artwork, theme-switched. Inside a tool this is the `icon` variant, placed by `kairos-product-lockup` | A redrawn or recoloured logo; the full wordmark beside a product name set in the display family, which puts two wordmarks on one screen | `--light` `--dark` |
 | `kairos-wordmark` | Text wordmark where the image will not fit | Replacing the lockup on a login screen | — |
 | `kairos-section-tag` | Opening a section on a Brand Scale page: a label, then a rule to the edge | A heading inside a panel; that is `kairos-section-title` | — |
 | `kairos-kicker` | The eyebrow over a page title, and only where it names real nesting: `Invoices` above `Invoice INV-0042` | A top-level screen, where the nav item repeated above the title is two lines of chrome carrying no information | — |
@@ -406,7 +408,7 @@ for.
 
 `kairos-section-tag` styles its own label, so the call site passes text and
 nothing else. The two close names are deliberate: the skill calls this pattern
-the section tag, and `kairos-section-title` is the Epilogue heading inside a
+the section tag, and `kairos-section-title` is the body-family heading inside a
 `kairos-section` panel. Brand Scale and Product Scale, and they are never
 interchangeable.
 
@@ -415,8 +417,8 @@ sizes come from the context rather than from a prop: `--kairos-product-mark`,
 `--kairos-product-rule` and `--kairos-product-name` default to the shell's
 28px mark, and `.kairos-auth-header` raises them to 44px. Two rules hold it
 together. The mark is always the icon, because `ICON + WORDMARK` contains the
-word KAIROS and a product name in Bebas beside it is a second wordmark. And
-the product name is type, never artwork, so a new Kairos app ships its
+word KAIROS and a product name in the display family beside it is a second
+wordmark. And the product name is type, never artwork, so a new Kairos app ships its
 identity by passing a string. Product names are one word at ten characters or
 fewer: the sidebar plaque has 196px of usable width at `--kairos-sidebar-w`,
 and a brand name that truncates is a different brand name.
@@ -432,6 +434,43 @@ is whichever variant the rest of the page is hiding. The markup is the same
 two images; the stylesheet flips them. Do not set `display` on a lockup from
 an app rule — a selector like `.my-brand img` outranks the lockup's own and
 renders both at once, one stacked on the other's cream tile.
+
+## Brand Scale parts
+
+The parts Kairos design brief v1 marks shared, for websites and other brand
+surfaces. Each is a class block in `kairos.css` that reads role tokens for
+colour, part tokens for size and the `--kairos-type-*` ranks for type, so it
+renders at either scale and takes the brief's look under the Brand Scale
+(`kairos-design/brand.css` and `<html data-scale="brand">`). Markup is native:
+links, buttons, checkbox and radio inputs, so the keyboard is the browser's.
+How a page arrives — reveals, wipes, staggers, a reel — is the site's code, not
+the package's.
+
+| Class | Use for | Do not use for | Modifiers |
+| --- | --- | --- | --- |
+| `kairos-text-link` | An inline call to action written as a link: ink at 700 over a 3px highlight underline that turns ink on hover, 44px tall. A trailing `kairos-text-link-arrow` (→) nudges on hover | Navigation in the header, which is `kairos-menu-link`; a primary action, which is a button | `--external` for ↗, which moves up and out |
+| `kairos-menu-link` | A header menu item, 44px: a highlight marker sweeps in behind the word on hover, and `aria-current="page"` carries a 3px underline | Links in running text | — |
+| `kairos-lang-link` | The other language, named in that language, with `lang` and `hreflang`: the last menu item, set off by a 1px by 18px ink-3 hairline | Choosing between more than two languages | `--row` for its own 48px row in the phone menu, with the link underline |
+| `kairos-required` | The asterisk after a required field's label, always `aria-hidden="true"`; the control carries `required`. `Field` writes it from `required`. Shown at the Brand Scale | The only signal that a field is required | — |
+| `kairos-error-line` | A message about something that failed, outside a field: a 20px round badge with "!", then 15px text at 600 in the error colour. Shakes once when it appears, stilled by reduced motion | A field's own error, which is `kairos-field-error` (it takes the same badge and shake at the Brand Scale) | — |
+| `kairos-tick-box` | A checkbox with its label: `kairos-tick-box-input` (native, visually hidden) then `kairos-tick-box-label`, a 24px square that shows a tick on tint once checked, in a 46px row. Wrap a set in `kairos-tick-box-group` (a `fieldset`) | A filter toggle, which is `kairos-segmented`; a dense form row, which is `kairos-checkbox-row` | — |
+| `kairos-day-grid` | Picking one day: a radio group of `kairos-day-grid-cell` labels, each a `kairos-day-grid-input` then `kairos-day-grid-face` holding `-weekday` over `-date`. 5 columns of 62px cells; the picked day fills with picked and pops its ink frame. `aria-invalid="true"` turns the outer edge to the error colour | More than one pick, or a full calendar | — |
+| `kairos-time-switch` | Picking one of 2 to 5 short options (morning, afternoon, evening): `kairos-time-switch-option` labels holding `-input` and `-label`, then one `kairos-time-switch-pill`, hidden until the first pick, that slides to the checked option. `aria-invalid="true"` on the track for its error edge | Six or more options; actions | — |
+| `kairos-card--soft` | The brief's card on `kairos-card`: card fill, no border, the soft card shadow, square corners | A tool's raised card, which keeps the stamp | `kairos-card--soft-rounded` for 2px corners on panels and lists |
+| `kairos-inset-band` | A tint box inside the content width, for a closing call to action | A full-width band; never against a `kairos-section-band` without cream or white between them | — |
+| `kairos-section-band` | The band ground across the full width behind one section | More than one section per page | — |
+| `kairos-tint-card` | A flat tint box | A raised card | `--band` for the band ground |
+| `kairos-tick-list` | Rows over rules, each `kairos-tick-list-item` holding a 28px `-box` with a drawn tick on a tick-green edge, then `-label` over `-value` | Steps in order, which is `kairos-step-line` | `--statement` for one statement per row with no label |
+| `kairos-step-line` | Numbered steps in order: `kairos-step-line-item` holding a mono `-box` and its `-title`, joined by 2px tick-green lines; box 1 in highlight. Vertical under 520px | A wizard's progress, which is `kairos-steps` | — |
+| `kairos-site-header` | A website's sticky white header, `--kairos-site-header-h` tall with a hairline under it: `-inner` (inside `kairos-wrap`) holding the logo, `-nav` with `kairos-menu-link`s and a `kairos-lang-link`, `-actions` with the small main button, and the `kairos-site-menu-toggle` under 900px | An app's top bar, which is `kairos-topbar` | — |
+| `kairos-site-menu` | The phone menu sheet under the header: card fill, `kairos-site-menu-row` links divided by rules. `kairos-site-menu-toggle` is its 46px button whose `kairos-site-menu-bars` cross into an X on `aria-expanded="true"`. Opening, closing, focus and the scroll lock are the site's | Desktop navigation | — |
+| `kairos-site-footer` | A website's footer: card fill under a 1px top rule, `-columns` with mono `-heading`s and 46px `-link`s, and the `-legal` line over a rule | An app's footer | — |
+| `kairos-placeholder` | Copy still to come, in coral at 600, inside the square brackets the copy writes | Real copy, or a form control's placeholder attribute | — |
+| `kairos-photo-slot` | A picture still to come: tint and cream stripes in a white mat with the photo shadow, and a `kairos-photo-slot-label` saying what goes there | A loading state | — |
+| `kairos-marker` | A highlight bar behind the foot of a marked phrase in a heading, tilted a degree | Body text, or more than one phrase per heading | — |
+| `kairos-title-bar` | A highlight bar under a page title | Any heading below the page title | — |
+| `kairos-type-display`, `kairos-type-title`, `kairos-type-h2`, `kairos-type-h3`, `kairos-type-quote`, `kairos-type-lead`, `kairos-type-statement`, `kairos-type-body`, `kairos-type-small`, `kairos-type-legal`, `kairos-type-label`, `kairos-type-price`, `kairos-type-button`, `kairos-type-nav` | The brief's type ranks. Each reads `--kairos-type-<rank>-*`: a 0.14 step at the Product Scale, the brief's size, weight, width, leading and tracking at the Brand Scale. Headings balance their lines; label and price are mono | Inside a tool's panels, which have their own heading rank | — |
+| `kairos-wrap` | The content wrapper: `--kairos-gutter` as inline padding, so every section shares one left edge and a band behind it still runs edge to edge | A max-width container; the gutter is the width | — |
 
 ## Layout and utilities
 
@@ -557,7 +596,7 @@ fails on it.
 | `Metric`, `MetricRow`, `Skeleton`, `SkeletonStack` | Figures and loading |
 | `ThemeToggle`, `ThemeSetting`, `useThemePreference`, `themeInitScript` | The theme control, in both placements. `ThemeToggle` ships the word beside the glyph because a lone sun or moon does not say whether it shows the theme you have or the one you would get; `labelled={false}` drops it to the glyph in a square box, for a control sitting in a row where the word would outrank the row. The title and the accessible name state both halves either way. See [adr/0010](adr/0010-let-the-theme-toggle-drop-its-word.md) |
 | `BrandLockup` | The Kairos mark, both theme variants, same `alt` on each and neither `aria-hidden` — which one is visible depends on the surface, so marking either decorative leaves the visible logo unnamed on half the screens. `variant="icon"` is the mark alone. It takes no size and no `style`: size belongs to the context, and `kairos.css` already sets it per context |
-| `ProductLockup` | How a tool names itself: the icon, the rule, and `product` set in Bebas. `AuthScreen`, `Sidebar` and `TopBar` all render it, which is what makes three screens open the same way. `as="h1"` where the name is the page's heading, which is the sign-in and nowhere else. No size prop, for `BrandLockup`'s reason |
+| `ProductLockup` | How a tool names itself: the icon, the rule, and `product` set in the display family. `AuthScreen`, `Sidebar` and `TopBar` all render it, which is what makes three screens open the same way. `as="h1"` where the name is the page's heading, which is the sign-in and nowhere else. No size prop, for `BrandLockup`'s reason |
 | `AuthScreen`, `AuthForm`, `AuthLink` | The signed-out screen. `AuthScreen` owns the surface, the product lockup carrying the `h1`, the theme toggle and the written company credit — the toggle is on by default because this screen has no shell to put a settings row in. `AuthForm` fixes the order that makes the layout hold: fields, the one reserved message row, the button, then `footer`. It writes `--one-message` and reserves that row itself, so the two cannot be separated by a call site |
 | `AppShell`, `Sidebar`, `NavGroup`, `NavLink`, `TopBar`, `BottomNav`, `BottomNavLink` | The app frame. `AppShell` places the sidebar, the body column, `<main>` and its centred `kairos-view`, the mobile-only floating theme toggle, and the bottom nav — a top bar passed as a direct child of the shell becomes a third flex column, which is why it is a slot rather than the app's to position. `Sidebar` carries `ThemeSetting` in its footer by default, and that is the desktop half of the theme pattern that lets the floating toggle stay mobile-only. `NavLink` marks the current screen with `aria-current="page"` only; `.active` is a deprecated alias. `BottomNavLink` with no `href` is the fifth slot that opens the rest as a sheet, and renders a button because it does not navigate |
 

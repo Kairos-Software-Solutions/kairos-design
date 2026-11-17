@@ -1,6 +1,6 @@
 {
   "name": "kairos-design",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "The shared Kairos design system: tokens, component vocabulary, and formatters.",
   "type": "module",
   "license": "UNLICENSED",
@@ -11,6 +11,7 @@
     "./tokens.css": "./dist/tokens.css",
     "./base.css": "./dist/base.css",
     "./kairos.css": "./dist/kairos.css",
+    "./brand.css": "./dist/brand.css",
     "./format/money": "./dist/format/money.ts",
     "./format/dates": "./dist/format/dates.ts",
     "./react": "./dist/react/index.ts",

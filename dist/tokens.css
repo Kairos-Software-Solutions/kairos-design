@@ -11,7 +11,9 @@
    `prefers-color-scheme` media query is an equally valid host choice; the
    token names and both value sets are not.
 
-   Source of truth: kairos-branding skill, references/visual-spec.md.
+   Source of truth: Kairos design brief v1, approved 17 November 2026. The
+   brief's role names are the token names; a 0.14 name a role replaced is kept
+   as an alias of it, so every earlier name still resolves.
    Do not edit an emitted copy of this file. Edit it here and release.
    ========================================================================== */
 
@@ -19,8 +21,8 @@
   color-scheme: light;
 
   /* --- Ground ----------------------------------------------------------- */
-  --kairos-bg: #fff8eb;
-  --kairos-surface: #ffffff;
+  --kairos-page: #fff8eb;
+  --kairos-card: #ffffff;
   --kairos-elevated: #f5e7c9;
   --kairos-sidebar: #f5e7c9;
 
@@ -43,24 +45,26 @@
   --kairos-border-subtle: #9d8140;
 
   /* --- Text ------------------------------------------------------------- */
-  --kairos-text: #16110b;
-  --kairos-text-2: #473728;
-  --kairos-text-muted: #79624a;
+  --kairos-ink: #16110b;
+  --kairos-ink-2: #473728;
+  --kairos-ink-3: #79624a;
 
   /* --- Accent ----------------------------------------------------------- */
   /* Full-saturation amber is a fill, never a text colour: it measures 1.52:1
      on cream. `--kairos-accent-on-light` is the amber-toned text and icon
      value, and it inverts to bare amber on the dark base where amber clears
      3:1 on its own. */
-  --kairos-accent: #ffc247;
-  --kairos-accent-hover: #e6a92d;
+  --kairos-highlight: #ffc247;
+  /* The primary's hover fill: the brief's darker step of the logo's yellow.
+     Ink on it reads at 10.70:1. */
+  --kairos-highlight-strong: #ffb627;
   /* The disabled primary's fill: amber carried 70% of the way to the page.
      Rank 1 disabled has to stay ahead of rank 2 enabled, so this rank is the
      one control that does not drop its ground — it desaturates instead. Still
      amber, still the loudest thing in a disabled action row, and the ink label
      reads at 13.17:1 on it. */
   --kairos-accent-disabled: #ffd278;
-  --kairos-accent-text: #16110b;
+  --kairos-on-highlight: #16110b;
   /* Text, so it owes 4.5:1 — and on the tightest ground it can sit on, not on
      the page. `.kairos-button--tertiary` takes this for its label and
      `.kairos-card` sets an elevated ground, so a tertiary button in a card is
@@ -85,7 +89,7 @@
   /* A 2px ink outline with a 2px amber inner ring at a 2px offset. The ink
      ring carries the contrast for WCAG 2.2 SC 1.4.11; the amber says which
      brand drew it. The pair inverts on dark. */
-  --kairos-focus: #16110b;
+  --kairos-focus-ring: #16110b;
   --kairos-focus-inner: #ffc247;
   --kairos-focus-w: 2px;
 
@@ -132,6 +136,78 @@
   --kairos-shadow: 4px 4px 0 var(--kairos-shadow-color);
   --kairos-shadow-card: 6px 6px 0 var(--kairos-shadow-color);
   --kairos-shadow-lg: 8px 8px 0 var(--kairos-shadow-color);
+
+  /* --- Brand grounds, marks and states ---------------------------------
+     The roles Kairos design brief v1 adds. Ink, ink-2 and ink-3 clear 4.5:1
+     on page, card, band and tint, and ink and ink-3 on picked; the figures
+     are the brief's contrast table, and `tests/contrast.test.mjs` computes
+     every one of them from this file. */
+  --kairos-band: #f1f6ec;
+  --kairos-tint: #e3eedc;
+  --kairos-picked: #fff0c4;
+  /* The brief's green, for ticks, the step line and a selected ring. Never
+     text and never a fill. 5.51 on the page, 5.82 on card, 4.86 on tint. */
+  --kairos-tick: #3d6f57;
+  /* `[placeholder]` text: content still to come. 5.32 on the page, 4.69 on
+     tint. */
+  --kairos-placeholder: #b93d10;
+  --kairos-error: #b3261e;
+  --kairos-on-error: #ffffff;
+
+  /* Decorative hairlines and the soft shadow colour, translucent so they read
+     the same on cream, white and both greens. Never a control edge: a control
+     boundary owes 3:1 and these are decoration. */
+  --kairos-rule: rgba(22, 17, 11, 0.18);
+  --kairos-rule-frame: rgba(22, 17, 11, 0.2);
+  --kairos-shadow-soft-color: rgba(71, 55, 40, 0.32);
+}
+
+/* Aliases, re-resolved wherever a theme is set.
+
+   A custom property inherits its computed value, so an alias declared on
+   `:root` alone resolves there, and a sub-tree that sets its own theme would
+   inherit the root's colour. Declared on every themed element as well, each
+   alias follows the theme of the element it lands on.
+
+   The 0.14 names come first: each is the role the brief renamed, at the same
+   value. Then the brief's role aliases, which change a role and never a hue. */
+:root,
+[data-theme] {
+  --kairos-bg: var(--kairos-page);
+  --kairos-surface: var(--kairos-card);
+  --kairos-text: var(--kairos-ink);
+  --kairos-text-2: var(--kairos-ink-2);
+  --kairos-text-muted: var(--kairos-ink-3);
+  --kairos-accent: var(--kairos-highlight);
+  --kairos-accent-hover: var(--kairos-highlight-strong);
+  --kairos-accent-text: var(--kairos-on-highlight);
+  --kairos-focus: var(--kairos-focus-ring);
+
+  --kairos-link: var(--kairos-ink);
+  --kairos-link-underline: var(--kairos-highlight);
+  --kairos-link-underline-hover: var(--kairos-ink);
+  --kairos-field-border: var(--kairos-ink-3);
+  --kairos-control-edge: var(--kairos-ink);
+  --kairos-required: var(--kairos-error);
+  --kairos-label: var(--kairos-ink-3);
+
+  /* Shadows built from a colour token, here so they follow the theme too. The
+     soft card and photo shadows are the brief's; the press is its hard ink
+     offset, which only a hovered button wears. */
+  --kairos-shadow-soft-card: 0 14px 30px -20px var(--kairos-shadow-soft-color);
+  --kairos-shadow-soft-photo: 0 10px 22px -12px var(--kairos-shadow-soft-color);
+  --kairos-shadow-press: 4px 4px 0 0 var(--kairos-shadow-color);
+  --kairos-shadow-hairline: 0 1px 0 0 var(--kairos-rule);
+
+  /* Component knobs that name a colour. Their defaults are what 0.14 painted;
+     `brand.css` re-points them at the Brand Scale. Here rather than in the
+     shared block so they follow a theme set below the root, as the names
+     above do. */
+  --kairos-button-secondary-hover-bg: var(--kairos-elevated);
+  --kairos-input-border-color: var(--kairos-border);
+  --kairos-input-focus-bg: var(--kairos-card);
+  --kairos-input-label-color: var(--kairos-text-2);
+  --kairos-field-error-color: var(--kairos-state-overdue);
 }
 
 /* The dark palette is wrapped in `@media not print`, and that wrapper is the
@@ -155,8 +231,8 @@
   [data-theme='dark'] {
     color-scheme: dark;
 
-    --kairos-bg: #1a1410;
-    --kairos-surface: #231e18;
+    --kairos-page: #1a1410;
+    --kairos-card: #231e18;
     --kairos-elevated: #2e2720;
     --kairos-sidebar: #2e2720;
 
@@ -167,24 +243,24 @@
        less far than light did. 3.77 / 3.41 / 3.04. */
     --kairos-border-subtle: #7f6f5e;
 
-    --kairos-text: #f5f1e8;
-    --kairos-text-2: #e0d7c8;
-    --kairos-text-muted: #b9ae9c;
+    --kairos-ink: #f5f1e8;
+    --kairos-ink-2: #e0d7c8;
+    --kairos-ink-3: #b9ae9c;
 
     /* Amber is 11.67:1 on ink and needs no dark variant. Only the text-safe
        value moves, because on the dark base amber clears 3:1 unaided. */
-    --kairos-accent: #ffc247;
-    --kairos-accent-hover: #e6a92d;
+    --kairos-highlight: #ffc247;
+    --kairos-highlight-strong: #e6a92d;
     /* The same 70%, carried toward the dark page instead, so the desaturation
        reads as the same gesture in both themes. Ink label at 6.26:1. */
     --kairos-accent-disabled: #ba8e36;
-    --kairos-accent-text: #16110b;
+    --kairos-on-highlight: #16110b;
     --kairos-accent-on-light: #ffc247;
 
     --kairos-invert-bg: #f5f1e8;
     --kairos-invert-fg: #16110b;
 
-    --kairos-focus: #ffc247;
+    --kairos-focus-ring: #ffc247;
     --kairos-focus-inner: #16110b;
 
     --kairos-state-settled: #8fcba1;
@@ -208,6 +284,20 @@
     --kairos-overlay: rgba(0, 0, 0, 0.64);
 
     --kairos-shadow-color: #f5f1e8;
+
+    /* The brief's new roles have no dark design yet. Each takes a value the
+       dark palette above already holds, so no hue is invented, and every pair
+       the contrast suite checks still clears its floor. */
+    --kairos-band: #2e2720; /* interim: the dark card replaces this */
+    --kairos-tint: #1e2c22; /* interim: the dark card replaces this */
+    --kairos-picked: #2e2415; /* interim: the dark card replaces this */
+    --kairos-tick: #8fcba1; /* interim: the dark card replaces this */
+    --kairos-placeholder: #e9a08a; /* interim: the dark card replaces this */
+    --kairos-error: #e9a08a; /* interim: the dark card replaces this */
+    --kairos-on-error: #16110b; /* interim: the dark card replaces this */
+    --kairos-rule: rgba(245, 241, 232, 0.18); /* interim: the dark card replaces this */
+    --kairos-rule-frame: rgba(245, 241, 232, 0.2); /* interim: the dark card replaces this */
+    --kairos-shadow-soft-color: rgba(0, 0, 0, 0.5); /* interim: the dark card replaces this */
   }
 }
 
@@ -218,12 +308,14 @@
 
 :root {
   /* --- Typefaces --------------------------------------------------------
-     The host app loads the families — next/font, a Google Fonts link, or
-     self-hosted files. These tokens only name the stack. Never a third
-     typeface. */
-  --kairos-display: 'Bebas Neue', Impact, sans-serif;
-  --kairos-body: 'Epilogue', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --kairos-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
+     Archivo (variable weight and width) for body and display, Courier Prime
+     for typed labels, prices, dates and times. The host app loads the
+     families — next/font, a Google Fonts link, or self-hosted files. This
+     package ships no font file and no font face rule; these tokens only name
+     the stack. Never a third typeface. */
+  --kairos-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --kairos-body: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --kairos-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
   /* --- Space ------------------------------------------------------------
      Nine steps, fine at the bottom and coarse at the top, because that is
@@ -335,8 +427,8 @@
   --kairos-text-xl: 20px;
 
   /* --- Type, by role ----------------------------------------------------
-     Bebas is the page title and nothing else, at 24px, with a hard limit of
-     two per screen. */
+     The display family is the page title and nothing else, at 24px, with a
+     hard limit of two per screen. */
   --kairos-text-body-lh: 1.5;
   --kairos-text-title: 24px;
   --kairos-text-heading: var(--kairos-text-lg);
@@ -381,6 +473,238 @@
      waits forever. Reduced motion should take away the movement, not the event.
      One millisecond lands on the final keyframe in the same frame it starts. */
   --kairos-duration-none: 1ms;
+  /* The error line's one sideways shake when it appears. */
+  --kairos-duration-shake: 320ms;
+  /* The brief's two other curves, for something leaving and for a mark that
+     lands with a little overshoot (a picked day's frame). Named `curve` so
+     they never read as the bare CSS keywords. */
+  --kairos-curve-in: cubic-bezier(0.55, 0, 0.8, 0.3);
+  --kairos-curve-pop: cubic-bezier(0.3, 1.4, 0.5, 1);
+  /* A valid member of a shadow list where `none` is not. */
+  --kairos-shadow-none: 0 0 0 0 transparent;
+
+  /* --- Brand layout -----------------------------------------------------
+     One content width and one left edge for every section: the gutter is
+     padding on the wrapper, never a max-width on it. */
+  --kairos-content-w: 1200px;
+  --kairos-gutter: max(20px, calc((100% - var(--kairos-content-w)) / 2));
+  --kairos-site-header-h: 76px;
+}
+
+/* ==========================================================================
+   Component knobs
+   ==========================================================================
+   What an existing part reads where Kairos design brief v1 changes its shape.
+   Every default reproduces 0.14 exactly — `tests/product-scale.test.mjs`
+   resolves each 0.14 declaration through these and compares — and
+   `brand.css` re-points them under `:root[data-scale='brand']`. The colour
+   knobs sit in the alias block above, so they follow the theme. */
+
+:root {
+  /* --- Button --------------------------------------------------------- */
+  --kairos-button-pad-x: var(--kairos-pad-control);
+  --kairos-button-pad-x-sm: var(--kairos-space-md);
+  --kairos-text-button-sm: var(--kairos-text-xs);
+  --kairos-button-weight: 900;
+  --kairos-button-stretch: 100%;
+  --kairos-button-case: uppercase;
+  /* The stamp the filled ranks wear at rest, on hover and on press. */
+  --kairos-button-shadow-rest: var(--kairos-shadow);
+  --kairos-button-shadow-hover: var(--kairos-shadow-card);
+  --kairos-button-shadow-active: var(--kairos-shadow-pressed);
+  /* Rank 2 stays flat at the Product Scale: a hover-only stamp would make the
+     ranks identical on touch. */
+  --kairos-button-secondary-hover-shadow: none;
+  --kairos-button-press-transform: translate(1px, 1px);
+  /* Buttons, fields and selects acknowledge a change on this. */
+  --kairos-control-duration: var(--kairos-duration);
+
+  /* --- Field ---------------------------------------------------------- */
+  --kairos-input-h: var(--kairos-control-h);
+  --kairos-input-h-multi: 80px;
+  --kairos-input-weight: 400;
+  --kairos-input-pad-y: 0;
+  --kairos-input-pad-x: var(--kairos-space-md);
+  --kairos-input-pad-y-multi: var(--kairos-space-md);
+  --kairos-input-label-size: var(--kairos-text-sm);
+  --kairos-input-label-case: uppercase;
+  --kairos-input-label-track: var(--kairos-track-label);
+  --kairos-input-label-stretch: 100%;
+  /* One message slot under the control, sized from the type that fills it:
+     17.4px here, as 0.14 drew it. The hint holds it and the error takes it. */
+  --kairos-field-message-size: var(--kairos-text-sm);
+  --kairos-field-message-leading: 1.45;
+  /* The required mark and the error badge are Brand Scale marks. */
+  --kairos-required-display: none;
+  --kairos-error-badge-display: none;
+
+  /* --- Focus ---------------------------------------------------------- */
+  --kairos-focus-outline-w: var(--kairos-border-w-strong);
+  --kairos-focus-offset: 2px;
+
+  /* --- Type ranks ------------------------------------------------------
+     The `kairos-type-*` classes read these. At the Product Scale each size is
+     a step the 0.14 type scale already had, so a rank class brings no new
+     number to an app that has not opted in; `brand.css` sets the brief's type
+     scale. Headings lead at 1.2 and text at 1.5; weights are 400 or 700. */
+  --kairos-type-display-size: var(--kairos-text-title);
+  --kairos-type-display-phone-size: var(--kairos-text-title);
+  --kairos-type-display-weight: 700;
+  --kairos-type-display-stretch: 100%;
+  --kairos-type-display-leading: 1.2;
+  --kairos-type-display-tracking: 0;
+  --kairos-type-title-size: var(--kairos-text-title);
+  --kairos-type-title-weight: 700;
+  --kairos-type-title-stretch: 100%;
+  --kairos-type-title-leading: 1.2;
+  --kairos-type-title-tracking: 0;
+  --kairos-type-h2-size: var(--kairos-text-xl);
+  --kairos-type-h2-weight: 700;
+  --kairos-type-h2-stretch: 100%;
+  --kairos-type-h2-leading: 1.2;
+  --kairos-type-h2-tracking: 0;
+  --kairos-type-h3-size: var(--kairos-text-lg);
+  --kairos-type-h3-weight: 700;
+  --kairos-type-h3-stretch: 100%;
+  --kairos-type-h3-leading: 1.2;
+  --kairos-type-h3-tracking: 0;
+  --kairos-type-quote-size: var(--kairos-text-xl);
+  --kairos-type-quote-weight: 700;
+  --kairos-type-quote-stretch: 100%;
+  --kairos-type-quote-leading: 1.2;
+  --kairos-type-quote-tracking: 0;
+  --kairos-type-lead-size: var(--kairos-text-lg);
+  --kairos-type-lead-weight: 400;
+  --kairos-type-lead-stretch: 100%;
+  --kairos-type-lead-leading: 1.5;
+  --kairos-type-lead-tracking: 0;
+  --kairos-type-statement-size: var(--kairos-text-lg);
+  --kairos-type-statement-weight: 700;
+  --kairos-type-statement-stretch: 100%;
+  --kairos-type-statement-leading: 1.5;
+  --kairos-type-statement-tracking: 0;
+  --kairos-type-body-size: var(--kairos-text-body);
+  --kairos-type-body-weight: 400;
+  --kairos-type-body-stretch: 100%;
+  --kairos-type-body-leading: 1.5;
+  --kairos-type-body-tracking: 0;
+  --kairos-type-small-size: var(--kairos-text-md);
+  --kairos-type-small-weight: 400;
+  --kairos-type-small-stretch: 100%;
+  --kairos-type-small-leading: 1.5;
+  --kairos-type-small-tracking: 0;
+  --kairos-type-legal-size: var(--kairos-text-sm);
+  --kairos-type-legal-weight: 400;
+  --kairos-type-legal-stretch: 100%;
+  --kairos-type-legal-leading: 1.5;
+  --kairos-type-legal-tracking: 0;
+  --kairos-type-label-size: var(--kairos-text-sm);
+  --kairos-type-label-weight: 700;
+  --kairos-type-label-stretch: 100%;
+  --kairos-type-label-leading: 1.5;
+  --kairos-type-label-tracking: 0;
+  --kairos-type-price-size: var(--kairos-text-lg);
+  --kairos-type-price-weight: 700;
+  --kairos-type-price-stretch: 100%;
+  --kairos-type-price-leading: 1.5;
+  --kairos-type-price-tracking: 0;
+  --kairos-type-button-size: var(--kairos-text-button);
+  --kairos-type-button-weight: 700;
+  --kairos-type-button-stretch: 100%;
+  --kairos-type-button-leading: 1.5;
+  --kairos-type-button-tracking: 0;
+  --kairos-type-nav-size: var(--kairos-text-md);
+  --kairos-type-nav-weight: 700;
+  --kairos-type-nav-stretch: 100%;
+  --kairos-type-nav-leading: 1.5;
+  --kairos-type-nav-tracking: 0;
+}
+
+/* ==========================================================================
+   Brand parts
+   ==========================================================================
+   Sizes of the parts Kairos design brief v1 adds to the vocabulary: links,
+   choices, the error line, lists, the site shell and the marks. They have no
+   0.14 shape to keep, so each holds the brief's value at both scales; their
+   type comes from the `--kairos-type-*` ranks, which do follow the scale.
+   Tokens rather than literals because `scale.test.mjs` refuses a hand-written
+   spacing, radius or border weight. */
+
+:root {
+  /* Links. A 3px underline 5px under the text; the current menu item's sits
+     6px under. The menu link's marker is 0.62em tall. */
+  --kairos-link-underline-w: 3px;
+  --kairos-link-underline-offset: 5px;
+  --kairos-menu-link-current-offset: 6px;
+  --kairos-menu-link-pad: 14px;
+  --kairos-menu-marker-h: 0.62em;
+  --kairos-lang-sep-h: 18px;
+  --kairos-lang-row-h: 48px;
+
+  /* A roomier tap target than the 44px floor: tick box rows, footer links and
+     the menu toggle. */
+  --kairos-tap-roomy: 46px;
+
+  /* Tick box: a 24px square, its label 10px off, groups 6px by 22px. */
+  --kairos-tick-box-size: 24px;
+  --kairos-tick-box-gap: 10px;
+  --kairos-tick-box-gap-x: 22px;
+  --kairos-tick-box-glyph: 19px;
+
+  /* Day grid: 62px cells, the picked frame 3px inside, the focus ring 4px
+     inside, the date 19px (16px on the narrow phone). */
+  --kairos-day-cell-h: 62px;
+  --kairos-day-frame-inset: 3px;
+  --kairos-day-focus-offset: -4px;
+  --kairos-day-date-size: 19px;
+  --kairos-day-date-size-narrow: 16px;
+
+  /* Time-of-day switch: 5px around the options, 48px options. */
+  --kairos-time-switch-pad: 5px;
+  --kairos-time-option-h: 48px;
+
+  /* The error line's round badge. */
+  --kairos-error-badge: 20px;
+
+  /* Tick list: 28px boxes, 14px between box and text and between rows, the
+     tick drawn at 3px. */
+  --kairos-tick-list-box: 28px;
+  --kairos-tick-list-gap: 14px;
+  --kairos-tick-stroke: 3px;
+
+  /* Step line: 42px boxes (40px under 520px) and the gap the line spans. */
+  --kairos-step-box: 42px;
+  --kairos-step-line-gap: clamp(16px, 2.4vw, 36px);
+
+  /* Bands and the site shell. */
+  --kairos-inset-band-pad-y: clamp(28px, 4vw, 56px);
+  --kairos-inset-band-pad-x: clamp(22px, 4.4vw, 64px);
+  --kairos-site-menu-row-h: 56px;
+  --kairos-site-menu-row-size: 26px;
+  --kairos-site-footer-pad: 56px;
+
+  /* Marks. The photo slot sits in a 6px white mat; the marker is a 0.3em bar
+     tilted a degree; the title bar is 2.2em by 0.16em. */
+  --kairos-photo-mat: 6px;
+  --kairos-marker-h: 0.3em;
+  --kairos-marker-tilt: -1deg;
+  --kairos-title-bar-w: 2.2em;
+  --kairos-title-bar-h: 0.16em;
+}
+
+/* The phone sizes, at the 520px boundary of the register below. */
+@media (max-width: 520px) {
+  :root {
+    --kairos-step-box: 40px;
+  }
+}
+
+/* The site header is shorter where the phone menu replaces the desktop one,
+   the 899/900 boundary of the register below. */
+@media (max-width: 899px) {
+  :root {
+    --kairos-site-header-h: 66px;
+  }
 }
 
 /* ==========================================================================

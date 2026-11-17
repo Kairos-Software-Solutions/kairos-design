@@ -160,8 +160,8 @@ h6 {
    and the most common place to land. The ink carries the contrast; the amber
    makes the ring legibly Kairos. On the dark base the two invert. */
 :focus-visible {
-  outline: var(--kairos-border-w-strong) solid var(--kairos-focus);
-  outline-offset: 2px;
+  outline: var(--kairos-focus-outline-w) solid var(--kairos-focus);
+  outline-offset: var(--kairos-focus-offset);
   box-shadow: 0 0 0 var(--kairos-focus-w) var(--kairos-focus-inner);
 }
 
@@ -740,8 +740,8 @@ h6 {
 .kairos-field-hint,
 .kairos-field-error {
   margin: 0;
-  font-size: var(--kairos-text-sm);
-  line-height: 1.45;
+  font-size: var(--kairos-field-message-size);
+  line-height: var(--kairos-field-message-leading);
 }
 
 .kairos-field-hint {
@@ -753,12 +753,12 @@ h6 {
      Derived from the type rather than measured once: at 11.5px and 1.45
      somebody wrote 17px, and the row stopped matching its own text the first
      time either value moved. */
-  min-height: calc(var(--kairos-text-sm) * 1.45);
+  min-height: calc(var(--kairos-field-message-size) * var(--kairos-field-message-leading));
   color: var(--kairos-text-muted);
 }
 
 .kairos-field-error {
-  color: var(--kairos-state-overdue);
+  color: var(--kairos-field-error-color);
 }
 
 /* One slot, not two. An empty error leaves the grid entirely rather than
@@ -1989,7 +1989,7 @@ button.kairos-step {
   width: fit-content;
   height: var(--button-height, var(--kairos-control-h));
   min-height: var(--button-height, var(--kairos-control-h));
-  padding: 0 var(--kairos-pad-control);
+  padding: 0 var(--kairos-button-pad-x);
   border: var(--button-border-width, var(--kairos-border-w-strong)) solid var(--button-border, var(--kairos-border));
   border-radius: var(--kairos-radius-button);
   /* The class has to survive being put on an `<a>`. `Button` renders a
@@ -2004,16 +2004,16 @@ button.kairos-step {
   color: var(--button-color, var(--kairos-text));
   cursor: pointer;
   font-size: var(--kairos-text-button);
-  font-weight: 900;
+  font-weight: var(--kairos-button-weight);
   letter-spacing: var(--kairos-track-button);
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: var(--kairos-button-case);
   transition:
-    transform var(--kairos-duration) var(--kairos-ease),
-    box-shadow var(--kairos-duration) var(--kairos-ease),
-    background-color var(--kairos-duration) var(--kairos-ease),
-    color var(--kairos-duration) var(--kairos-ease),
-    opacity var(--kairos-duration) var(--kairos-ease);
+    transform var(--kairos-control-duration) var(--kairos-ease),
+    box-shadow var(--kairos-control-duration) var(--kairos-ease),
+    background-color var(--kairos-control-duration) var(--kairos-ease),
+    color var(--kairos-control-duration) var(--kairos-ease),
+    opacity var(--kairos-control-duration) var(--kairos-ease);
   white-space: nowrap;
   touch-action: manipulation;
 }
@@ -2038,15 +2038,15 @@ button.kairos-step {
 }
 
 .kairos-button:active:not(:disabled):not([aria-busy='true']) {
-  transform: translate(1px, 1px);
+  transform: var(--kairos-button-press-transform);
   box-shadow: var(--button-shadow-active, none);
 }
 
 .kairos-button--sm {
   height: var(--button-height-sm, var(--kairos-control-h-sm));
   min-height: var(--button-height-sm, var(--kairos-control-h-sm));
-  padding: 0 var(--kairos-space-md);
-  font-size: var(--kairos-text-xs);
+  padding: 0 var(--kairos-button-pad-x-sm);
+  font-size: var(--kairos-text-button-sm);
   letter-spacing: var(--kairos-track-button);
 }
 
@@ -2224,19 +2224,19 @@ input[type='radio'] {
 }
 
 .kairos-input-label {
-  font-size: var(--kairos-text-sm);
+  font-size: var(--kairos-input-label-size);
   font-weight: 700;
-  letter-spacing: var(--kairos-track-label);
-  text-transform: uppercase;
-  color: var(--kairos-text-2);
+  letter-spacing: var(--kairos-input-label-track);
+  text-transform: var(--kairos-input-label-case);
+  color: var(--kairos-input-label-color);
 }
 
 .kairos-input-field,
 .kairos-select {
   width: 100%;
-  height: var(--kairos-control-h);
-  min-height: var(--kairos-control-h);
-  padding: 0 var(--kairos-space-md);
+  height: var(--kairos-input-h);
+  min-height: var(--kairos-input-h);
+  padding: var(--kairos-input-pad-y) var(--kairos-input-pad-x);
   /* The same 16px `--kairos-text-lg` resolves to, reached through the role
      token, because the reason this control is 16px is not that it is a large
      rank. Safari zooms the page when a control under 16px takes focus, so
@@ -2244,21 +2244,21 @@ input[type='radio'] {
      it survives a pass that tightens the type scale. */
   font-size: var(--kairos-text-input);
   line-height: 1.2;
-  border: var(--kairos-border-w-strong) solid var(--kairos-border);
+  border: var(--kairos-border-w-strong) solid var(--kairos-input-border-color);
   border-radius: var(--kairos-radius-input);
   background: var(--kairos-surface);
   color: var(--kairos-text);
   transition:
-    box-shadow var(--kairos-duration) var(--kairos-ease),
-    border-color var(--kairos-duration) var(--kairos-ease),
-    background-color var(--kairos-duration) var(--kairos-ease);
+    box-shadow var(--kairos-control-duration) var(--kairos-ease),
+    border-color var(--kairos-control-duration) var(--kairos-ease),
+    background-color var(--kairos-control-duration) var(--kairos-ease);
 }
 
 textarea.kairos-input-field {
   height: auto;
-  min-height: 80px;
-  padding-top: var(--kairos-space-md);
-  padding-bottom: var(--kairos-space-md);
+  min-height: var(--kairos-input-h-multi);
+  padding-top: var(--kairos-input-pad-y-multi);
+  padding-bottom: var(--kairos-input-pad-y-multi);
   line-height: 1.5;
   resize: vertical;
 }
@@ -4305,6 +4305,1090 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    does not implement `@page` margin boxes, so CSS cannot draw them.
    ========================================================================== */
 
+/* ==========================================================================
+   Brand parts
+   ==========================================================================
+   The parts Kairos design brief v1 marks shared: links, choices, the error
+   line, surfaces, lists, the site shell and the marks. Each is a new block,
+   so an existing class keeps its 0.14 look; each reads role tokens for colour,
+   part tokens for size and the `--kairos-type-*` ranks for type, so it follows
+   the scale it is shown at.
+
+   Built on native elements — links, buttons, checkbox and radio inputs — so
+   keyboard behaviour (arrows in a radio group, Space to pick) is the
+   browser's. Each part ships in its final state and its state changes; how a
+   page arrives (reveals, wipes, staggers) is the site's. */
+
+/* Text link: ink at 700 over a 3px highlight underline, which turns ink on
+   hover while a trailing arrow nudges along. A 44px tap target. */
+.kairos-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kairos-space-xs);
+  min-height: var(--kairos-control-h-touch);
+  color: var(--kairos-link);
+  font-weight: 700;
+  text-decoration-line: underline;
+  text-decoration-color: var(--kairos-link-underline);
+  text-decoration-thickness: var(--kairos-link-underline-w);
+  text-underline-offset: var(--kairos-link-underline-offset);
+  transition: text-decoration-color var(--kairos-duration-fast) var(--kairos-ease);
+}
+
+.kairos-text-link:hover {
+  text-decoration-color: var(--kairos-link-underline-hover);
+}
+
+.kairos-text-link-arrow {
+  display: inline-block;
+  transition: transform var(--kairos-duration-fast) var(--kairos-ease);
+}
+
+.kairos-text-link:hover .kairos-text-link-arrow {
+  transform: translateX(var(--kairos-space-2xs));
+}
+
+/* An arrow pointing out of the site moves up and out instead. */
+.kairos-text-link--external:hover .kairos-text-link-arrow {
+  transform: translate(var(--kairos-space-3xs), calc(-1 * var(--kairos-space-3xs)));
+}
+
+/* Menu link: the header's own. A highlight marker sweeps in behind the word
+   from the left on hover, and the current page carries a 3px underline. The
+   marker leaves faster than it arrives, on the curve for something going. */
+.kairos-menu-link {
+  position: relative;
+  z-index: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--kairos-control-h-touch);
+  padding: 0 var(--kairos-menu-link-pad);
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-nav-size);
+  font-weight: var(--kairos-type-nav-weight);
+  font-stretch: var(--kairos-type-nav-stretch);
+  line-height: var(--kairos-type-nav-leading);
+  text-decoration: none;
+}
+
+.kairos-menu-link::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  top: 50%;
+  left: calc(var(--kairos-menu-link-pad) - var(--kairos-space-2xs));
+  right: calc(var(--kairos-menu-link-pad) - var(--kairos-space-2xs));
+  height: var(--kairos-menu-marker-h);
+  margin-top: -0.1em;
+  background: var(--kairos-highlight);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--kairos-duration-fast) var(--kairos-curve-in);
+}
+
+.kairos-menu-link:hover::before {
+  transform: scaleX(1);
+  transition: transform var(--kairos-duration) var(--kairos-ease);
+}
+
+.kairos-menu-link[aria-current='page'] {
+  text-decoration-line: underline;
+  text-decoration-color: var(--kairos-highlight);
+  text-decoration-thickness: var(--kairos-link-underline-w);
+  text-underline-offset: var(--kairos-menu-link-current-offset);
+}
+
+/* Language link: the other language, named in that language, with `lang`
+   and `hreflang` on the link. In the menu it is the last item, set off by a
+   1px by 18px ink-3 hairline; in the phone menu it is a 48px row of its own
+   carrying the link underline. */
+.kairos-lang-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--kairos-control-h-touch);
+  padding-right: var(--kairos-menu-link-pad);
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-nav-size);
+  font-weight: var(--kairos-type-nav-weight);
+  text-decoration: none;
+}
+
+.kairos-lang-link::before {
+  content: '';
+  flex: none;
+  width: var(--kairos-border-w);
+  height: var(--kairos-lang-sep-h);
+  margin: 0 calc(var(--kairos-menu-link-pad) + var(--kairos-space-xs)) 0 var(--kairos-space-2xs);
+  background: var(--kairos-ink-3);
+}
+
+.kairos-lang-link--row {
+  min-height: var(--kairos-lang-row-h);
+  padding-right: 0;
+  font-size: var(--kairos-type-body-size);
+  font-weight: 600;
+  text-decoration-line: underline;
+  text-decoration-color: var(--kairos-link-underline);
+  text-decoration-thickness: var(--kairos-link-underline-w);
+  text-underline-offset: var(--kairos-link-underline-offset);
+}
+
+.kairos-lang-link--row::before {
+  content: none;
+}
+
+/* The required mark: a red asterisk after a label. Decoration only — always
+   `aria-hidden`, because the control's own `required` is what assistive
+   technology reads. Shown at the Brand Scale; `Field` writes it. */
+.kairos-required {
+  display: var(--kairos-required-display);
+  margin-left: var(--kairos-space-2xs);
+  color: var(--kairos-required);
+}
+
+/* Error line: a 20px round badge holding "!", then the message at 600 in the
+   error colour, under the thing it is about. It shakes once, sideways, when
+   it appears; the reduced-motion block below stills it to a single 1ms step.
+   The Field error borrows the badge and the shake at the Brand Scale. */
+.kairos-error-line {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-sm);
+  margin: 0;
+  color: var(--kairos-error);
+  font-size: var(--kairos-type-small-size);
+  font-weight: 600;
+  line-height: var(--kairos-type-small-leading);
+  animation: kairos-shake var(--kairos-duration-shake) var(--kairos-ease) 1;
+}
+
+.kairos-error-line::before {
+  display: inline-flex;
+}
+
+.kairos-error-line::before,
+:root[data-scale='brand'] .kairos-field-error:not(:empty)::before {
+  content: '!';
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--kairos-error-badge);
+  height: var(--kairos-error-badge);
+  border-radius: 50%;
+  background: var(--kairos-error);
+  color: var(--kairos-on-error);
+  font-size: var(--kairos-text-md);
+  font-weight: 800;
+  line-height: 1;
+}
+
+@keyframes kairos-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25%,
+  75% {
+    transform: translateX(-4px);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+/* Tick box: a native checkbox drawn as a 24px square with a 2px control edge
+   on card, a mono tick on tint once checked, the label beside it at 600, in
+   a 46px row. The focus ring goes round the whole label. Groups wrap, 6px by
+   22px. */
+.kairos-tick-box-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--kairos-space-xs) var(--kairos-tick-box-gap-x);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.kairos-tick-box {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--kairos-tap-roomy);
+  cursor: pointer;
+}
+
+.kairos-tick-box-input,
+.kairos-day-grid-input,
+.kairos-time-switch-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.kairos-tick-box-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kairos-tick-box-gap);
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-small-size);
+  font-weight: 600;
+  line-height: var(--kairos-type-small-leading);
+}
+
+.kairos-tick-box-label::before {
+  content: '';
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: var(--kairos-tick-box-size);
+  height: var(--kairos-tick-box-size);
+  border: var(--kairos-border-w-strong) solid var(--kairos-control-edge);
+  background: var(--kairos-card);
+  color: var(--kairos-ink);
+  font-family: var(--kairos-mono);
+  font-size: var(--kairos-tick-box-glyph);
+  font-weight: 700;
+  line-height: 1;
+  transition: background-color var(--kairos-control-duration) var(--kairos-ease);
+}
+
+.kairos-tick-box-input:checked + .kairos-tick-box-label::before {
+  content: '\2713';
+  background: var(--kairos-tint);
+}
+
+.kairos-tick-box-input:focus-visible + .kairos-tick-box-label {
+  outline: var(--kairos-focus-outline-w) solid var(--kairos-focus-ring);
+  outline-offset: var(--kairos-space-3xs);
+}
+
+/* Day grid: one radio group of days, 5 columns of 62px cells inside a 2px
+   control edge, 1px rules between them. Hover tints a day; the picked day
+   fills with picked and pops a 2px ink frame 3px inside it. The focus ring
+   sits inside the cell. An invalid group draws its outer edge in error. */
+.kairos-day-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  border: var(--kairos-border-w-strong) solid var(--kairos-control-edge);
+  background: var(--kairos-card);
+}
+
+.kairos-day-grid[aria-invalid='true'] {
+  border-color: var(--kairos-error);
+}
+
+.kairos-day-grid-cell {
+  position: relative;
+  border-top: var(--kairos-border-w) solid var(--kairos-rule);
+  border-left: var(--kairos-border-w) solid var(--kairos-rule);
+  cursor: pointer;
+}
+
+.kairos-day-grid-cell:nth-child(5n + 1) {
+  border-left: 0;
+}
+
+.kairos-day-grid-cell:nth-child(-n + 5) {
+  border-top: 0;
+}
+
+.kairos-day-grid-face {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  box-sizing: border-box;
+  min-height: var(--kairos-day-cell-h);
+  padding: var(--kairos-space-xs) var(--kairos-space-3xs);
+  color: var(--kairos-ink);
+  line-height: 1.2;
+  text-align: center;
+  transition: background-color var(--kairos-control-duration) var(--kairos-ease);
+}
+
+.kairos-day-grid-cell:hover .kairos-day-grid-face {
+  background: var(--kairos-tint);
+}
+
+.kairos-day-grid-input:checked + .kairos-day-grid-face {
+  background: var(--kairos-picked);
+}
+
+.kairos-day-grid-face::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: var(--kairos-day-frame-inset);
+  border: var(--kairos-border-w-strong) solid var(--kairos-ink);
+  border-radius: var(--kairos-radius-chip);
+  opacity: 0;
+  transform: scale(0.9);
+  transition:
+    opacity var(--kairos-duration-fast) var(--kairos-ease),
+    transform var(--kairos-duration) var(--kairos-curve-pop);
+}
+
+.kairos-day-grid-input:checked + .kairos-day-grid-face::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.kairos-day-grid-input:focus-visible + .kairos-day-grid-face {
+  outline: var(--kairos-focus-outline-w) solid var(--kairos-focus-ring);
+  outline-offset: var(--kairos-day-focus-offset);
+}
+
+.kairos-day-grid-weekday {
+  color: var(--kairos-ink-3);
+  font-size: var(--kairos-text-md);
+  font-weight: 600;
+}
+
+.kairos-day-grid-date {
+  font-family: var(--kairos-mono);
+  font-size: var(--kairos-day-date-size);
+  font-weight: 700;
+}
+
+@media (max-width: 420px) {
+  .kairos-day-grid-date {
+    font-size: var(--kairos-day-date-size-narrow);
+  }
+}
+
+/* Time-of-day switch: one radio group in a track with a 2px control edge, an
+   equal column per option (2 to 5), and one pill in picked fill that slides
+   to the checked option. The pill is hidden until the first pick. Its count
+   and position come from `:has()` on the inputs, so there is no script. The
+   focus ring goes round the track; an invalid track draws its edge in error. */
+.kairos-time-switch {
+  --time-switch-count: 3;
+  --time-switch-at: 0;
+  position: relative;
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  padding: var(--kairos-time-switch-pad);
+  border: var(--kairos-border-w-strong) solid var(--kairos-control-edge);
+  background: var(--kairos-card);
+}
+
+.kairos-time-switch[aria-invalid='true'] {
+  border-color: var(--kairos-error);
+}
+
+.kairos-time-switch:has(.kairos-time-switch-input:focus-visible) {
+  outline: var(--kairos-focus-outline-w) solid var(--kairos-focus-ring);
+  outline-offset: var(--kairos-focus-offset);
+}
+
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(2):last-of-type) { --time-switch-count: 2; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(3):last-of-type) { --time-switch-count: 3; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(4):last-of-type) { --time-switch-count: 4; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(5):last-of-type) { --time-switch-count: 5; }
+
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(1) .kairos-time-switch-input:checked) { --time-switch-at: 0; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(2) .kairos-time-switch-input:checked) { --time-switch-at: 1; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(3) .kairos-time-switch-input:checked) { --time-switch-at: 2; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(4) .kairos-time-switch-input:checked) { --time-switch-at: 3; }
+.kairos-time-switch:has(> .kairos-time-switch-option:nth-of-type(5) .kairos-time-switch-input:checked) { --time-switch-at: 4; }
+
+.kairos-time-switch-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.kairos-time-switch-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--kairos-time-option-h);
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-small-size);
+  font-weight: 700;
+}
+
+.kairos-time-switch-pill {
+  position: absolute;
+  z-index: 0;
+  top: var(--kairos-time-switch-pad);
+  bottom: var(--kairos-time-switch-pad);
+  left: var(--kairos-time-switch-pad);
+  box-sizing: border-box;
+  width: calc((100% - 2 * var(--kairos-time-switch-pad)) / var(--time-switch-count));
+  border: var(--kairos-border-w-strong) solid var(--kairos-ink);
+  border-radius: var(--kairos-radius-chip);
+  background: var(--kairos-picked);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(var(--time-switch-at) * 100%));
+  transition:
+    transform var(--kairos-duration) var(--kairos-ease),
+    opacity var(--kairos-duration-fast) var(--kairos-ease);
+}
+
+.kairos-time-switch:has(.kairos-time-switch-input:checked) .kairos-time-switch-pill {
+  opacity: 1;
+}
+
+/* Soft card: the brief's card. Card fill, no border, the soft card shadow;
+   square, or 2px with `--soft-rounded`. A modifier on `kairos-card`, so the
+   existing card keeps its stamp. */
+.kairos-card--soft {
+  border: 0;
+  border-radius: 0;
+  background: var(--kairos-card);
+  box-shadow: var(--kairos-shadow-soft-card);
+}
+
+.kairos-card--soft-rounded {
+  border-radius: var(--kairos-radius-chip);
+}
+
+/* Inset band: a tint box inside the content width. Section band: the band
+   ground across the full width behind one section. Never put one against the
+   other without cream or white between them. */
+.kairos-inset-band {
+  padding: var(--kairos-inset-band-pad-y) var(--kairos-inset-band-pad-x);
+  background: var(--kairos-tint);
+}
+
+.kairos-section-band {
+  background: var(--kairos-band);
+}
+
+/* Tint card: a flat tint box, or band with `--band`. Any tilt is the site's. */
+.kairos-tint-card {
+  padding: var(--kairos-section-pad);
+  background: var(--kairos-tint);
+}
+
+.kairos-tint-card--band {
+  background: var(--kairos-band);
+}
+
+/* Tick list: rows over 1px rules, each with a 28px box on a 2px tick-green
+   edge holding a drawn tick, then a label over a value. `--statement` drops
+   the label for a single statement per row. */
+.kairos-tick-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kairos-tick-list-item {
+  display: grid;
+  grid-template-columns: var(--kairos-tick-list-box) minmax(0, 1fr);
+  column-gap: var(--kairos-tick-list-gap);
+  row-gap: var(--kairos-space-3xs);
+  padding: var(--kairos-tick-list-gap) 0;
+  border-top: var(--kairos-border-w) solid var(--kairos-rule);
+}
+
+.kairos-tick-list-box {
+  display: grid;
+  grid-row: span 2;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--kairos-tick-list-box);
+  height: var(--kairos-tick-list-box);
+  border: var(--kairos-border-w-strong) solid var(--kairos-tick);
+  background: var(--kairos-card);
+}
+
+.kairos-tick-list-box::after {
+  content: '';
+  width: 28%;
+  height: 52%;
+  margin-top: -14%;
+  border-right: var(--kairos-tick-stroke) solid var(--kairos-tick);
+  border-bottom: var(--kairos-tick-stroke) solid var(--kairos-tick);
+  transform: rotate(45deg);
+}
+
+.kairos-tick-list-label {
+  color: var(--kairos-ink-3);
+  font-size: var(--kairos-type-small-size);
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.kairos-tick-list-value {
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-statement-size);
+  font-weight: var(--kairos-type-statement-weight);
+  font-stretch: var(--kairos-type-statement-stretch);
+  line-height: var(--kairos-type-statement-leading);
+  text-wrap: pretty;
+}
+
+.kairos-tick-list--statement .kairos-tick-list-item {
+  align-items: center;
+}
+
+.kairos-tick-list--statement .kairos-tick-list-box {
+  grid-row: auto;
+}
+
+/* Step line: numbered mono boxes joined by 2px tick-green lines from box edge
+   to box edge, each with its title under it. Box 1 is highlight with an ink
+   edge; the rest are card on a tick-green edge. Under 520px the line runs
+   down the left instead. The numbers are the order: use it for steps only. */
+.kairos-step-line {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  column-gap: var(--kairos-step-line-gap);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.kairos-step-line-item {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: var(--kairos-space-md);
+}
+
+.kairos-step-line-box {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  width: var(--kairos-step-box);
+  height: var(--kairos-step-box);
+  border: var(--kairos-border-w-strong) solid var(--kairos-tick);
+  background: var(--kairos-card);
+  color: var(--kairos-ink);
+  font-family: var(--kairos-mono);
+  font-size: var(--kairos-type-price-size);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kairos-step-line-item:first-child .kairos-step-line-box {
+  border-color: var(--kairos-ink);
+  background: var(--kairos-highlight);
+}
+
+.kairos-step-line-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--kairos-step-box) / 2 - var(--kairos-border-w));
+  left: var(--kairos-step-box);
+  width: calc(100% + var(--kairos-step-line-gap) - var(--kairos-step-box));
+  height: var(--kairos-border-w-strong);
+  background: var(--kairos-tick);
+  transform-origin: left center;
+}
+
+.kairos-step-line-title {
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-body-size);
+  font-weight: 800;
+  font-stretch: var(--kairos-type-button-stretch);
+  line-height: 1.3;
+  text-wrap: balance;
+}
+
+@media (max-width: 520px) {
+  .kairos-step-line {
+    grid-auto-flow: row;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .kairos-step-line-item {
+    grid-template-columns: var(--kairos-step-box) minmax(0, 1fr);
+    align-items: center;
+    column-gap: var(--kairos-tick-list-gap);
+    padding-bottom: var(--kairos-space-lg);
+  }
+
+  .kairos-step-line-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .kairos-step-line-item:not(:last-child)::after {
+    top: var(--kairos-step-box);
+    left: calc(var(--kairos-step-box) / 2 - var(--kairos-border-w));
+    width: var(--kairos-border-w-strong);
+    height: calc(100% - var(--kairos-step-box));
+    transform-origin: center top;
+  }
+}
+
+/* Site header: the website's white sticky bar, `--kairos-site-header-h` tall
+   (76px, 66px under 900px), with a hairline under it. Logo left; the menu,
+   the language link and the small main button right, and the menu toggle in
+   their place under 900px. Which button collapses when is the site's. */
+.kairos-site-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: grid;
+  align-items: center;
+  min-height: var(--kairos-site-header-h);
+  background: var(--kairos-card);
+  box-shadow: var(--kairos-shadow-hairline);
+}
+
+.kairos-site-header-inner {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-xl);
+}
+
+.kairos-site-header-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-xs);
+  margin-left: auto;
+}
+
+.kairos-site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-md);
+}
+
+.kairos-site-header-inner > .kairos-site-menu-toggle {
+  margin-left: auto;
+}
+
+@media (max-width: 899px) {
+  .kairos-site-header-nav,
+  .kairos-site-header-actions {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .kairos-site-header-inner > .kairos-site-menu-toggle {
+    display: none;
+  }
+}
+
+/* Phone menu: the sheet under the header, full height, card fill, its rows
+   divided by rules. The toggle is a 46px button on a 2px edge whose two bars
+   cross into an X when `aria-expanded="true"`. Opening, closing, focus and
+   the scroll lock are the site's; this draws the states. */
+.kairos-site-menu {
+  position: fixed;
+  z-index: 45;
+  top: var(--kairos-site-header-h);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: grid;
+  align-content: start;
+  gap: var(--kairos-space-xl);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--kairos-space-md) var(--kairos-gutter) var(--kairos-space-2xl);
+  background: var(--kairos-card);
+}
+
+.kairos-site-menu[hidden] {
+  display: none;
+}
+
+.kairos-site-menu-row {
+  display: flex;
+  align-items: center;
+  min-height: var(--kairos-site-menu-row-h);
+  border-bottom: var(--kairos-border-w) solid var(--kairos-rule);
+  color: var(--kairos-ink);
+  font-size: var(--kairos-site-menu-row-size);
+  font-weight: 800;
+  font-stretch: var(--kairos-type-display-stretch);
+  text-decoration: none;
+}
+
+.kairos-site-menu-toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--kairos-tick-box-gap);
+  min-height: var(--kairos-tap-roomy);
+  padding: 0 var(--kairos-space-lg);
+  border: var(--kairos-border-w-strong) solid var(--kairos-control-edge);
+  border-radius: var(--kairos-radius-chip);
+  background: var(--kairos-card);
+  color: var(--kairos-ink);
+  cursor: pointer;
+  font: inherit;
+  font-weight: 700;
+}
+
+.kairos-site-menu-bars {
+  display: grid;
+  gap: var(--kairos-space-xs);
+  width: 20px;
+}
+
+.kairos-site-menu-bars::before,
+.kairos-site-menu-bars::after {
+  content: '';
+  height: var(--kairos-border-w-strong);
+  background: currentColor;
+  transition: transform var(--kairos-duration) var(--kairos-ease);
+}
+
+.kairos-site-menu-toggle[aria-expanded='true'] .kairos-site-menu-bars::before {
+  transform: translateY(calc((var(--kairos-space-xs) + var(--kairos-border-w-strong)) / 2)) rotate(45deg);
+}
+
+.kairos-site-menu-toggle[aria-expanded='true'] .kairos-site-menu-bars::after {
+  transform: translateY(calc((var(--kairos-space-xs) + var(--kairos-border-w-strong)) / -2)) rotate(-45deg);
+}
+
+/* Site footer: card fill under a 1px top rule; the brand and its note, then
+   columns headed in mono with 46px links (underlined on hover), then the
+   legal line over a rule. */
+.kairos-site-footer {
+  padding: var(--kairos-site-footer-pad) 0 var(--kairos-space-3xl);
+  border-top: var(--kairos-border-w) solid var(--kairos-rule);
+  background: var(--kairos-card);
+}
+
+.kairos-site-footer-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr));
+  gap: var(--kairos-space-2xl) var(--kairos-space-3xl);
+}
+
+.kairos-site-footer-heading {
+  margin: 0 0 var(--kairos-space-xs);
+  color: var(--kairos-label);
+  font-family: var(--kairos-mono);
+  font-size: var(--kairos-type-label-size);
+  font-weight: var(--kairos-type-label-weight);
+}
+
+.kairos-site-footer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--kairos-tap-roomy);
+  color: var(--kairos-ink);
+  font-size: var(--kairos-type-nav-size);
+  text-decoration: none;
+}
+
+.kairos-site-footer-link:hover {
+  text-decoration: underline;
+}
+
+.kairos-site-footer-legal {
+  margin-top: var(--kairos-space-2xl);
+  padding-top: var(--kairos-space-lg);
+  border-top: var(--kairos-border-w) solid var(--kairos-rule);
+  color: var(--kairos-ink-3);
+  font-size: var(--kairos-type-legal-size);
+  line-height: var(--kairos-type-legal-leading);
+}
+
+@media (max-width: 899px) {
+  .kairos-site-footer-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .kairos-site-footer-columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Placeholder text: content still to come, in coral at 600, inside square
+   brackets the copy writes. The photo slot is the same promise for a picture:
+   tint and cream stripes in a white mat, a soft shadow, and a white label box
+   saying what goes there. */
+.kairos-placeholder {
+  color: var(--kairos-placeholder);
+  font-weight: 600;
+}
+
+.kairos-photo-slot {
+  display: grid;
+  place-items: end start;
+  box-sizing: border-box;
+  aspect-ratio: 4 / 5;
+  padding: var(--kairos-tick-list-gap);
+  border: var(--kairos-photo-mat) solid var(--kairos-card);
+  outline: var(--kairos-border-w) solid var(--kairos-rule-frame);
+  background: repeating-linear-gradient(45deg, var(--kairos-tint) 0 12px, var(--kairos-page) 12px 24px);
+  box-shadow: var(--kairos-shadow-soft-photo);
+}
+
+.kairos-photo-slot-label {
+  max-width: 22em;
+  padding: var(--kairos-space-sm) var(--kairos-space-md);
+  background: var(--kairos-card);
+  color: var(--kairos-ink-2);
+  font-size: var(--kairos-type-small-size);
+}
+
+/* Marker: a highlight bar 0.3em tall behind the foot of a marked phrase,
+   tilted a degree. Title bar: a 2.2em by 0.16em bar under a page title. Both
+   grow from the left, so a site's arrival can wipe them in with `scaleX`. */
+.kairos-marker {
+  position: relative;
+  z-index: 0;
+  display: inline-block;
+  isolation: isolate;
+}
+
+.kairos-marker::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  right: -0.07em;
+  bottom: 0.03em;
+  left: -0.05em;
+  height: var(--kairos-marker-h);
+  background: var(--kairos-highlight);
+  transform: rotate(var(--kairos-marker-tilt));
+  transform-origin: left center;
+}
+
+.kairos-title-bar::after {
+  content: '';
+  display: block;
+  width: var(--kairos-title-bar-w);
+  height: var(--kairos-title-bar-h);
+  margin-top: 0.18em;
+  background: var(--kairos-highlight);
+  transform-origin: left center;
+}
+
+/* Type ranks. Each reads its `--kairos-type-<rank>-*` tokens, so a rank is
+   one of the 0.14 type steps at the Product Scale and the brief's size,
+   weight, width, leading and tracking at the Brand Scale. Headings balance
+   their lines and text avoids a lone last word. Label and price are mono. */
+.kairos-type-display,
+.kairos-type-title,
+.kairos-type-h2,
+.kairos-type-h3,
+.kairos-type-quote {
+  margin: 0;
+  font-family: var(--kairos-display);
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.kairos-type-lead,
+.kairos-type-statement,
+.kairos-type-body,
+.kairos-type-small,
+.kairos-type-legal,
+.kairos-type-button,
+.kairos-type-nav {
+  font-family: var(--kairos-body);
+  text-wrap: pretty;
+}
+
+.kairos-type-label,
+.kairos-type-price {
+  font-family: var(--kairos-mono);
+}
+
+.kairos-type-display {
+  font-size: var(--kairos-type-display-size);
+  font-weight: var(--kairos-type-display-weight);
+  font-stretch: var(--kairos-type-display-stretch);
+  line-height: var(--kairos-type-display-leading);
+  letter-spacing: var(--kairos-type-display-tracking);
+}
+
+@media (max-width: 520px) {
+  .kairos-type-display {
+    font-size: var(--kairos-type-display-phone-size);
+  }
+}
+
+.kairos-type-title {
+  font-size: var(--kairos-type-title-size);
+  font-weight: var(--kairos-type-title-weight);
+  font-stretch: var(--kairos-type-title-stretch);
+  line-height: var(--kairos-type-title-leading);
+  letter-spacing: var(--kairos-type-title-tracking);
+}
+
+.kairos-type-h2 {
+  font-size: var(--kairos-type-h2-size);
+  font-weight: var(--kairos-type-h2-weight);
+  font-stretch: var(--kairos-type-h2-stretch);
+  line-height: var(--kairos-type-h2-leading);
+  letter-spacing: var(--kairos-type-h2-tracking);
+}
+
+.kairos-type-h3 {
+  font-size: var(--kairos-type-h3-size);
+  font-weight: var(--kairos-type-h3-weight);
+  font-stretch: var(--kairos-type-h3-stretch);
+  line-height: var(--kairos-type-h3-leading);
+  letter-spacing: var(--kairos-type-h3-tracking);
+}
+
+.kairos-type-quote {
+  font-size: var(--kairos-type-quote-size);
+  font-weight: var(--kairos-type-quote-weight);
+  font-stretch: var(--kairos-type-quote-stretch);
+  line-height: var(--kairos-type-quote-leading);
+  letter-spacing: var(--kairos-type-quote-tracking);
+}
+
+.kairos-type-lead {
+  font-size: var(--kairos-type-lead-size);
+  font-weight: var(--kairos-type-lead-weight);
+  font-stretch: var(--kairos-type-lead-stretch);
+  line-height: var(--kairos-type-lead-leading);
+  letter-spacing: var(--kairos-type-lead-tracking);
+}
+
+.kairos-type-statement {
+  font-size: var(--kairos-type-statement-size);
+  font-weight: var(--kairos-type-statement-weight);
+  font-stretch: var(--kairos-type-statement-stretch);
+  line-height: var(--kairos-type-statement-leading);
+  letter-spacing: var(--kairos-type-statement-tracking);
+}
+
+.kairos-type-body {
+  font-size: var(--kairos-type-body-size);
+  font-weight: var(--kairos-type-body-weight);
+  font-stretch: var(--kairos-type-body-stretch);
+  line-height: var(--kairos-type-body-leading);
+  letter-spacing: var(--kairos-type-body-tracking);
+}
+
+.kairos-type-small {
+  font-size: var(--kairos-type-small-size);
+  font-weight: var(--kairos-type-small-weight);
+  font-stretch: var(--kairos-type-small-stretch);
+  line-height: var(--kairos-type-small-leading);
+  letter-spacing: var(--kairos-type-small-tracking);
+}
+
+.kairos-type-legal {
+  font-size: var(--kairos-type-legal-size);
+  font-weight: var(--kairos-type-legal-weight);
+  font-stretch: var(--kairos-type-legal-stretch);
+  line-height: var(--kairos-type-legal-leading);
+  letter-spacing: var(--kairos-type-legal-tracking);
+}
+
+.kairos-type-label {
+  font-size: var(--kairos-type-label-size);
+  font-weight: var(--kairos-type-label-weight);
+  font-stretch: var(--kairos-type-label-stretch);
+  line-height: var(--kairos-type-label-leading);
+  letter-spacing: var(--kairos-type-label-tracking);
+}
+
+.kairos-type-price {
+  font-size: var(--kairos-type-price-size);
+  font-weight: var(--kairos-type-price-weight);
+  font-stretch: var(--kairos-type-price-stretch);
+  line-height: var(--kairos-type-price-leading);
+  letter-spacing: var(--kairos-type-price-tracking);
+}
+
+.kairos-type-button {
+  font-size: var(--kairos-type-button-size);
+  font-weight: var(--kairos-type-button-weight);
+  font-stretch: var(--kairos-type-button-stretch);
+  line-height: var(--kairos-type-button-leading);
+  letter-spacing: var(--kairos-type-button-tracking);
+}
+
+.kairos-type-nav {
+  font-size: var(--kairos-type-nav-size);
+  font-weight: var(--kairos-type-nav-weight);
+  font-stretch: var(--kairos-type-nav-stretch);
+  line-height: var(--kairos-type-nav-leading);
+  letter-spacing: var(--kairos-type-nav-tracking);
+}
+
+/* Content wrapper: one left edge for every section. The gutter is padding,
+   so a full-width band behind a section still runs edge to edge; never a
+   max-width on the wrapper itself. */
+.kairos-wrap {
+  padding-inline: var(--kairos-gutter);
+}
+
+/* Brand Scale rules ------------------------------------------------------
+   Declarations Kairos design brief v1 adds to an existing part that no knob
+   can make inert at the Product Scale: 0.14 never set them, so any default
+   would override what the part inherits or what its hover paints. Each one
+   begins `:root[data-scale='brand']`, so it cannot match without the switch,
+   and reads a knob or a role token. `brand.css` itself holds only tokens. */
+
+/* The brief's wide button label. */
+:root[data-scale='brand'] .kairos-button {
+  font-stretch: var(--kairos-button-stretch);
+}
+
+/* The outline button lifts onto the hard ink offset as the main one does.
+   The shared rank-2 rule sets its hover shadow to none, and comes later at the
+   same specificity, so the knob needs a rule of its own. */
+:root[data-scale='brand'] .kairos-button--secondary {
+  --button-shadow-hover: var(--kairos-button-secondary-hover-shadow);
+}
+
+/* Field text weight. 0.14 set none and `base.css` makes a control inherit its
+   font, so a Product Scale default would override the host's. */
+:root[data-scale='brand'] .kairos-input-field,
+:root[data-scale='brand'] .kairos-select {
+  font-weight: var(--kairos-input-weight);
+}
+
+/* A focused field fills with tint. 0.14's focused field sets no ground, so it
+   keeps its hover ground; a default here would take that away. */
+:root[data-scale='brand'] .kairos-input-field:focus-visible,
+:root[data-scale='brand'] .kairos-select:focus-visible {
+  background: var(--kairos-input-focus-bg);
+}
+
+/* The invalid edge. 0.14 marks an invalid field by its message alone. */
+:root[data-scale='brand'] .kairos-input-field[aria-invalid='true'],
+:root[data-scale='brand'] .kairos-select[aria-invalid='true'] {
+  border-color: var(--kairos-error);
+}
+
+:root[data-scale='brand'] .kairos-input-label {
+  font-stretch: var(--kairos-input-label-stretch);
+}
+
+/* The field's error reads as `kairos-error-line` does: the round badge, then
+   the text on one line at 600, shaking once as it appears. The slot is sized
+   for the badge (`--kairos-field-message-*`), so nothing below moves.
+   `:not(:empty)`, because this outranks the rule that takes an empty error
+   out of the grid. */
+:root[data-scale='brand'] .kairos-field-error:not(:empty) {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-sm);
+  font-weight: 600;
+  animation: kairos-shake var(--kairos-duration-shake) var(--kairos-ease) 1;
+}
+
+/* The badge is drawn only where the knob shows it: none at the Product Scale,
+   so a 0.14 error is unchanged, and inline-flex at the Brand Scale. */
+.kairos-field-error::before {
+  display: var(--kairos-error-badge-display);
+}
+
 /* Reduced motion ---------------------------------------------------------
    `tokens.css` has said the motion tokens are "honoured against
    prefers-reduced-motion in kairos.css" since they were written, and no such
@@ -4747,16 +5831,16 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-hover-bg: var(--kairos-accent-hover);
   --button-color: var(--kairos-accent-text);
   --button-border: var(--kairos-border);
-  --button-shadow: var(--kairos-shadow);
-  --button-shadow-hover: var(--kairos-shadow-card);
-  --button-shadow-active: var(--kairos-shadow-pressed);
+  --button-shadow: var(--kairos-button-shadow-rest);
+  --button-shadow-hover: var(--kairos-button-shadow-hover);
+  --button-shadow-active: var(--kairos-button-shadow-active);
 }
 
 /* The default appearance, named so a call site can say which rank it means
    rather than relying on the bare class. */
 .kairos-button--secondary {
   --button-bg: var(--kairos-surface);
-  --button-hover-bg: var(--kairos-elevated);
+  --button-hover-bg: var(--kairos-button-secondary-hover-bg);
   --button-color: var(--kairos-text);
   --button-border: var(--kairos-border);
 }
@@ -4817,9 +5901,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-hover-bg: var(--kairos-danger-solid-hover);
   --button-color: var(--kairos-danger-solid-fg);
   --button-border: var(--kairos-border);
-  --button-shadow: var(--kairos-shadow);
-  --button-shadow-hover: var(--kairos-shadow-card);
-  --button-shadow-active: var(--kairos-shadow-pressed);
+  --button-shadow: var(--kairos-button-shadow-rest);
+  --button-shadow-hover: var(--kairos-button-shadow-hover);
+  --button-shadow-active: var(--kairos-button-shadow-active);
 }
 
 /* --- Reading blocks and small layouts ------------------------------------

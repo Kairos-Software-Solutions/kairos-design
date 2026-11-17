@@ -3,6 +3,7 @@ import { withThemeByDataAttribute } from '@storybook/addon-themes';
 
 import '../dist/tokens.css';
 import '../dist/base.css';
+import '../dist/brand.css';
 import '../dist/kairos.css';
 import './workshop.css';
 
@@ -53,7 +54,7 @@ const preview: Preview = {
        * same defect one line further on.
        */
       storySort: {
-        order: ['Foundations', ['Colour', 'Type', 'Space', 'Geometry'], 'Components', 'Screens'],
+        order: ['Foundations', ['Colour', 'Type', 'Space', 'Geometry'], 'Components', 'Brand', 'Screens'],
       },
     },
     viewport: {
@@ -92,6 +93,18 @@ const preview: Preview = {
     },
   },
   decorators: [
+    /**
+     * The Brand Scale switch, per story. `brand.css` waits for
+     * `data-scale="brand"` on the root element, the way the website sets it on
+     * `<html>`, so a story asks for it with `parameters: { scale: 'brand' }`.
+     * Every other story has the attribute removed, which keeps the Product
+     * Scale stories honest about what an app that never opts in sees.
+     */
+    (Story, context) => {
+      if (context.parameters.scale === 'brand') document.documentElement.dataset.scale = 'brand';
+      else delete document.documentElement.dataset.scale;
+      return <Story />;
+    },
     withThemeByDataAttribute({
       themes: { light: 'light', dark: 'dark' },
       defaultTheme: 'light',

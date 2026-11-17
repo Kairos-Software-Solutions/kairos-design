@@ -117,14 +117,14 @@ export const Scale: Story = {
 
       <Section
         title="The families"
-        lede="Two, and never a third. The host app loads them; these tokens only name the stack."
+        lede="Two, and never a third: Archivo across its weight and width axes, and Courier Prime. The host app loads them; these tokens only name the stack."
       >
         <div className="kairos-panel kairos-pad kairos-stack kairos-stack--lg">
           {(
             [
-              ['display', 'Bebas Neue', 'Page titles. Nothing else.'],
-              ['body', 'Epilogue', 'Everything that is read rather than glanced at.'],
-              ['mono', 'System monospace', 'Identifiers, amounts in a column, anything that has to line up.'],
+              ['display', 'Archivo', 'Page titles in a tool; every heading rank at the Brand Scale, set wide and heavy.'],
+              ['body', 'Archivo', 'Everything that is read rather than glanced at.'],
+              ['mono', 'Courier Prime', 'Identifiers, amounts in a column, labels and prices on a brand page.'],
             ] as const
           ).map(([token, name, use]) => (
             <div className="kairos-stack kairos-stack--xs" key={token}>
@@ -159,8 +159,8 @@ export const Scale: Story = {
 export const OneFamilyPerJob: Story = {
   render: () => (
     <Page
-      title="Bebas is the page title"
-      lede="At 24px, with a hard limit of two per screen. Every other piece of type in a tool is Epilogue. The two panels below are the same screen; only the family moved."
+      title="Display type is the page title"
+      lede="At 24px, with a hard limit of two per screen. Every other piece of type in a tool is the body family. The two panels below are the same screen; only the family moved."
     >
       <div className="kairos-row kairos-row--lg" style={{ alignItems: 'flex-start' }}>
         <section className="kairos-panel kairos-pad kairos-stack kairos-stack--md" style={{ flex: 1 }}>
@@ -194,7 +194,7 @@ export const OneFamilyPerJob: Story = {
 
       <Note>
         The right-hand panel is not a caricature. It is what every heading class rendered outside
-        `.kairos-app-shell` until 0.3.0, because the rule dropping Bebas was scoped to the shell and
+        `.kairos-app-shell` until 0.3.0, because the rule dropping display type was scoped to the shell and
         a dialog is not inside one. Display type carries a page title and loses a sentence: the
         second panel has no rank order, because everything in it is shouting.
       </Note>

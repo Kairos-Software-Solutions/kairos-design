@@ -1496,3 +1496,124 @@ settings row. A toggle hung beside a shell is hidden outright. Every remaining
 placement is a screen with no chrome, which is a phone. `contract.test.mjs`
 asserts each of those, so the day one of them changes, the height gets
 reconsidered rather than silently kept.
+
+## Brand, 0.16.0
+
+0.16.0 takes the look of **Kairos design brief v1** (approved 17 November 2026)
+into the package. The brief is now the source of truth named at the top of
+`tokens.css`. It describes the company's brand surfaces, the website first; the
+apps keep their shape. Three ADRs carry the larger calls:
+[0012](adr/0012-switch-the-brand-scale-on-at-the-root.md),
+[0013](adr/0013-give-decorative-hairlines-their-own-token.md) and
+[0014](adr/0014-rename-a-role-and-keep-its-old-name.md).
+
+### The light palette already was the brief
+
+Page `#fff8eb`, card `#ffffff`, ink `#16110b`, ink-2 `#473728`, ink-3
+`#79624a` and highlight `#ffc247` are the 0.14 light values, under other
+names. One existing value moves: `--kairos-accent-hover` becomes the brief's
+highlight-strong, `#ffb627` (was `#e6a92d`; ink on it 10.70:1). The roles 0.14
+lacked are new tokens: band, tint, picked, tick, placeholder, error, on-error,
+rule, rule-frame and the soft shadow colour. Every brief colour is written as
+its approved hex, never the oklch the brief's stylesheet carries, because the
+contrast suite computes from hex. The hairlines and the soft shadow colour
+stay `rgba()`, as the brief has them: they are decorative, never paired for
+contrast, and have to read the same on cream, white and both greens.
+
+### Renamed roles keep their old names
+
+Nine roles take the brief's name, and the 0.14 name stays as an alias:
+`page` (`bg`), `card` (`surface`), `ink` (`text`), `ink-2` (`text-2`), `ink-3`
+(`text-muted`), `highlight` (`accent`), `highlight-strong` (`accent-hover`),
+`on-highlight` (`accent-text`) and `focus-ring` (`focus`). The aliases sit in
+their own block, `:root, [data-theme]`, so an old name re-resolves on any
+element that sets a theme rather than inheriting the root's light value.
+Existing rules keep reading the old names (no churn, same values); new rules
+read the new ones. See ADR 0014.
+
+### Two names were taken
+
+The brief's `accent` is its green, and `--kairos-accent` is the amber every
+app's primary button reads. The brief's `border` is a 20% hairline, and
+`--kairos-border` is the ink edge on fifty rules. Giving either old name the
+brief's meaning would repaint every app, so the green is `--kairos-tick` (its
+first job) and the hairlines are `--kairos-rule` (18%, decorative lines) and
+`--kairos-rule-frame` (20%, a photo's edge). A test pins that no control edge
+ever reads a rule token. See ADR 0013.
+
+### Colours and fonts are shared; the shape is opt-in
+
+Colours and the font stacks are the same at both scales, so an app that bumps
+gets them. The website's geometry, type ranks and motion are in the new
+`brand.css`, one rule under `:root[data-scale='brand']` holding only custom
+properties: no colour value, no class rule, no `@font-face`, no `url()`. It
+does nothing until the root element carries `data-scale="brand"`. Its
+selector outranks the light and dark blocks without `!important`, so import
+order does not decide it, and the workshop can render both scales in one
+build. It goes on the root because a token built from other tokens resolves on
+the element that declares it. See ADR 0012.
+
+Existing parts read **component knobs** where the brief changes them
+(`--kairos-button-*`, `--kairos-input-*`, `--kairos-field-message-*`,
+`--kairos-focus-*`, `--kairos-type-*`, `--kairos-control-duration`). Each
+knob's default in `tokens.css` reproduces 0.14 exactly, and `brand.css`
+re-points it. Where the brief adds a declaration that no default can make inert
+(a focused field's tint ground, the invalid field's edge, the wide button
+label), `kairos.css` carries a rule that begins `:root[data-scale='brand']`
+and so cannot match without the switch.
+
+### The fonts are Archivo and Courier Prime
+
+`--kairos-display` and `--kairos-body` are `'Archivo', ui-sans-serif,
+system-ui, sans-serif`; `--kairos-mono` is `'Courier Prime', 'Courier New',
+ui-monospace, monospace`. One name per role, as the Tokens section rules. The
+package ships no font file, no `@font-face` and no font URL: the host loads the
+families, as it always has. Product Scale keeps its case and size rules, so an
+app's page title is Archivo where it was the 0.14 display face, once the app
+loads Archivo. A bump alone brings Archivo to no app (see the adoption guide).
+
+### The Product Scale guarantee
+
+With no `data-scale` attribute, 0.16 renders every existing class as 0.14 did,
+in both themes, except for the INTENTIONAL list: the three font stacks and the
+light `--kairos-accent-hover`. `tests/product-scale.test.mjs` proves it against
+byte copies of the published 0.14.0 `tokens.css`, `base.css` and `kairos.css`:
+every 0.14 declaration, resolved through each version's tokens, must come out
+equal. A new declaration on an existing class must be Brand-scoped or listed
+with the value it resolves to at Product Scale; the one listed is the Field
+error's badge, `display: none` at Product Scale.
+
+### Smaller calls
+
+- **Dark.** Every 0.14 dark value stays. The new roles take interim dark values
+  from the existing dark palette, marked in the file; a designed dark theme
+  replaces them in a later release. The Brand stories render light only.
+- **Reduced motion keeps 1ms**, not the brief's 0ms, for the reason recorded on
+  `--kairos-duration-none`. `brand.css` never sets it.
+- **The motion curves are `--kairos-curve-in` and `--kairos-curve-pop`**, not
+  `ease-in` and `ease-pop`: the scale test reads `ease-in` inside a `var()` as
+  a literal easing.
+- **One message slot under a field.** The hint and the error still share it.
+  At Brand Scale it is 15px at 1.6, 24px, which holds the error's 20px badge,
+  so an error moves nothing below the field. The hint stays under the control
+  at both scales; the brief draws it under the label, which would need a second
+  row.
+- **Shared parts became classes; site parts did not.** Every part the brief
+  marks shared is a `kairos-*` block (links, the required mark, the error line,
+  tick box, day grid, time switch, soft card, bands, tint card, tick list, step
+  line, site header, phone menu, site footer, placeholder, photo slot, marker,
+  title bar, type ranks, wrapper). The logo reel, its spotlight, the arrival
+  and reveal choreography and the site's copy stay in the site. No new React
+  component: `Field` renders the required mark, and `Button` already had the
+  brief's busy state.
+- **The release tags after it publishes.** The workflow pushed the version tag
+  before `npm publish`; a failed publish left the tag, and the rerun found it and
+  released nothing. The tag step now follows the publish, unchanged otherwise.
+
+### Release note, 0.16.0
+
+Minor. Apps on `^0.14.0` do not receive it. On a bump an app sees two things:
+the font stacks name Archivo and Courier Prime (the app loads them, or falls
+back to the system stack), and the primary button's hover fill is the brighter
+`#ffb627`. Old token names keep working. New: `kairos-design/brand.css`, the
+shared brand parts in `kairos.css`, `Field`'s `required`.

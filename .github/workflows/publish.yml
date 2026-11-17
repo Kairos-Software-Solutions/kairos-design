@@ -89,6 +89,10 @@ jobs:
         if: steps.release.outputs.publish == 'true'
         run: npm run build-storybook
 
+      - name: Publish
+        if: steps.release.outputs.publish == 'true'
+        run: npm publish --access public
+
       - name: Create and push the version tag
         if: steps.release.outputs.create_tag == 'true'
         env:
@@ -100,7 +104,3 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag --annotate "$TAG" --message "Release $TAG"
           git push origin "$TAG"
-
-      - name: Publish
-        if: steps.release.outputs.publish == 'true'
-        run: npm publish --access public
