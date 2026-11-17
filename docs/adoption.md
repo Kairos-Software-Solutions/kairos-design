@@ -18,6 +18,118 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
+## Upgrading to 0.15.0
+
+The brand release: Kairos design brief v1 in the token layer, an opt-in Brand
+Scale for brand surfaces, and the brief's shared parts as classes. An app's
+shape does not change. See the "Brand, 0.15.0" section of
+[decisions.md](decisions.md).
+
+**What an app sees on a bump.** Two things and nothing else:
+
+- The font tokens name new families. `--kairos-display` and `--kairos-body`
+  are `'Archivo', ui-sans-serif, system-ui, sans-serif`, and `--kairos-mono` is
+  `'Courier Prime', 'Courier New', ui-monospace, monospace`.
+- The primary button's hover fill is `#ffb627` (was `#e6a92d`).
+
+**When the font actually changes.** The package ships no font; the app loads
+the families, so the bump alone puts Archivo on no screen:
+
+- An app that re-points `--kairos-display`, `--kairos-body` and
+  `--kairos-mono` on `:root` in its own stylesheet keeps its families until it
+  changes both its font loader and that override.
+- An app that loads the 0.14 families by a link and overrides no font token
+  falls back to the system sans (and its mono to Courier New where that is
+  installed) until it loads Archivo and Courier Prime.
+
+So change the font loading in the same change as the bump. Archivo is wider
+than the old display face: check long page titles.
+
+With `next/font/local` (the font files live in the app; the package has none),
+point the tokens at the variables it creates:
+
+```tsx
+import localFont from 'next/font/local';
+
+const archivo = localFont({
+  src: './fonts/archivo.woff2',
+  weight: '400 900',
+  declarations: [{ prop: 'font-stretch', value: '62% 125%' }],
+  variable: '--font-archivo',
+  display: 'swap',
+});
+const courierPrime = localFont({
+  src: [
+    { path: './fonts/courier-prime-400.woff2', weight: '400' },
+    { path: './fonts/courier-prime-700.woff2', weight: '700' },
+  ],
+  variable: '--font-courier-prime',
+  display: 'swap',
+});
+
+// <html className={`${archivo.variable} ${courierPrime.variable}`}>
+```
+
+```css
+:root {
+  --kairos-display: var(--font-archivo), 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --kairos-body: var(--font-archivo), 'Archivo', ui-sans-serif, system-ui, sans-serif;
+  --kairos-mono: var(--font-courier-prime), 'Courier Prime', 'Courier New', ui-monospace, monospace;
+}
+```
+
+With a link, the family names match the tokens and nothing else is needed:
+
+```html
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+```
+
+**Opting into the Brand Scale.** A brand surface (the website) imports
+`brand.css` between base and the vocabulary and sets the switch on `<html>`:
+
+```css
+@import "kairos-design/tokens.css";
+@import "kairos-design/base.css";
+@import "kairos-design/brand.css";
+@import "kairos-design/kairos.css";
+```
+
+```html
+<html data-scale="brand">
+```
+
+The attribute goes on the root element, not lower down: tokens built from other
+tokens resolve where they are declared, so a switch on a descendant leaves them
+at the root's scale ([adr/0012](adr/0012-switch-the-brand-scale-on-at-the-root.md)).
+Without the attribute, importing `brand.css` changes nothing.
+
+**Renamed tokens.** Nine roles take the brief's names; the old names are
+aliases and keep working, in both themes and under any `data-theme`
+([adr/0014](adr/0014-rename-a-role-and-keep-its-old-name.md)):
+
+| 0.15 name | 0.14 name, still valid |
+| --- | --- |
+| `--kairos-page` | `--kairos-bg` |
+| `--kairos-card` | `--kairos-surface` |
+| `--kairos-ink` | `--kairos-text` |
+| `--kairos-ink-2` | `--kairos-text-2` |
+| `--kairos-ink-3` | `--kairos-text-muted` |
+| `--kairos-highlight` | `--kairos-accent` |
+| `--kairos-highlight-strong` | `--kairos-accent-hover` |
+| `--kairos-on-highlight` | `--kairos-accent-text` |
+| `--kairos-focus-ring` | `--kairos-focus` |
+
+An app overriding an old name on `:root` still wins for every rule that reads
+that name; new parts read the new names.
+
+**New:** the brand roles (`band`, `tint`, `picked`, `tick`, `placeholder`,
+`error`, `on-error`, `rule`, `rule-frame`), the brief's shared parts as
+`kairos-*` classes (see the manifest), and `required` on `Field`,
+`InputField`, `Textarea` and `SelectField`, which draws an `aria-hidden`
+asterisk in the label at the Brand Scale and passes `required` to the control.
+
 ## Upgrading to 0.14.0
 
 The density release. Nothing is removed and no prop changes meaning; what
