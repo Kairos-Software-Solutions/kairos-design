@@ -18,6 +18,26 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
+## Upgrading to 0.17.0
+
+The apps take the brief's type. See "Product type on the brief, 0.17.0" in
+[decisions.md](decisions.md).
+
+**What changes on a bump, at Product Scale only:** headings are Archivo 800,
+wide and in sentence case; small labels, table headers, state chips and
+figures are Courier Prime 700 (labels in capitals); buttons, tabs and switch
+options are sentence case. Geometry and density do not change.
+
+**Load both families.** An app still loading Bebas Neue and Epilogue (Paykit,
+Mailkit and the account app did) changes its loader and its `:root` override
+in the same change, as the 0.16.0 section below shows. Point
+`--kairos-mono` at Courier Prime too: the typed labels read it.
+
+**Check:** a heading written as a label (`h3.kairos-label-caps`) stays in
+capitals; a long page title wraps sooner, because Archivo is wider than Bebas;
+`Panel` now spaces its children, so a screen that wrapped a panel's children
+in its own stack is unchanged and one that did not gains the spacing.
+
 ## Upgrading to 0.16.0
 
 The brand release: Kairos design brief v1 in the token layer, an opt-in Brand

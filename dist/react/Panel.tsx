@@ -29,7 +29,7 @@ export default function Panel({ heading, help, flush = false, children }: PanelP
   // tool, and a panel heading in it reads as a second page title.
   const title = heading ? <h2 className="kairos-panel-heading">{heading}</h2> : null;
   return (
-    <section className={['kairos-panel', !flush && 'kairos-pad'].filter(Boolean).join(' ')}>
+    <section className={['kairos-panel', 'kairos-panel--flow', !flush && 'kairos-pad'].filter(Boolean).join(' ')}>
       {title && help ? (
         <div className="kairos-panel-heading-row">
           {title}

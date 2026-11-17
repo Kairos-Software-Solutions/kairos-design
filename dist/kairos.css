@@ -657,6 +657,17 @@ h6 {
   margin-bottom: var(--kairos-space-md);
 }
 
+/* And the blocks under the heading are spaced from each other. `Panel` puts its
+   children straight into the padded section, so a panel holding a list and a
+   note, or a list and its button, drew them touching unless the screen
+   remembered to wrap them in a stack. A child that is already a stack is
+   one block and gets nothing extra inside. Only `Panel` sets the modifier: a
+   hand-built panel that is itself a stack, a grid or a filter row already
+   spaces its children, and a margin there would add to its gap. */
+.kairos-panel--flow > :not(.kairos-panel-heading, .kairos-panel-heading-row) + * {
+  margin-top: var(--kairos-space-md);
+}
+
 /* A panel heading with the panel's help at the right end of its row. The one
    place a section's ⓘ goes, so it is in the same place on every panel that has
    one: not after the heading's last word, where its position moved with the
@@ -687,6 +698,11 @@ h6 {
    modifier; it just defaults to a step now instead of to 12. */
 .kairos-stack {
   display: grid;
+  /* One column that never grows past its container. The implicit track sized
+     itself to its widest child's min-content, so one unbreakable line (an
+     email address, a nowrap row of buttons) pushed the whole stack, and
+     everything in it, out of a sidebar or a card. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--stack-gap, var(--kairos-space-md));
 }
 
@@ -1091,6 +1107,9 @@ h6 {
 
 .kairos-metric-row > div {
   display: grid;
+  /* Top-aligned: a figure with no comparison line under it was pushed down
+     to the middle of a taller neighbour's column. */
+  align-content: start;
   gap: var(--kairos-space-3xs);
 }
 
@@ -4221,6 +4240,18 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   .kairos-topbar--switcher .kairos-topbar-brand {
       display: flex;
     }
+
+  /* But in a shell that does have a sidebar, the sidebar carries the mark and
+     the account menu. A switcher bar there shows only its switcher, and a bar
+     whose only switcher was the phone's account button goes away, instead of
+     drawing the product name and the account a second time. */
+  .kairos-app-shell:has(.kairos-sidebar) .kairos-topbar--switcher .kairos-topbar-brand {
+      display: none;
+    }
+
+  .kairos-app-shell:has(.kairos-sidebar) .kairos-topbar:not(:has(> :not(.kairos-topbar-brand, .kairos-account-trigger--compact))) {
+      display: none;
+    }
 }
 
 @media (max-width: 899px) {
@@ -6019,6 +6050,7 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    ========================================================================== */
 
 .kairos-account-trigger {
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: var(--kairos-space-sm);
@@ -6099,4 +6131,97 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 .kairos-account-email {
   color: var(--kairos-text-muted);
   font-size: var(--kairos-text-sm);
+}
+
+/* ==========================================================================
+   Product type on the brief (0.17.0).
+
+   The apps take Kairos design brief v2's type and keep their own geometry:
+   the same 36px controls, ink edges and stamps, at the same density. What
+   changes is the voice. Headings are Archivo set wide and heavy, in sentence
+   case, where they were Bebas Neue capitals. Small labels, the eyebrow over a
+   group, a table's column names, a definition's term and a state chip, are
+   typed in Courier Prime capitals, the way the website sets "What we take care
+   of". Buttons, tabs and switch options read in sentence case.
+
+   Every rule here begins `:root:not([data-scale='brand'])`, so the Brand
+   Scale (the website) is untouched: it sets its own ranks in brand.css. The
+   switches that used to make labels and buttons uppercase are knobs in
+   tokens.css, so those changes live there, as defaults brand.css re-points.
+   ========================================================================== */
+
+/* Headings: wide, heavy, sentence case. Archivo has a width axis; 112% is the
+   brief's "set wide" at app sizes, where the website's 118% would push a long
+   page title onto a second line on a laptop. `:where` keeps this at the
+   specificity of the in-shell rule below, which comes later and wins for
+   section headings. */
+:root:not([data-scale='brand']) :where(h1, h2, h3, h4, h5, h6) {
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.01em;
+  line-height: 1.12;
+  text-transform: none;
+}
+
+/* Section headings inside the tool stay a step quieter than the page title:
+   still Archivo, still wide, at 700 and the body size the shell gives them. */
+:root:not([data-scale='brand']) :where(.kairos-app-shell) :where(h2, h3, h4, h5, h6),
+:root:not([data-scale='brand']) :is(.kairos-panel-heading, .kairos-panel-subheading, .kairos-section-title, .kairos-record-row-title, .kairos-tile-heading, .kairos-disclosure-title, .kairos-dialog-title) {
+  font-family: var(--kairos-display);
+  font-weight: 700;
+  font-stretch: 106%;
+  letter-spacing: 0;
+}
+
+/* The product name beside the mark keeps its capitals: it sits next to the
+   logo's own capital wordmark. Archivo is drawn at every weight, so the
+   lockup takes the heavy one rather than Bebas Neue's only weight. */
+:root:not([data-scale='brand']) :is(.kairos-product-name, .kairos-wordmark, .kairos-print-header-business) {
+  font-weight: 800;
+  font-stretch: 100%;
+  letter-spacing: var(--kairos-track-display);
+}
+
+:root:not([data-scale='brand']) .kairos-print-header-business {
+  text-transform: none;
+}
+
+/* Typed labels: Courier Prime capitals. The face is wider than Archivo at the
+   same size, so the tracking comes down to keep a column name the width it
+   was. */
+:root:not([data-scale='brand']) :is(.kairos-label-caps, .kairos-definition-grid dt, .kairos-kicker, .kairos-nav-group, .kairos-table th, .kairos-record-card-detail-label, .kairos-section-tag > :first-child, .kairos-state-chip, .kairos-skip-link, .kairos-theme-toggle, .kairos-bottom-nav-link) {
+  font-family: var(--kairos-mono);
+  font-weight: 700;
+  letter-spacing: var(--kairos-track-typed);
+  /* Restated for a heading set as a label (`h3.kairos-label-caps`), which
+     the sentence-case heading rule above would otherwise lower. */
+  text-transform: uppercase;
+}
+
+/* Tabs, sub-navigation, switch options and steps are things to press, so they
+   read like the buttons: sentence case, no tracking. */
+:root:not([data-scale='brand']) :is(.kairos-tab, .kairos-subnav-link, .kairos-segmented-option, .kairos-segmented-link, .kairos-step) {
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+/* A figure is a price: typed, the way the website sets "From TTD 5,000".
+   Courier Prime's figures are all one width, so a column of them lines up
+   without tabular-nums. */
+:root:not([data-scale='brand']) .kairos-metric-value {
+  font-family: var(--kairos-mono);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* An identifier in a table cell breaks only when the whole of it cannot fit.
+   `base.css` lets a cell break anywhere, which also tells the table that a
+   column of identifiers needs no width at all; Courier Prime is wide enough
+   that the table took it at its word and set "template_archived" and a domain
+   name on three lines each beside columns with room to spare. `break-word`
+   still breaks a key too long for a phone, but sizes the column to the
+   longest word first. */
+.kairos-table td :is(.kairos-mono, .kairos-code, code) {
+  overflow-wrap: break-word;
 }

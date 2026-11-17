@@ -36,6 +36,8 @@ const INTENTIONAL = [
   { theme: 'both', token: '--kairos-body', value: "'Archivo', ui-sans-serif, system-ui, sans-serif" },
   { theme: 'both', token: '--kairos-mono', value: "'Courier Prime', 'Courier New', ui-monospace, monospace" },
   { theme: 'light', token: '--kairos-accent-hover', value: '#ffb627' },
+  // 0.17.0: the tracking that went with capital buttons and tabs.
+  { theme: 'both', token: '--kairos-track-button', value: '0.01em' },
 ];
 
 /**
@@ -47,6 +49,42 @@ const ALLOWED_NEW = [
   // The Field error badge. A `::before` with no content draws nothing, and the
   // knob keeps it out of the layout too; the Brand Scale shows it.
   { file: 'kairos.css', context: '', selector: '.kairos-field-error::before', prop: 'display', productValue: 'none' },
+];
+
+/**
+ * 0.17.0 moves the Product Scale onto the brief's type on purpose: sentence
+ * case buttons, labels and tabs, and the tracking that went with capitals
+ * comes down. Each 0.14 declaration that changes is listed with the value it
+ * now resolves to (both themes unless a theme is named).
+ */
+const CHANGED_0_17 = [
+  { selector: '.kairos-button', prop: 'font-weight', value: '700' },
+  { selector: '.kairos-button', prop: 'letter-spacing', value: '0.01em' },
+  { selector: '.kairos-button', prop: 'text-transform', value: 'none' },
+  { selector: '.kairos-button--sm', prop: 'letter-spacing', value: '0.01em' },
+  { selector: '.kairos-input-label', prop: 'color', value: { light: '#16110b', dark: '#f5f1e8' } },
+  { selector: '.kairos-input-label', prop: 'font-size', value: '13px' },
+  { selector: '.kairos-input-label', prop: 'letter-spacing', value: '0' },
+  { selector: '.kairos-input-label', prop: 'text-transform', value: 'none' },
+  ...['.kairos-kicker', '.kairos-nav-group', '.kairos-section-tag > :first-child', '.kairos-segmented-link', '.kairos-segmented-option', '.kairos-step', '.kairos-subnav-link', '.kairos-tab'].map(
+    (selector) => ({ selector, prop: 'letter-spacing', value: '0.01em' }),
+  ),
+];
+
+/**
+ * New 0.17.0 declarations on existing classes. The type layer is one block
+ * whose every rule begins `:root:not([data-scale='brand'])`, so it reaches the
+ * apps and never the Brand Scale; it is accepted by that prefix. The rest are
+ * layout fixes, listed one by one.
+ */
+const PRODUCT_TYPE_PREFIX = ":root:not([data-scale='brand'])";
+const NEW_0_17 = [
+  { selector: '.kairos-metric-row > div', prop: 'align-content' },
+  { selector: '.kairos-panel--flow > :not(.kairos-panel-heading, .kairos-panel-heading-row) + *', prop: 'margin-top' },
+  { selector: '.kairos-stack', prop: 'grid-template-columns' },
+  { selector: '.kairos-table td :is(.kairos-mono, .kairos-code, code)', prop: 'overflow-wrap' },
+  { selector: '.kairos-app-shell:has(.kairos-sidebar) .kairos-topbar--switcher .kairos-topbar-brand', prop: 'display' },
+  { selector: '.kairos-app-shell:has(.kairos-sidebar) .kairos-topbar:not(:has(> :not(.kairos-topbar-brand, .kairos-account-trigger--compact)))', prop: 'display' },
 ];
 
 function sha256(path) {
@@ -119,9 +157,15 @@ test('every 0.14 declaration resolves the same at Product Scale, light and dark'
         failures.push(`${file}.css: ${key} is gone`);
         continue;
       }
+      const changed = file === 'kairos' && !d.context.length ? CHANGED_0_17.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       for (const theme of THEMES) {
-        const expected = resolve(d.value, before[theme]);
         const actual = resolve(now.value, after[theme]);
+        if (changed) {
+          const want = typeof changed.value === 'string' ? changed.value : changed.value[theme];
+          if (actual !== want) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_17 says ${want}`);
+          continue;
+        }
+        const expected = resolve(d.value, before[theme]);
         if (expected !== actual) failures.push(`${file}.css ${theme}: ${key} was ${expected}, is ${actual}`);
       }
     }
@@ -146,6 +190,9 @@ test('a new rule on an existing class is Brand-scoped, or listed and inert at Pr
       // A step of a keyframes block 0.14 did not have belongs to a new part.
       const frames = d.context.map((c) => c.match(/^@keyframes\s+([\w-]+)/)?.[1]).find(Boolean);
       if (frames && !oldKeyframes.has(frames)) continue;
+
+      if (d.selector.startsWith(PRODUCT_TYPE_PREFIX)) continue;
+      if (file === 'kairos' && NEW_0_17.some((n) => n.selector === d.selector && n.prop === d.prop)) continue;
 
       const parts = d.selector.split(', ');
       const free = parts.every(

@@ -1617,3 +1617,56 @@ the font stacks name Archivo and Courier Prime (the app loads them, or falls
 back to the system stack), and the primary button's hover fill is the brighter
 `#ffb627`. Old token names keep working. New: `kairos-design/brand.css`, the
 shared brand parts in `kairos.css`, `Field`'s `required`.
+
+## Product type on the brief, 0.17.0
+
+0.16.0 left the apps their shape, and on a bump that shape was Bebas Neue's:
+uppercase tracked headings, labels, table headers and buttons. With Archivo
+loaded in its place, those capitals came out as wide heavy display type on
+every control, and the product name beside the mark came out thin. The owner
+asked for every app to match the new branding (brief v2, approved
+17 November 2026), so 0.17.0 moves the Product Scale onto the brief's type
+and keeps its geometry: the same 36px controls, ink edges, stamps and density.
+
+- **Headings** are Archivo 800 at 112% width in sentence case, the website's
+  voice at app sizes. Section headings in the shell and the named heading
+  classes are 700 at 106%. The page title stays at the 24px rank.
+- **Typed labels** are Courier Prime 700 capitals at `--kairos-track-typed`
+  (0.04em): `kairos-label-caps`, a definition's term, the kicker, the nav
+  group, table headers, record-card labels, section tags, state chips, the
+  skip link, the theme toggle and the bottom-nav labels. This is how the
+  website sets "What we take care of".
+- **Figures** (`kairos-metric-value`) are Courier Prime 700, the way the
+  website sets a price.
+- **Buttons, tabs, sub-navigation, switch options and steps** read in
+  sentence case at 700 with `--kairos-track-button` at 0.01em. Field labels
+  are sentence case at 13px in ink.
+- **The product name** keeps its capitals beside the logo's own capital
+  wordmark, at Archivo 800.
+
+All of the type layer is one block at the end of `kairos.css` whose rules
+begin `:root:not([data-scale='brand'])`, so the Brand Scale is untouched, and
+the knob defaults in `tokens.css` (button case and weight, the input label)
+that brand.css re-points anyway. `tests/product-scale.test.mjs` lists every
+0.14 declaration that moves (`CHANGED_0_17`) and every new declaration outside
+that block (`NEW_0_17`).
+
+Layout fixes found on the apps' screens in the same pass:
+
+- `kairos-stack` has one `minmax(0, 1fr)` column. Its implicit track sized to
+  the widest child's min-content, so one unbreakable line (an email address in
+  the sidebar's account button) pushed the stack and everything in it out of
+  the sidebar.
+- `Panel` adds `kairos-panel--flow`, which spaces the blocks under its heading.
+  Its children went straight into the padded section, so a list and its note,
+  or a list and its button, drew touching. Only `Panel` sets the modifier, so
+  a hand-built panel that is already a stack, grid or filter row is unchanged.
+- At 900px and up, in a shell with a sidebar, a switcher top bar hides its
+  brand, and a top bar holding only the brand and the phone's account button
+  hides altogether. Apps that pass an account menu as the top bar's switcher
+  drew the product name and the account twice on a laptop.
+- `kairos-account-trigger` is `border-box`, so it fits the sidebar footer.
+- Figures in a `kairos-metric-row` align to the top; one without a comparison
+  line under it sat in the middle of a taller neighbour's column.
+- An identifier in a table cell breaks only when the whole of it cannot fit,
+  so a column of keys is sized to its longest key instead of to one letter.

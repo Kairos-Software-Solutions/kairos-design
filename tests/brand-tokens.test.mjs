@@ -100,7 +100,10 @@ test('every solid colour token is plain hex', () => {
 
 test('every 0.14 token name still resolves, to its 0.14 value unless listed', () => {
   const LISTED = {
-    light: { '--kairos-accent-hover': ['#e6a92d', '#ffb627'] },
+    // 0.17.0: buttons, tabs and switches read in sentence case, so their
+    // tracking comes down from the old capitals' 0.14em.
+    light: { '--kairos-accent-hover': ['#e6a92d', '#ffb627'], '--kairos-track-button': ['0.14em', '0.01em'] },
+    dark: { '--kairos-track-button': ['0.14em', '0.01em'] },
     both: ['--kairos-display', '--kairos-body', '--kairos-mono'],
   };
   const failures = [];

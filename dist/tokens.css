@@ -206,7 +206,7 @@
   --kairos-button-secondary-hover-bg: var(--kairos-elevated);
   --kairos-input-border-color: var(--kairos-border);
   --kairos-input-focus-bg: var(--kairos-card);
-  --kairos-input-label-color: var(--kairos-text-2);
+  --kairos-input-label-color: var(--kairos-ink);
   --kairos-field-error-color: var(--kairos-state-overdue);
 }
 
@@ -448,7 +448,10 @@
   --kairos-track-display: 0.02em;
   --kairos-track-heading: 0.06em;
   --kairos-track-label: 0.08em;
-  --kairos-track-button: 0.14em;
+  --kairos-track-button: 0.01em;
+  /* Courier Prime capitals for typed labels (0.17.0): the face is wide, so it
+     takes less tracking than the old sans capitals did. */
+  --kairos-track-typed: 0.04em;
 
   /* --- Motion -----------------------------------------------------------
      ease-out, at or under 700ms. Honoured against prefers-reduced-motion by a
@@ -505,9 +508,9 @@
   --kairos-button-pad-x: var(--kairos-pad-control);
   --kairos-button-pad-x-sm: var(--kairos-space-md);
   --kairos-text-button-sm: var(--kairos-text-xs);
-  --kairos-button-weight: 900;
+  --kairos-button-weight: 700;
   --kairos-button-stretch: 100%;
-  --kairos-button-case: uppercase;
+  --kairos-button-case: none;
   /* The stamp the filled ranks wear at rest, on hover and on press. */
   --kairos-button-shadow-rest: var(--kairos-shadow);
   --kairos-button-shadow-hover: var(--kairos-shadow-card);
@@ -526,9 +529,9 @@
   --kairos-input-pad-y: 0;
   --kairos-input-pad-x: var(--kairos-space-md);
   --kairos-input-pad-y-multi: var(--kairos-space-md);
-  --kairos-input-label-size: var(--kairos-text-sm);
-  --kairos-input-label-case: uppercase;
-  --kairos-input-label-track: var(--kairos-track-label);
+  --kairos-input-label-size: var(--kairos-text-md);
+  --kairos-input-label-case: none;
+  --kairos-input-label-track: 0;
   --kairos-input-label-stretch: 100%;
   /* One message slot under the control, sized from the type that fills it:
      17.4px here, as 0.14 drew it. The hint holds it and the error takes it. */
