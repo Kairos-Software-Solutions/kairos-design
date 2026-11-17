@@ -22,6 +22,13 @@ export interface FieldProps {
    * the amount.
    */
   suffix?: ReactNode;
+  /**
+   * The control is required. Draws the brief's asterisk inside the label,
+   * hidden from assistive technology: the control's own `required` is what a
+   * screen reader announces, so pass it to the control as well. `InputField`,
+   * `Textarea` and `SelectField` do both.
+   */
+  required?: boolean;
   children: (ids: { id: string; describedBy: string | undefined }) => ReactNode;
 }
 
@@ -46,7 +53,7 @@ export interface FieldProps {
  * A call site needing the hint visible alongside an error composes both into
  * the error content. There is no arrangement where they stack.
  */
-export function Field({ label, hint, error, suffix, children }: FieldProps) {
+export function Field({ label, hint, error, suffix, required, children }: FieldProps) {
   const id = useId();
   const hintId = `${id}-hint`;
   const errorId = `${id}-error`;
@@ -60,6 +67,7 @@ export function Field({ label, hint, error, suffix, children }: FieldProps) {
     <div className="kairos-field">
       <label className="kairos-input-label" htmlFor={id}>
         {label}
+        {required ? <span className="kairos-required" aria-hidden="true">*</span> : null}
       </label>
       {suffix ? (
         <div className="kairos-affix">
@@ -90,15 +98,16 @@ export interface InputFieldProps extends Omit<InputHTMLAttributes<HTMLInputEleme
  * control is something else.
  */
 const InputField = forwardRef<HTMLInputElement, InputFieldProps>(function InputField(
-  { label, hint, error, suffix, className, ...props },
+  { label, hint, error, suffix, required, className, ...props },
   ref
 ) {
   return (
-    <Field label={label} hint={hint} error={error} suffix={suffix}>
+    <Field label={label} hint={hint} error={error} suffix={suffix} required={required}>
       {({ id, describedBy }) => (
         <input
           ref={ref}
           id={id}
+          required={required}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
           className={['kairos-input-field', className].filter(Boolean).join(' ')}
@@ -131,15 +140,16 @@ export interface TextareaProps extends Omit<TextareaHTMLAttributes<HTMLTextAreaE
  * everyone else's.
  */
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(function Textarea(
-  { label, hint, error, className, ...props },
+  { label, hint, error, required, className, ...props },
   ref
 ) {
   return (
-    <Field label={label} hint={hint} error={error}>
+    <Field label={label} hint={hint} error={error} required={required}>
       {({ id, describedBy }) => (
         <textarea
           ref={ref}
           id={id}
+          required={required}
           aria-describedby={describedBy}
           aria-invalid={error ? true : undefined}
           className={['kairos-input-field', className].filter(Boolean).join(' ')}
@@ -175,16 +185,17 @@ export interface SelectFieldProps extends Omit<SelectHTMLAttributes<HTMLSelectEl
  * gone and the box is a native select painted over.
  */
 const SelectField = forwardRef<HTMLSelectElement, SelectFieldProps>(function SelectField(
-  { label, hint, error, className, children, ...props },
+  { label, hint, error, required, className, children, ...props },
   ref
 ) {
   return (
-    <Field label={label} hint={hint} error={error}>
+    <Field label={label} hint={hint} error={error} required={required}>
       {({ id, describedBy }) => (
         <span className="kairos-select-wrap">
           <select
             ref={ref}
             id={id}
+            required={required}
             aria-describedby={describedBy}
             aria-invalid={error ? true : undefined}
             className={['kairos-select', className].filter(Boolean).join(' ')}

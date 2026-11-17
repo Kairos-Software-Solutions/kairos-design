@@ -61,7 +61,14 @@ export function splitTop(text, separator) {
 /** Whitespace collapsed, one quote style, no space around combinators or commas. */
 export function normaliseSelector(selector) {
   return splitTop(selector.replace(/"/g, "'").replace(/\s+/g, ' ').trim(), ',')
-    .map((part) => part.trim().replace(/\s*([>+~])\s*/g, ' $1 ').replace(/\s+/g, ' '))
+    .map((part) =>
+      part
+        .trim()
+        .replace(/\s*([>+~])\s*/g, ' $1 ')
+        .replace(/\s+/g, ' ')
+        .replace(/\(\s+/g, '(')
+        .replace(/\s+\)/g, ')'),
+    )
     .join(', ');
 }
 

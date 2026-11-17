@@ -178,3 +178,39 @@ test('the font tokens name Archivo and Courier Prime', () => {
   assert.equal(value('light', '--kairos-body'), "'Archivo', ui-sans-serif, system-ui, sans-serif");
   assert.equal(value('light', '--kairos-mono'), "'Courier Prime', 'Courier New', ui-monospace, monospace");
 });
+
+test('the decorative rule is never a control edge', () => {
+  // A control boundary owes 3:1 and `--kairos-rule` is an 18% hairline, so
+  // a control drawn with it has no findable edge at rest. These are the
+  // classes that draw a control's own boundary: the element a person presses,
+  // types in or picks from, or the box that stands for it.
+  const CONTROLS = [
+    'kairos-button',
+    'kairos-input-field',
+    'kairos-select',
+    'kairos-segmented-option',
+    'kairos-overflow-trigger',
+    'kairos-tick-box',
+    'kairos-tick-box-label',
+    'kairos-day-grid',
+    'kairos-time-switch',
+    'kairos-time-switch-pill',
+    'kairos-site-menu-toggle',
+  ];
+  const kairos = parse(read('dist', 'kairos.css'));
+  /** The classes on the element a selector part lands on: its last compound. */
+  const subject = (part) => {
+    const last = part.split(/\s+[>+~]\s+|\s+/).pop();
+    return [...last.replace(/:not\([^)]*\)/g, '').matchAll(/\.(kairos-[a-z0-9-]+)/g)].map((m) => m[1]);
+  };
+  const offenders = kairos
+    .filter((d) => /^(border|outline)/.test(d.prop))
+    .filter((d) => d.selector.split(', ').some((part) => subject(part).some((cls) => CONTROLS.includes(cls))))
+    .filter((d) => /var\(--kairos-rule(-frame)?\)/.test(d.value))
+    .map((d) => `${d.selector} { ${d.prop}: ${d.value} }`);
+  assert.deepEqual(offenders, []);
+  // And the scan reaches the new controls at all.
+  const edges = kairos.filter((d) => d.prop === 'border' && ['.kairos-day-grid', '.kairos-time-switch'].includes(d.selector));
+  assert.equal(edges.length, 2, 'the day grid and time switch edges were read');
+  assert.ok(edges.every((d) => /var\(--kairos-control-edge\)/.test(d.value)));
+});

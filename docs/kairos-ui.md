@@ -10,6 +10,7 @@ next agent.
 ```
 Tokens      dist/tokens.css        --kairos-*, light and dark
 Base        dist/base.css          element defaults, optional
+Brand       dist/brand.css         the Brand Scale, optional; on with <html data-scale="brand">
 Components  dist/kairos.css        the kairos-* class vocabulary
 Money       dist/format/money.ts   TTD 8,500.00
 Dates       dist/format/dates.ts   24 Aug 2026
@@ -19,7 +20,8 @@ Emit        kairos-design emit     writes the CSS into a surface with no bundler
 ```
 
 Everything above is reachable as `kairos-design/<name>` once the package is
-installed. Import order is tokens, base, components.
+installed. Import order is tokens, base (optional), brand (optional),
+components.
 
 `base.css` sets the page: ground, ink, body type, the 320px floor, and the
 `[hidden]` reset. Import it and an app needs no stylesheet of its own to render
