@@ -198,6 +198,16 @@
   --kairos-shadow-soft-photo: 0 10px 22px -12px var(--kairos-shadow-soft-color);
   --kairos-shadow-press: 4px 4px 0 0 var(--kairos-shadow-color);
   --kairos-shadow-hairline: 0 1px 0 0 var(--kairos-rule);
+
+  /* Component knobs that name a colour. Their defaults are what 0.14 painted;
+     `brand.css` re-points them at the Brand Scale. Here rather than in the
+     shared block so they follow a theme set below the root, as the names
+     above do. */
+  --kairos-button-secondary-hover-bg: var(--kairos-elevated);
+  --kairos-input-border-color: var(--kairos-border);
+  --kairos-input-focus-bg: var(--kairos-card);
+  --kairos-input-label-color: var(--kairos-text-2);
+  --kairos-field-error-color: var(--kairos-state-overdue);
 }
 
 /* The dark palette is wrapped in `@media not print`, and that wrapper is the
@@ -479,6 +489,135 @@
   --kairos-content-w: 1200px;
   --kairos-gutter: max(20px, calc((100% - var(--kairos-content-w)) / 2));
   --kairos-site-header-h: 76px;
+}
+
+/* ==========================================================================
+   Component knobs
+   ==========================================================================
+   What an existing part reads where Kairos design brief v1 changes its shape.
+   Every default reproduces 0.14 exactly — `tests/product-scale.test.mjs`
+   resolves each 0.14 declaration through these and compares — and
+   `brand.css` re-points them under `:root[data-scale='brand']`. The colour
+   knobs sit in the alias block above, so they follow the theme. */
+
+:root {
+  /* --- Button --------------------------------------------------------- */
+  --kairos-button-pad-x: var(--kairos-pad-control);
+  --kairos-button-pad-x-sm: var(--kairos-space-md);
+  --kairos-text-button-sm: var(--kairos-text-xs);
+  --kairos-button-weight: 900;
+  --kairos-button-stretch: 100%;
+  --kairos-button-case: uppercase;
+  /* The stamp the filled ranks wear at rest, on hover and on press. */
+  --kairos-button-shadow-rest: var(--kairos-shadow);
+  --kairos-button-shadow-hover: var(--kairos-shadow-card);
+  --kairos-button-shadow-active: var(--kairos-shadow-pressed);
+  /* Rank 2 stays flat at the Product Scale: a hover-only stamp would make the
+     ranks identical on touch. */
+  --kairos-button-secondary-hover-shadow: none;
+  --kairos-button-press-transform: translate(1px, 1px);
+  /* Buttons, fields and selects acknowledge a change on this. */
+  --kairos-control-duration: var(--kairos-duration);
+
+  /* --- Field ---------------------------------------------------------- */
+  --kairos-input-h: var(--kairos-control-h);
+  --kairos-input-h-multi: 80px;
+  --kairos-input-weight: 400;
+  --kairos-input-pad-y: 0;
+  --kairos-input-pad-x: var(--kairos-space-md);
+  --kairos-input-pad-y-multi: var(--kairos-space-md);
+  --kairos-input-label-size: var(--kairos-text-sm);
+  --kairos-input-label-case: uppercase;
+  --kairos-input-label-track: var(--kairos-track-label);
+  --kairos-input-label-stretch: 100%;
+  /* One message slot under the control, sized from the type that fills it:
+     17.4px here, as 0.14 drew it. The hint holds it and the error takes it. */
+  --kairos-field-message-size: var(--kairos-text-sm);
+  --kairos-field-message-leading: 1.45;
+  /* The required mark and the error badge are Brand Scale marks. */
+  --kairos-required-display: none;
+  --kairos-error-badge-display: none;
+
+  /* --- Focus ---------------------------------------------------------- */
+  --kairos-focus-outline-w: var(--kairos-border-w-strong);
+  --kairos-focus-offset: 2px;
+
+  /* --- Type ranks ------------------------------------------------------
+     The `kairos-type-*` classes read these. At the Product Scale each size is
+     a step the 0.14 type scale already had, so a rank class brings no new
+     number to an app that has not opted in; `brand.css` sets the brief's type
+     scale. Headings lead at 1.2 and text at 1.5; weights are 400 or 700. */
+  --kairos-type-display-size: var(--kairos-text-title);
+  --kairos-type-display-phone-size: var(--kairos-text-title);
+  --kairos-type-display-weight: 700;
+  --kairos-type-display-stretch: 100%;
+  --kairos-type-display-leading: 1.2;
+  --kairos-type-display-tracking: 0;
+  --kairos-type-title-size: var(--kairos-text-title);
+  --kairos-type-title-weight: 700;
+  --kairos-type-title-stretch: 100%;
+  --kairos-type-title-leading: 1.2;
+  --kairos-type-title-tracking: 0;
+  --kairos-type-h2-size: var(--kairos-text-xl);
+  --kairos-type-h2-weight: 700;
+  --kairos-type-h2-stretch: 100%;
+  --kairos-type-h2-leading: 1.2;
+  --kairos-type-h2-tracking: 0;
+  --kairos-type-h3-size: var(--kairos-text-lg);
+  --kairos-type-h3-weight: 700;
+  --kairos-type-h3-stretch: 100%;
+  --kairos-type-h3-leading: 1.2;
+  --kairos-type-h3-tracking: 0;
+  --kairos-type-quote-size: var(--kairos-text-xl);
+  --kairos-type-quote-weight: 700;
+  --kairos-type-quote-stretch: 100%;
+  --kairos-type-quote-leading: 1.2;
+  --kairos-type-quote-tracking: 0;
+  --kairos-type-lead-size: var(--kairos-text-lg);
+  --kairos-type-lead-weight: 400;
+  --kairos-type-lead-stretch: 100%;
+  --kairos-type-lead-leading: 1.5;
+  --kairos-type-lead-tracking: 0;
+  --kairos-type-statement-size: var(--kairos-text-lg);
+  --kairos-type-statement-weight: 700;
+  --kairos-type-statement-stretch: 100%;
+  --kairos-type-statement-leading: 1.5;
+  --kairos-type-statement-tracking: 0;
+  --kairos-type-body-size: var(--kairos-text-body);
+  --kairos-type-body-weight: 400;
+  --kairos-type-body-stretch: 100%;
+  --kairos-type-body-leading: 1.5;
+  --kairos-type-body-tracking: 0;
+  --kairos-type-small-size: var(--kairos-text-md);
+  --kairos-type-small-weight: 400;
+  --kairos-type-small-stretch: 100%;
+  --kairos-type-small-leading: 1.5;
+  --kairos-type-small-tracking: 0;
+  --kairos-type-legal-size: var(--kairos-text-sm);
+  --kairos-type-legal-weight: 400;
+  --kairos-type-legal-stretch: 100%;
+  --kairos-type-legal-leading: 1.5;
+  --kairos-type-legal-tracking: 0;
+  --kairos-type-label-size: var(--kairos-text-sm);
+  --kairos-type-label-weight: 700;
+  --kairos-type-label-stretch: 100%;
+  --kairos-type-label-leading: 1.5;
+  --kairos-type-label-tracking: 0;
+  --kairos-type-price-size: var(--kairos-text-lg);
+  --kairos-type-price-weight: 700;
+  --kairos-type-price-stretch: 100%;
+  --kairos-type-price-leading: 1.5;
+  --kairos-type-price-tracking: 0;
+  --kairos-type-button-size: var(--kairos-text-button);
+  --kairos-type-button-weight: 700;
+  --kairos-type-button-stretch: 100%;
+  --kairos-type-button-leading: 1.5;
+  --kairos-type-button-tracking: 0;
+  --kairos-type-nav-size: var(--kairos-text-md);
+  --kairos-type-nav-weight: 700;
+  --kairos-type-nav-stretch: 100%;
+  --kairos-type-nav-leading: 1.5;
+  --kairos-type-nav-tracking: 0;
 }
 
 /* The site header is shorter where the phone menu replaces the desktop one,

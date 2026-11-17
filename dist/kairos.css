@@ -160,8 +160,8 @@ h6 {
    and the most common place to land. The ink carries the contrast; the amber
    makes the ring legibly Kairos. On the dark base the two invert. */
 :focus-visible {
-  outline: var(--kairos-border-w-strong) solid var(--kairos-focus);
-  outline-offset: 2px;
+  outline: var(--kairos-focus-outline-w) solid var(--kairos-focus);
+  outline-offset: var(--kairos-focus-offset);
   box-shadow: 0 0 0 var(--kairos-focus-w) var(--kairos-focus-inner);
 }
 
@@ -740,8 +740,8 @@ h6 {
 .kairos-field-hint,
 .kairos-field-error {
   margin: 0;
-  font-size: var(--kairos-text-sm);
-  line-height: 1.45;
+  font-size: var(--kairos-field-message-size);
+  line-height: var(--kairos-field-message-leading);
 }
 
 .kairos-field-hint {
@@ -753,12 +753,12 @@ h6 {
      Derived from the type rather than measured once: at 11.5px and 1.45
      somebody wrote 17px, and the row stopped matching its own text the first
      time either value moved. */
-  min-height: calc(var(--kairos-text-sm) * 1.45);
+  min-height: calc(var(--kairos-field-message-size) * var(--kairos-field-message-leading));
   color: var(--kairos-text-muted);
 }
 
 .kairos-field-error {
-  color: var(--kairos-state-overdue);
+  color: var(--kairos-field-error-color);
 }
 
 /* One slot, not two. An empty error leaves the grid entirely rather than
@@ -1989,7 +1989,7 @@ button.kairos-step {
   width: fit-content;
   height: var(--button-height, var(--kairos-control-h));
   min-height: var(--button-height, var(--kairos-control-h));
-  padding: 0 var(--kairos-pad-control);
+  padding: 0 var(--kairos-button-pad-x);
   border: var(--button-border-width, var(--kairos-border-w-strong)) solid var(--button-border, var(--kairos-border));
   border-radius: var(--kairos-radius-button);
   /* The class has to survive being put on an `<a>`. `Button` renders a
@@ -2004,16 +2004,16 @@ button.kairos-step {
   color: var(--button-color, var(--kairos-text));
   cursor: pointer;
   font-size: var(--kairos-text-button);
-  font-weight: 900;
+  font-weight: var(--kairos-button-weight);
   letter-spacing: var(--kairos-track-button);
   line-height: 1;
-  text-transform: uppercase;
+  text-transform: var(--kairos-button-case);
   transition:
-    transform var(--kairos-duration) var(--kairos-ease),
-    box-shadow var(--kairos-duration) var(--kairos-ease),
-    background-color var(--kairos-duration) var(--kairos-ease),
-    color var(--kairos-duration) var(--kairos-ease),
-    opacity var(--kairos-duration) var(--kairos-ease);
+    transform var(--kairos-control-duration) var(--kairos-ease),
+    box-shadow var(--kairos-control-duration) var(--kairos-ease),
+    background-color var(--kairos-control-duration) var(--kairos-ease),
+    color var(--kairos-control-duration) var(--kairos-ease),
+    opacity var(--kairos-control-duration) var(--kairos-ease);
   white-space: nowrap;
   touch-action: manipulation;
 }
@@ -2038,15 +2038,15 @@ button.kairos-step {
 }
 
 .kairos-button:active:not(:disabled):not([aria-busy='true']) {
-  transform: translate(1px, 1px);
+  transform: var(--kairos-button-press-transform);
   box-shadow: var(--button-shadow-active, none);
 }
 
 .kairos-button--sm {
   height: var(--button-height-sm, var(--kairos-control-h-sm));
   min-height: var(--button-height-sm, var(--kairos-control-h-sm));
-  padding: 0 var(--kairos-space-md);
-  font-size: var(--kairos-text-xs);
+  padding: 0 var(--kairos-button-pad-x-sm);
+  font-size: var(--kairos-text-button-sm);
   letter-spacing: var(--kairos-track-button);
 }
 
@@ -2224,19 +2224,19 @@ input[type='radio'] {
 }
 
 .kairos-input-label {
-  font-size: var(--kairos-text-sm);
+  font-size: var(--kairos-input-label-size);
   font-weight: 700;
-  letter-spacing: var(--kairos-track-label);
-  text-transform: uppercase;
-  color: var(--kairos-text-2);
+  letter-spacing: var(--kairos-input-label-track);
+  text-transform: var(--kairos-input-label-case);
+  color: var(--kairos-input-label-color);
 }
 
 .kairos-input-field,
 .kairos-select {
   width: 100%;
-  height: var(--kairos-control-h);
-  min-height: var(--kairos-control-h);
-  padding: 0 var(--kairos-space-md);
+  height: var(--kairos-input-h);
+  min-height: var(--kairos-input-h);
+  padding: var(--kairos-input-pad-y) var(--kairos-input-pad-x);
   /* The same 16px `--kairos-text-lg` resolves to, reached through the role
      token, because the reason this control is 16px is not that it is a large
      rank. Safari zooms the page when a control under 16px takes focus, so
@@ -2244,21 +2244,21 @@ input[type='radio'] {
      it survives a pass that tightens the type scale. */
   font-size: var(--kairos-text-input);
   line-height: 1.2;
-  border: var(--kairos-border-w-strong) solid var(--kairos-border);
+  border: var(--kairos-border-w-strong) solid var(--kairos-input-border-color);
   border-radius: var(--kairos-radius-input);
   background: var(--kairos-surface);
   color: var(--kairos-text);
   transition:
-    box-shadow var(--kairos-duration) var(--kairos-ease),
-    border-color var(--kairos-duration) var(--kairos-ease),
-    background-color var(--kairos-duration) var(--kairos-ease);
+    box-shadow var(--kairos-control-duration) var(--kairos-ease),
+    border-color var(--kairos-control-duration) var(--kairos-ease),
+    background-color var(--kairos-control-duration) var(--kairos-ease);
 }
 
 textarea.kairos-input-field {
   height: auto;
-  min-height: 80px;
-  padding-top: var(--kairos-space-md);
-  padding-bottom: var(--kairos-space-md);
+  min-height: var(--kairos-input-h-multi);
+  padding-top: var(--kairos-input-pad-y-multi);
+  padding-bottom: var(--kairos-input-pad-y-multi);
   line-height: 1.5;
   resize: vertical;
 }
@@ -4305,6 +4305,68 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    does not implement `@page` margin boxes, so CSS cannot draw them.
    ========================================================================== */
 
+/* Brand Scale rules ------------------------------------------------------
+   Declarations Kairos design brief v1 adds to an existing part that no knob
+   can make inert at the Product Scale: 0.14 never set them, so any default
+   would override what the part inherits or what its hover paints. Each one
+   begins `:root[data-scale='brand']`, so it cannot match without the switch,
+   and reads a knob or a role token. `brand.css` itself holds only tokens. */
+
+/* The brief's wide button label. */
+:root[data-scale='brand'] .kairos-button {
+  font-stretch: var(--kairos-button-stretch);
+}
+
+/* The outline button lifts onto the hard ink offset as the main one does.
+   The shared rank-2 rule sets its hover shadow to none, and comes later at the
+   same specificity, so the knob needs a rule of its own. */
+:root[data-scale='brand'] .kairos-button--secondary {
+  --button-shadow-hover: var(--kairos-button-secondary-hover-shadow);
+}
+
+/* Field text weight. 0.14 set none and `base.css` makes a control inherit its
+   font, so a Product Scale default would override the host's. */
+:root[data-scale='brand'] .kairos-input-field,
+:root[data-scale='brand'] .kairos-select {
+  font-weight: var(--kairos-input-weight);
+}
+
+/* A focused field fills with tint. 0.14's focused field sets no ground, so it
+   keeps its hover ground; a default here would take that away. */
+:root[data-scale='brand'] .kairos-input-field:focus-visible,
+:root[data-scale='brand'] .kairos-select:focus-visible {
+  background: var(--kairos-input-focus-bg);
+}
+
+/* The invalid edge. 0.14 marks an invalid field by its message alone. */
+:root[data-scale='brand'] .kairos-input-field[aria-invalid='true'],
+:root[data-scale='brand'] .kairos-select[aria-invalid='true'] {
+  border-color: var(--kairos-error);
+}
+
+:root[data-scale='brand'] .kairos-input-label {
+  font-stretch: var(--kairos-input-label-stretch);
+}
+
+/* The field's error reads as `kairos-error-line` does: the round badge, then
+   the text on one line at 600, shaking once as it appears. The slot is sized
+   for the badge (`--kairos-field-message-*`), so nothing below moves.
+   `:not(:empty)`, because this outranks the rule that takes an empty error
+   out of the grid. */
+:root[data-scale='brand'] .kairos-field-error:not(:empty) {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-sm);
+  font-weight: 600;
+  animation: kairos-shake var(--kairos-duration-shake) var(--kairos-ease) 1;
+}
+
+/* The badge is drawn only where the knob shows it: none at the Product Scale,
+   so a 0.14 error is unchanged, and inline-flex at the Brand Scale. */
+.kairos-field-error::before {
+  display: var(--kairos-error-badge-display);
+}
+
 /* Reduced motion ---------------------------------------------------------
    `tokens.css` has said the motion tokens are "honoured against
    prefers-reduced-motion in kairos.css" since they were written, and no such
@@ -4747,16 +4809,16 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-hover-bg: var(--kairos-accent-hover);
   --button-color: var(--kairos-accent-text);
   --button-border: var(--kairos-border);
-  --button-shadow: var(--kairos-shadow);
-  --button-shadow-hover: var(--kairos-shadow-card);
-  --button-shadow-active: var(--kairos-shadow-pressed);
+  --button-shadow: var(--kairos-button-shadow-rest);
+  --button-shadow-hover: var(--kairos-button-shadow-hover);
+  --button-shadow-active: var(--kairos-button-shadow-active);
 }
 
 /* The default appearance, named so a call site can say which rank it means
    rather than relying on the bare class. */
 .kairos-button--secondary {
   --button-bg: var(--kairos-surface);
-  --button-hover-bg: var(--kairos-elevated);
+  --button-hover-bg: var(--kairos-button-secondary-hover-bg);
   --button-color: var(--kairos-text);
   --button-border: var(--kairos-border);
 }
@@ -4817,9 +4879,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   --button-hover-bg: var(--kairos-danger-solid-hover);
   --button-color: var(--kairos-danger-solid-fg);
   --button-border: var(--kairos-border);
-  --button-shadow: var(--kairos-shadow);
-  --button-shadow-hover: var(--kairos-shadow-card);
-  --button-shadow-active: var(--kairos-shadow-pressed);
+  --button-shadow: var(--kairos-button-shadow-rest);
+  --button-shadow-hover: var(--kairos-button-shadow-hover);
+  --button-shadow-active: var(--kairos-button-shadow-active);
 }
 
 /* --- Reading blocks and small layouts ------------------------------------

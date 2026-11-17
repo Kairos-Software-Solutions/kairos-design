@@ -43,7 +43,11 @@ const INTENTIONAL = [
  * part nor Brand-scoped. Each one names the value it resolves to at Product
  * Scale, in both themes, and that value must leave the part as 0.14 drew it.
  */
-const ALLOWED_NEW = [];
+const ALLOWED_NEW = [
+  // The Field error badge. A `::before` with no content draws nothing, and the
+  // knob keeps it out of the layout too; the Brand Scale shows it.
+  { file: 'kairos.css', context: '', selector: '.kairos-field-error::before', prop: 'display', productValue: 'none' },
+];
 
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
