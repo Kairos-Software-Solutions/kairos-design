@@ -214,3 +214,22 @@ test('the decorative rule is never a control edge', () => {
   assert.equal(edges.length, 2, 'the day grid and time switch edges were read');
   assert.ok(edges.every((d) => /var\(--kairos-control-edge\)/.test(d.value)));
 });
+
+test('the Colour page groups every light colour token', () => {
+  // The block `stories/tokens.ts` reads: the first `:root {` up to its closing
+  // brace at the start of a line.
+  const start = tokens.indexOf(':root {');
+  const open = tokens.indexOf('{', start);
+  const block = stripComments(tokens.slice(open + 1, tokens.indexOf('\n}', open)));
+  const names = [...block.matchAll(/(--kairos-[a-z0-9-]+)\s*:/g)].map((m) => m[1]);
+  assert.ok(names.includes('--kairos-page') && names.includes('--kairos-tick'), 'the first :root block is the light block');
+
+  const page = read('stories', 'foundations', 'Colour.stories.tsx');
+  const stems = [...page.matchAll(/group\(themed,([^)]*)\)/g)].flatMap((m) =>
+    [...m[1].matchAll(/'([^']+)'/g)].map((s) => s[1])
+  );
+  assert.ok(stems.length > 0, 'the Colour page groups by stem');
+
+  const missing = names.filter((name) => !name.startsWith('--kairos-shadow') && !stems.some((stem) => name.startsWith(stem)));
+  assert.deepEqual(missing, [], 'every light colour token has a swatch group on the Colour page');
+});
