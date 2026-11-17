@@ -433,6 +433,43 @@ two images; the stylesheet flips them. Do not set `display` on a lockup from
 an app rule — a selector like `.my-brand img` outranks the lockup's own and
 renders both at once, one stacked on the other's cream tile.
 
+## Brand Scale parts
+
+The parts Kairos design brief v1 marks shared, for websites and other brand
+surfaces. Each is a class block in `kairos.css` that reads role tokens for
+colour, part tokens for size and the `--kairos-type-*` ranks for type, so it
+renders at either scale and takes the brief's look under the Brand Scale
+(`kairos-design/brand.css` and `<html data-scale="brand">`). Markup is native:
+links, buttons, checkbox and radio inputs, so the keyboard is the browser's.
+How a page arrives — reveals, wipes, staggers, a reel — is the site's code, not
+the package's.
+
+| Class | Use for | Do not use for | Modifiers |
+| --- | --- | --- | --- |
+| `kairos-text-link` | An inline call to action written as a link: ink at 700 over a 3px highlight underline that turns ink on hover, 44px tall. A trailing `kairos-text-link-arrow` (→) nudges on hover | Navigation in the header, which is `kairos-menu-link`; a primary action, which is a button | `--external` for ↗, which moves up and out |
+| `kairos-menu-link` | A header menu item, 44px: a highlight marker sweeps in behind the word on hover, and `aria-current="page"` carries a 3px underline | Links in running text | — |
+| `kairos-lang-link` | The other language, named in that language, with `lang` and `hreflang`: the last menu item, set off by a 1px by 18px ink-3 hairline | Choosing between more than two languages | `--row` for its own 48px row in the phone menu, with the link underline |
+| `kairos-required` | The asterisk after a required field's label, always `aria-hidden="true"`; the control carries `required`. `Field` writes it from `required`. Shown at the Brand Scale | The only signal that a field is required | — |
+| `kairos-error-line` | A message about something that failed, outside a field: a 20px round badge with "!", then 15px text at 600 in the error colour. Shakes once when it appears, stilled by reduced motion | A field's own error, which is `kairos-field-error` (it takes the same badge and shake at the Brand Scale) | — |
+| `kairos-tick-box` | A checkbox with its label: `kairos-tick-box-input` (native, visually hidden) then `kairos-tick-box-label`, a 24px square that shows a tick on tint once checked, in a 46px row. Wrap a set in `kairos-tick-box-group` (a `fieldset`) | A filter toggle, which is `kairos-segmented`; a dense form row, which is `kairos-checkbox-row` | — |
+| `kairos-day-grid` | Picking one day: a radio group of `kairos-day-grid-cell` labels, each a `kairos-day-grid-input` then `kairos-day-grid-face` holding `-weekday` over `-date`. 5 columns of 62px cells; the picked day fills with picked and pops its ink frame. `aria-invalid="true"` turns the outer edge to the error colour | More than one pick, or a full calendar | — |
+| `kairos-time-switch` | Picking one of 2 to 5 short options (morning, afternoon, evening): `kairos-time-switch-option` labels holding `-input` and `-label`, then one `kairos-time-switch-pill`, hidden until the first pick, that slides to the checked option. `aria-invalid="true"` on the track for its error edge | Six or more options; actions | — |
+| `kairos-card--soft` | The brief's card on `kairos-card`: card fill, no border, the soft card shadow, square corners | A tool's raised card, which keeps the stamp | `kairos-card--soft-rounded` for 2px corners on panels and lists |
+| `kairos-inset-band` | A tint box inside the content width, for a closing call to action | A full-width band; never against a `kairos-section-band` without cream or white between them | — |
+| `kairos-section-band` | The band ground across the full width behind one section | More than one section per page | — |
+| `kairos-tint-card` | A flat tint box | A raised card | `--band` for the band ground |
+| `kairos-tick-list` | Rows over rules, each `kairos-tick-list-item` holding a 28px `-box` with a drawn tick on a tick-green edge, then `-label` over `-value` | Steps in order, which is `kairos-step-line` | `--statement` for one statement per row with no label |
+| `kairos-step-line` | Numbered steps in order: `kairos-step-line-item` holding a mono `-box` and its `-title`, joined by 2px tick-green lines; box 1 in highlight. Vertical under 520px | A wizard's progress, which is `kairos-steps` | — |
+| `kairos-site-header` | A website's sticky white header, `--kairos-site-header-h` tall with a hairline under it: `-inner` (inside `kairos-wrap`) holding the logo, `-nav` with `kairos-menu-link`s and a `kairos-lang-link`, `-actions` with the small main button, and the `kairos-site-menu-toggle` under 900px | An app's top bar, which is `kairos-topbar` | — |
+| `kairos-site-menu` | The phone menu sheet under the header: card fill, `kairos-site-menu-row` links divided by rules. `kairos-site-menu-toggle` is its 46px button whose `kairos-site-menu-bars` cross into an X on `aria-expanded="true"`. Opening, closing, focus and the scroll lock are the site's | Desktop navigation | — |
+| `kairos-site-footer` | A website's footer: card fill under a 1px top rule, `-columns` with mono `-heading`s and 46px `-link`s, and the `-legal` line over a rule | An app's footer | — |
+| `kairos-placeholder` | Copy still to come, in coral at 600, inside the square brackets the copy writes | Real copy, or a form control's placeholder attribute | — |
+| `kairos-photo-slot` | A picture still to come: tint and cream stripes in a white mat with the photo shadow, and a `kairos-photo-slot-label` saying what goes there | A loading state | — |
+| `kairos-marker` | A highlight bar behind the foot of a marked phrase in a heading, tilted a degree | Body text, or more than one phrase per heading | — |
+| `kairos-title-bar` | A highlight bar under a page title | Any heading below the page title | — |
+| `kairos-type-display`, `kairos-type-title`, `kairos-type-h2`, `kairos-type-h3`, `kairos-type-quote`, `kairos-type-lead`, `kairos-type-statement`, `kairos-type-body`, `kairos-type-small`, `kairos-type-legal`, `kairos-type-label`, `kairos-type-price`, `kairos-type-button`, `kairos-type-nav` | The brief's type ranks. Each reads `--kairos-type-<rank>-*`: a 0.14 step at the Product Scale, the brief's size, weight, width, leading and tracking at the Brand Scale. Headings balance their lines; label and price are mono | Inside a tool's panels, which have their own heading rank | — |
+| `kairos-wrap` | The content wrapper: `--kairos-gutter` as inline padding, so every section shares one left edge and a band behind it still runs edge to edge | A max-width container; the gutter is the width | — |
+
 ## Layout and utilities
 
 The stylesheet carries more than this manifest used to name, and an undocumented

@@ -620,6 +620,85 @@
   --kairos-type-nav-tracking: 0;
 }
 
+/* ==========================================================================
+   Brand parts
+   ==========================================================================
+   Sizes of the parts Kairos design brief v1 adds to the vocabulary: links,
+   choices, the error line, lists, the site shell and the marks. They have no
+   0.14 shape to keep, so each holds the brief's value at both scales; their
+   type comes from the `--kairos-type-*` ranks, which do follow the scale.
+   Tokens rather than literals because `scale.test.mjs` refuses a hand-written
+   spacing, radius or border weight. */
+
+:root {
+  /* Links. A 3px underline 5px under the text; the current menu item's sits
+     6px under. The menu link's marker is 0.62em tall. */
+  --kairos-link-underline-w: 3px;
+  --kairos-link-underline-offset: 5px;
+  --kairos-menu-link-current-offset: 6px;
+  --kairos-menu-link-pad: 14px;
+  --kairos-menu-marker-h: 0.62em;
+  --kairos-lang-sep-h: 18px;
+  --kairos-lang-row-h: 48px;
+
+  /* A roomier tap target than the 44px floor: tick box rows, footer links and
+     the menu toggle. */
+  --kairos-tap-roomy: 46px;
+
+  /* Tick box: a 24px square, its label 10px off, groups 6px by 22px. */
+  --kairos-tick-box-size: 24px;
+  --kairos-tick-box-gap: 10px;
+  --kairos-tick-box-gap-x: 22px;
+  --kairos-tick-box-glyph: 19px;
+
+  /* Day grid: 62px cells, the picked frame 3px inside, the focus ring 4px
+     inside, the date 19px (16px on the narrow phone). */
+  --kairos-day-cell-h: 62px;
+  --kairos-day-frame-inset: 3px;
+  --kairos-day-focus-offset: -4px;
+  --kairos-day-date-size: 19px;
+  --kairos-day-date-size-narrow: 16px;
+
+  /* Time-of-day switch: 5px around the options, 48px options. */
+  --kairos-time-switch-pad: 5px;
+  --kairos-time-option-h: 48px;
+
+  /* The error line's round badge. */
+  --kairos-error-badge: 20px;
+
+  /* Tick list: 28px boxes, 14px between box and text and between rows, the
+     tick drawn at 3px. */
+  --kairos-tick-list-box: 28px;
+  --kairos-tick-list-gap: 14px;
+  --kairos-tick-stroke: 3px;
+
+  /* Step line: 42px boxes (40px under 520px) and the gap the line spans. */
+  --kairos-step-box: 42px;
+  --kairos-step-line-gap: clamp(16px, 2.4vw, 36px);
+
+  /* Bands and the site shell. */
+  --kairos-inset-band-pad-y: clamp(28px, 4vw, 56px);
+  --kairos-inset-band-pad-x: clamp(22px, 4.4vw, 64px);
+  --kairos-site-menu-row-h: 56px;
+  --kairos-site-menu-row-size: 26px;
+  --kairos-site-footer-pad: 56px;
+
+  /* Marks. The photo slot sits in a 6px white mat; the marker is a 0.3em bar
+     tilted a degree; the title bar is 2.2em by 0.16em. */
+  --kairos-photo-mat: 6px;
+  --kairos-marker-h: 0.3em;
+  --kairos-marker-tilt: -1deg;
+  --kairos-title-bar-w: 2.2em;
+  --kairos-title-bar-h: 0.16em;
+}
+
+/* The phone sizes, at the 520px boundary of the register below. */
+@media (max-width: 520px) {
+  :root {
+    --kairos-step-box: 40px;
+  }
+}
+
 /* The site header is shorter where the phone menu replaces the desktop one,
    the 899/900 boundary of the register below. */
 @media (max-width: 899px) {
