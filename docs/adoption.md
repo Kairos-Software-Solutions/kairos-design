@@ -18,11 +18,11 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
-## Upgrading to 0.15.0
+## Upgrading to 0.16.0
 
 The brand release: Kairos design brief v1 in the token layer, an opt-in Brand
 Scale for brand surfaces, and the brief's shared parts as classes. An app's
-shape does not change. See the "Brand, 0.15.0" section of
+shape does not change. See the "Brand, 0.16.0" section of
 [decisions.md](decisions.md).
 
 **What an app sees on a bump.** Two things and nothing else:
@@ -109,7 +109,7 @@ Without the attribute, importing `brand.css` changes nothing.
 aliases and keep working, in both themes and under any `data-theme`
 ([adr/0014](adr/0014-rename-a-role-and-keep-its-old-name.md)):
 
-| 0.15 name | 0.14 name, still valid |
+| 0.16 name | 0.14 name, still valid |
 | --- | --- |
 | `--kairos-page` | `--kairos-bg` |
 | `--kairos-card` | `--kairos-surface` |

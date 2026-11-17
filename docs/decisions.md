@@ -1497,9 +1497,9 @@ placement is a screen with no chrome, which is a phone. `contract.test.mjs`
 asserts each of those, so the day one of them changes, the height gets
 reconsidered rather than silently kept.
 
-## Brand, 0.15.0
+## Brand, 0.16.0
 
-0.15.0 takes the look of **Kairos design brief v1** (approved 17 November 2026)
+0.16.0 takes the look of **Kairos design brief v1** (approved 17 November 2026)
 into the package. The brief is now the source of truth named at the top of
 `tokens.css`. It describes the company's brand surfaces, the website first; the
 apps keep their shape. Three ADRs carry the larger calls:
@@ -1574,7 +1574,7 @@ loads Archivo. A bump alone brings Archivo to no app (see the adoption guide).
 
 ### The Product Scale guarantee
 
-With no `data-scale` attribute, 0.15 renders every existing class as 0.14 did,
+With no `data-scale` attribute, 0.16 renders every existing class as 0.14 did,
 in both themes, except for the INTENTIONAL list: the three font stacks and the
 light `--kairos-accent-hover`. `tests/product-scale.test.mjs` proves it against
 byte copies of the published 0.14.0 `tokens.css`, `base.css` and `kairos.css`:
@@ -1610,7 +1610,7 @@ error's badge, `display: none` at Product Scale.
   before `npm publish`; a failed publish left the tag, and the rerun found it and
   released nothing. The tag step now follows the publish, unchanged otherwise.
 
-### Release note, 0.15.0
+### Release note, 0.16.0
 
 Minor. Apps on `^0.14.0` do not receive it. On a bump an app sees two things:
 the font stacks name Archivo and Courier Prime (the app loads them, or falls

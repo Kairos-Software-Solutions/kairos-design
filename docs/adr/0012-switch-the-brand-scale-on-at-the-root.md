@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted, 0.15.0.
+Accepted, 0.16.0.
 
 ## Context
 

@@ -3,7 +3,7 @@
  *
  * The promise every app relies on when it bumps: with no `data-scale`
  * attribute on the root, every class 0.14.0 shipped draws the same thing in
- * 0.15, light and dark, apart from a short list of intentional changes. The
+ * 0.16, light and dark, apart from a short list of intentional changes. The
  * comparison is against byte copies of the published 0.14.0 stylesheets in
  * `tests/fixtures/kairos-design-0.14.0/`, not against git history, so it
  * keeps meaning the same thing after the history moves on.

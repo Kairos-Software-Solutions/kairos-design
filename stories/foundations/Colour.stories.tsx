@@ -25,7 +25,7 @@ export const Palette: Story = {
       lede="Cream ground, ink line, amber action, and four record states. Every value carries a light and a dark, so a theme is a token swap and no component ever branches."
     >
       <Note>
-        Grouped by the names of Kairos design brief v1. Nine roles were renamed in 0.15.0 (page, card,
+        Grouped by the names of Kairos design brief v1. Nine roles were renamed in 0.16.0 (page, card,
         ink, ink-2, ink-3, highlight, highlight-strong, on-highlight, focus-ring); their 0.14 names
         (<code className="kairos-code">bg</code>, <code className="kairos-code">surface</code>,{' '}
         <code className="kairos-code">text</code>, <code className="kairos-code">text-2</code>,{' '}

@@ -104,7 +104,7 @@ The tokens name the families and the app loads them: Archivo for
 package never ships a font file, an `@font-face` or a font URL, and a test
 fails the release if one appears. Load them with `next/font/local` (pointing
 the three tokens at the variables it creates) or with a link; see
-[docs/adoption.md](docs/adoption.md), "Upgrading to 0.15.0".
+[docs/adoption.md](docs/adoption.md), "Upgrading to 0.16.0".
 
 ### Surfaces with no bundler
 

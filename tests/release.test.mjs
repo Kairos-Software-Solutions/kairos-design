@@ -1,10 +1,10 @@
 /**
- * What 0.15.0 publishes, and how the release workflow publishes it.
+ * What 0.16.0 publishes, and how the release workflow publishes it.
  *
  * The package is the export map and the tarball, so both are pinned against
  * the 0.14.0 release: the same exports plus `./brand.css`, the same packed
  * files plus `dist/brand.css`, and no font in either. The version literal is
- * deliberately not pinned here, so a 0.15.1 fix passes the release
+ * deliberately not pinned here, so a 0.16.1 fix passes the release
  * workflow's `npm test` unchanged.
  *
  * The workflow used to push the version tag before `npm publish`. A publish
@@ -77,13 +77,13 @@ test('brand.css is exported and every 0.14 export is unchanged', () => {
   );
 });
 
-test("the packed files are 0.14's plus brand.css", () => {
+test("the packed files are 0.14's plus AccountMenu (0.15.0) and brand.css", () => {
   const before = read(FIXTURE, 'files.txt').split('\n').map((l) => l.trim()).filter(Boolean);
   assert.equal(before.length, 42, 'the 0.14.0 fixture lists its 42 packed files');
-  const expected = [...before, 'dist/brand.css'].sort();
+  const expected = [...before, 'dist/brand.css', 'dist/react/AccountMenu.tsx'].sort();
   const actual = packedFiles();
   assert.deepEqual(actual, expected);
-  assert.equal(actual.length, 43);
+  assert.equal(actual.length, 44);
   const strays = actual.filter((path) => /^(tests|stories|\.storybook|openspec|docs\/adr)\//.test(path));
   assert.deepEqual(strays, [], 'no test, story, workshop, plan or ADR file ships');
 });
@@ -136,10 +136,10 @@ test("the release workflow differs from 0.14's only in step order", () => {
   assert.notDeepEqual(a.map(stepName), b.map(stepName), 'the tag step did move');
 });
 
-test('the docs describe 0.15.0', () => {
+test('the docs describe 0.16.0', () => {
   const adoption = read('docs', 'adoption.md');
-  const start = adoption.search(/^#+ .*Upgrading to 0\.15\.0.*$/m);
-  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.15.0" heading');
+  const start = adoption.search(/^#+ .*Upgrading to 0\.16\.0.*$/m);
+  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.16.0" heading');
   const level = adoption.slice(start).match(/^#+/)[0].length;
   const rest = adoption.slice(start).split('\n').slice(1).join('\n');
   const end = rest.search(new RegExp(`^#{1,${level}} `, 'm'));
@@ -148,7 +148,7 @@ test('the docs describe 0.15.0', () => {
     assert.ok(section.includes(needle), `the upgrade section names ${needle}`);
   }
 
-  assert.match(read('docs', 'decisions.md'), /^#+ .*0\.15\.0.*$/m, 'docs/decisions.md has a 0.15.0 heading');
+  assert.match(read('docs', 'decisions.md'), /^#+ .*0\.16\.0.*$/m, 'docs/decisions.md has a 0.16.0 heading');
 
   const tokens = read('dist', 'tokens.css');
   const tokensHeader = tokens.slice(0, tokens.indexOf('*/') + 2);
