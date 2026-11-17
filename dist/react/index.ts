@@ -42,6 +42,9 @@ export type { EmptyStateProps } from './EmptyState';
 export { default as SortHeader, SortAnnouncer } from './SortHeader';
 export type { SortHeaderProps, SortDirection } from './SortHeader';
 
+export { default as AccountMenu, accountInitials } from './AccountMenu';
+export type { AccountMenuProps } from './AccountMenu';
+
 export { default as OverflowMenu } from './OverflowMenu';
 export type { OverflowMenuProps, OverflowItem } from './OverflowMenu';
 

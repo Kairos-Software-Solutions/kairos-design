@@ -4924,3 +4924,95 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 }
 
 /* HMR probe */
+
+/* ==========================================================================
+   Account menu: who is signed in, in every Kairos app (AccountMenu).
+
+   The trigger names the person in words beside the initials, so two accounts
+   with the same initials still read apart. In the phone's top bar it is the
+   initials alone, at the control height, because the bar has no room for a
+   name. The menu reuses the overflow menu's surface and items.
+   ========================================================================== */
+
+.kairos-account-trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--kairos-space-sm);
+  width: 100%;
+  min-height: var(--kairos-control-h);
+  padding: var(--kairos-space-xs);
+  border: var(--kairos-border-w) solid var(--kairos-border-subtle);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-surface);
+  color: var(--kairos-text);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  touch-action: manipulation;
+  transition: background-color var(--kairos-duration) var(--kairos-ease), border-color var(--kairos-duration) var(--kairos-ease);
+}
+
+.kairos-account-trigger:hover,
+.kairos-account-trigger[aria-expanded='true'] {
+  border-color: var(--kairos-border);
+  background: var(--kairos-elevated);
+}
+
+.kairos-account-trigger--compact {
+  width: auto;
+  padding: var(--kairos-space-2xs);
+}
+
+.kairos-account-avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--kairos-control-h);
+  height: var(--kairos-control-h);
+  border-radius: var(--kairos-radius-input);
+  background: var(--kairos-accent);
+  color: var(--kairos-accent-text);
+  font-size: var(--kairos-text-sm);
+  font-weight: 700;
+}
+
+.kairos-account-trigger--compact .kairos-account-avatar {
+  width: calc(var(--kairos-control-h) - 2 * var(--kairos-space-2xs));
+  height: calc(var(--kairos-control-h) - 2 * var(--kairos-space-2xs));
+}
+
+.kairos-account-menu {
+  /* Wide enough for a full email address before it is cut short. */
+  min-width: 220px;
+}
+
+.kairos-account-who,
+.kairos-account-menu-label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+
+.kairos-account-menu-label {
+  padding: var(--kairos-space-sm) var(--kairos-space-md);
+  border-bottom: var(--kairos-border-w) solid var(--kairos-border-subtle);
+  margin-bottom: var(--kairos-space-2xs);
+}
+
+.kairos-account-name,
+.kairos-account-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.kairos-account-name {
+  font-size: var(--kairos-text-md);
+  font-weight: 600;
+}
+
+.kairos-account-email {
+  color: var(--kairos-text-muted);
+  font-size: var(--kairos-text-sm);
+}
