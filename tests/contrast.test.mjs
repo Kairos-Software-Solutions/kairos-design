@@ -243,3 +243,90 @@ test('the focus ring is findable on every ground', () => {
   }
   assert.deepEqual(failures, [], `focus ring below 3:1:\n${failures.join('\n')}`);
 });
+
+/* --- Kairos design brief v1 ------------------------------------------------
+   The brief adds three grounds (band, tint, picked), a green non-text mark and
+   two state colours. Each pair below is a placement the brief makes, checked in
+   both themes, so the interim dark values have to clear the same floors. */
+
+const BRIEF_GROUNDS = ['--kairos-page', '--kairos-card', '--kairos-band', '--kairos-tint'];
+
+test('every brief text colour clears 4.5:1 on every brief ground', () => {
+  const failures = [];
+  const placements = [
+    ...['--kairos-ink', '--kairos-ink-2', '--kairos-ink-3', '--kairos-placeholder', '--kairos-error'].flatMap((fg) =>
+      BRIEF_GROUNDS.map((bg) => [fg, bg]),
+    ),
+    ['--kairos-ink', '--kairos-picked'],
+    ['--kairos-ink-3', '--kairos-picked'],
+  ];
+  for (const theme of THEMES) {
+    for (const [fg, bg] of placements) {
+      const value = pair(theme, fg, bg);
+      if (value < TEXT_FLOOR) failures.push(`${theme}: ${fg} on ${bg} is ${value.toFixed(2)}`);
+    }
+  }
+  assert.deepEqual(failures, [], `brief text below 4.5:1:\n${failures.join('\n')}`);
+});
+
+test('every brief non-text colour clears 3:1 on every brief ground', () => {
+  const failures = [];
+  const signals = ['--kairos-border-subtle', '--kairos-field-border', '--kairos-control-edge', '--kairos-focus-ring', '--kairos-tick'];
+  for (const theme of THEMES) {
+    for (const fg of signals) {
+      for (const bg of [...BRIEF_GROUNDS, '--kairos-picked']) {
+        const value = pair(theme, fg, bg);
+        if (value < NON_TEXT_FLOOR) failures.push(`${theme}: ${fg} on ${bg} is ${value.toFixed(2)}`);
+      }
+    }
+  }
+  assert.deepEqual(failures, [], `brief signal below 3:1:\n${failures.join('\n')}`);
+});
+
+test("labels on the brief's fills clear 4.5:1", () => {
+  const failures = [];
+  const fills = [
+    ['--kairos-on-highlight', '--kairos-highlight'],
+    ['--kairos-on-highlight', '--kairos-highlight-strong'],
+    ['--kairos-on-error', '--kairos-error'],
+  ];
+  for (const theme of THEMES) {
+    for (const [fg, bg] of fills) {
+      const value = pair(theme, fg, bg);
+      if (value < TEXT_FLOOR) failures.push(`${theme}: ${fg} on ${bg} is ${value.toFixed(2)}`);
+    }
+  }
+  assert.deepEqual(failures, [], `label below 4.5:1 on its fill:\n${failures.join('\n')}`);
+});
+
+test("the brief's contrast table is the token layer's", () => {
+  // All 41 rows of the brief's contrast table, in its order, with the brief's
+  // names mapped to the tokens (the brief's green `accent` is `--kairos-tick`).
+  // Computed from the light tokens and rounded to two decimals, each must be
+  // the brief's own figure.
+  const T = {
+    ink: '--kairos-ink', 'ink-2': '--kairos-ink-2', 'ink-3': '--kairos-ink-3',
+    placeholder: '--kairos-placeholder', error: '--kairos-error', accent: '--kairos-tick',
+    page: '--kairos-page', card: '--kairos-card', band: '--kairos-band', tint: '--kairos-tint',
+    picked: '--kairos-picked', highlight: '--kairos-highlight', 'highlight-strong': '--kairos-highlight-strong',
+    'on-error': '--kairos-on-error',
+  };
+  const ROWS = [
+    ['ink', 'page', 17.76], ['ink-2', 'page', 10.77], ['ink-3', 'page', 5.43], ['placeholder', 'page', 5.32],
+    ['error', 'page', 6.19], ['ink', 'page', 17.76], ['ink-3', 'page', 5.43], ['accent', 'page', 5.51],
+    ['ink', 'card', 18.76], ['ink-2', 'card', 11.38], ['ink-3', 'card', 5.74], ['placeholder', 'card', 5.62],
+    ['error', 'card', 6.54], ['ink', 'card', 18.76], ['ink-3', 'card', 5.74], ['accent', 'card', 5.82],
+    ['ink', 'band', 17.10], ['ink-2', 'band', 10.37], ['ink-3', 'band', 5.23], ['placeholder', 'band', 5.12],
+    ['error', 'band', 5.96], ['ink', 'band', 17.10], ['ink-3', 'band', 5.23], ['accent', 'band', 5.30],
+    ['ink', 'tint', 15.66], ['ink-2', 'tint', 9.50], ['ink-3', 'tint', 4.79], ['placeholder', 'tint', 4.69],
+    ['error', 'tint', 5.46], ['ink', 'tint', 15.66], ['ink-3', 'tint', 4.79], ['accent', 'tint', 4.86],
+    ['ink', 'picked', 16.54], ['ink-3', 'picked', 5.06], ['ink', 'picked', 16.54],
+    ['ink', 'highlight', 11.67], ['ink', 'highlight-strong', 10.70], ['ink', 'highlight', 11.67],
+    ['on-error', 'error', 6.54], ['page', 'ink', 17.76], ['highlight', 'card', 1.61],
+  ];
+  assert.equal(ROWS.length, 41, 'every row of the table');
+  const wrong = ROWS.filter(([fg, bg, figure]) => quoted('light', T[fg], T[bg]) !== figure).map(
+    ([fg, bg, figure]) => `${fg} on ${bg}: computed ${quoted('light', T[fg], T[bg])}, the brief says ${figure}`,
+  );
+  assert.deepEqual(wrong, []);
+});

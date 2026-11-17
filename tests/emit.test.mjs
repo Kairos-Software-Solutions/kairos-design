@@ -99,7 +99,7 @@ test('an inline target replaces only the marked region', () => {
   const html = readFileSync(join(dir, 'index.html'), 'utf8');
   assert.match(html, /^<style>/, 'content before the marker survives');
   assert.match(html, /<\/style>\n$/, 'content after the marker survives');
-  assert.match(html, /--kairos-bg: #fff8eb/, 'the tokens landed');
+  assert.match(html, /--kairos-page: #fff8eb/, 'the tokens landed');
   assert.equal(html.match(/kairos-design:tokens begin/g).length, 1, 'markers are not duplicated');
 
   run(['emit'], dir);
