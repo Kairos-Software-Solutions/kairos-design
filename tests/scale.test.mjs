@@ -33,6 +33,7 @@ const css = raw.replace(/\/\*[\s\S]*?\*\//g, '');
 const surfaces = [
   css,
   readFileSync(join(ROOT, 'dist', 'base.css'), 'utf8'),
+  readFileSync(join(ROOT, 'dist', 'brand.css'), 'utf8'),
   ...readdirSync(join(ROOT, 'dist', 'react'))
     .filter((name) => /\.tsx?$/.test(name))
     .map((name) => readFileSync(join(ROOT, 'dist', 'react', name), 'utf8')),
@@ -175,7 +176,8 @@ test('every token is read by something', () => {
   // A consuming app may still be the only reader of a token, and that is
   // fine — the token has to be read HERE by whatever demonstrates it. If the
   // package cannot show its own token in use, the token is a document.
-  const declared = [...new Set([...tokens.matchAll(/(--kairos-[a-z0-9-]+)\s*:/g)].map((m) => m[1]))];
+  const brand = readFileSync(join(ROOT, 'dist', 'brand.css'), 'utf8');
+  const declared = [...new Set([...(tokens + brand).matchAll(/(--kairos-[a-z0-9-]+)\s*:/g)].map((m) => m[1]))];
   const unread = declared.filter((name) => {
     const reference = new RegExp(`var\\(${name}[,)]`);
     // `--kairos-shadow-color` is read by the four stamp tokens inside

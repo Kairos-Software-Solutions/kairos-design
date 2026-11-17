@@ -11,6 +11,7 @@
     "./tokens.css": "./dist/tokens.css",
     "./base.css": "./dist/base.css",
     "./kairos.css": "./dist/kairos.css",
+    "./brand.css": "./dist/brand.css",
     "./format/money": "./dist/format/money.ts",
     "./format/dates": "./dist/format/dates.ts",
     "./react": "./dist/react/index.ts",

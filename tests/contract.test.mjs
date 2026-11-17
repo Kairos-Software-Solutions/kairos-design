@@ -113,7 +113,7 @@ test('every button variant the component maps has a rule', () => {
 });
 
 test('no custom property is referenced without a definition or a fallback', () => {
-  const all = css + tokens;
+  const all = css + tokens + readFileSync(join(ROOT, 'dist', 'brand.css'), 'utf8');
   const definitions = new Set([...all.matchAll(/^\s*(--[a-zA-Z0-9-]+)\s*:/gm)].map((m) => m[1]));
 
   const broken = [];
