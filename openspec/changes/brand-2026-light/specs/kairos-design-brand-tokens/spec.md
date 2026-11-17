@@ -64,7 +64,7 @@ Text colours SHALL clear 4.5:1 and non-text signals 3:1 on every ground the brie
 - **CHECK** `tests/contrast.test.mjs` › "labels on the brief's fills clear 4.5:1"
 
 #### Scenario: The brief's table is the token layer's
-- **WHEN** the 40 numeric pairs of the brief's contrast table are computed from the light tokens and rounded to two decimals
+- **WHEN** the 41 rows of the brief's contrast table (all numeric) are computed from the light tokens and rounded to two decimals
 - **THEN** each equals the brief's figure (for example ink on page 17.76, ink-3 on picked 5.06, ink on highlight-strong 10.70)
 - **CHECK** `tests/contrast.test.mjs` › "the brief's contrast table is the token layer's"
 
@@ -95,7 +95,7 @@ The font tokens SHALL name Archivo for body and display and Courier Prime for mo
 - **CHECK** `tests/release.test.mjs` › "no font file, @font-face or font URL ships"
 
 ### Requirement: Product Scale renders as 0.14 did
-Without the Brand Scale switched on, every declaration in the 0.14.0 `tokens.css`, `base.css` and `kairos.css` SHALL resolve in 0.15 to the value it had in 0.14.0, light and dark, after applying only the listed intentional changes (the three font stacks and the light primary hover). A new declaration on an existing class SHALL be Brand-scoped or leave the part as 0.14 drew it.
+Without the Brand Scale switched on, every 0.14.0 token SHALL resolve in 0.15 by name to its 0.14.0 value, and every declaration in the 0.14.0 `base.css` and `kairos.css` SHALL resolve to the value it had, light and dark, after only the listed intentional changes (the three font stacks and the light primary hover). A new declaration on an existing class SHALL be Brand-scoped or leave the part as 0.14 drew it.
 
 #### Scenario: The fixture is the published release
 - **WHEN** the sha256 of each file in `tests/fixtures/kairos-design-0.14.0/` is computed
@@ -103,8 +103,8 @@ Without the Brand Scale switched on, every declaration in the 0.14.0 `tokens.css
 - **CHECK** `tests/product-scale.test.mjs` › "the 0.14.0 fixture is the published 0.14.0"
 
 #### Scenario: Every 0.14 declaration resolves the same
-- **WHEN** every declaration of the fixture and of `dist/` is keyed by at-rule context, selector and property, and resolved through each version's Product Scale tokens in light and in dark
-- **THEN** every 0.14 key exists in 0.15 with an equal value once the INTENTIONAL list is applied to 0.14's tokens
+- **WHEN** every token of the fixture's and of `dist/`'s `tokens.css` is resolved by name, and every declaration of their `base.css` and `kairos.css` is keyed by at-rule context, selector and property, each through its version's Product Scale tokens in light and in dark
+- **THEN** every 0.14 token name and every 0.14 `base.css` and `kairos.css` key exists in 0.15 with an equal value once the INTENTIONAL list is applied to 0.14's tokens
 - **CHECK** `tests/product-scale.test.mjs` › "every 0.14 declaration resolves the same at Product Scale, light and dark"
 
 #### Scenario: New rules on existing classes

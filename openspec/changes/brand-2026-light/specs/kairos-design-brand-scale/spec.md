@@ -60,7 +60,7 @@ At Brand Scale the primary and secondary ranks SHALL render as the brief's main 
 
 #### Scenario: Main and outline at rest
 - **WHEN** the Brand "Buttons" story renders a primary and a secondary button at default and small size
-- **THEN** both report a 3px radius, 50px height (44px small), 26px side padding (18px small), a 16px 700-weight label with no case transform, no box shadow, a 2px edge in ink, highlight fill on the primary and card fill on the secondary, and equal widths for equal labels
+- **THEN** both report a 3px radius, 50px height (44px small), 26px side padding (18px small), a 16px 700-weight label with no case transform, no box shadow, a 2px edge in ink, highlight fill on the primary and card fill on the secondary, transitions of 160ms, and equal widths for equal labels
 - **CHECK** `npm run test-stories`: `stories/brand/Actions.stories.tsx` › "Buttons" passes (its play function asserts these computed values)
 
 #### Scenario: A busy button keeps its box
@@ -70,15 +70,15 @@ At Brand Scale the primary and secondary ranks SHALL render as the brief's main 
 
 #### Scenario: Hover, press and focus at Brand Scale
 - **WHEN** a reviewer hovers, presses and tabs to the Brand buttons, links and fields at 1366 and 390
-- **THEN** hover lifts the button onto the 4px ink offset with the strong highlight (outline: tint fill), press drops it to no shadow at 0.98 scale, focus shows a 3px ink ring at 3px offset, and a focused field fills with tint, matching the brief's state shots
+- **THEN** hover lifts the button onto the 4px ink offset with the strong highlight (outline: tint fill), press drops it to no shadow at `scale(0.98)`, focus shows a 3px ink ring at 3px offset, and a focused field fills with tint, matching the brief's state shots
 - **CHECK** planner browser check on the built workshop at 1366 and 390 against the brief's `state-button-hover-1366.png` and `state-outline-hover-1366.png` (Workflow follow-up)
 
 ### Requirement: Fields follow the brief at Brand Scale
-At Brand Scale a field SHALL render the brief's text field: 52px (textarea 120px), 2px ink-3 border, 3px radius, 18px/500 text, a 15px/700 sentence-case ink label, a red asterisk on a required field, and the error line with its badge under an invalid field.
+At Brand Scale a field SHALL render the brief's text field: 52px (textarea 120px), 10px × 14px padding, 2px ink-3 border, 3px radius, 18px/500 text, 160ms transitions, a 15px/700 sentence-case ink label, a 15px ink-3 hint, a red asterisk on a required field, and the error line with its badge under an invalid field, in a message slot tall enough that an error moves nothing below the field.
 
 #### Scenario: Field at rest
 - **WHEN** the Brand "Fields" story renders an `InputField`, a `Textarea` and a `SelectField`
-- **THEN** the input reports min-height 52px, the textarea 120px, a 2px border in ink-3, a 3px radius, 18px text at weight 500, and the label 15px, weight 700, no case transform, in ink
+- **THEN** the input reports min-height 52px, the textarea 120px, padding 10px top and bottom and 14px left and right, a 2px border in ink-3, a 3px radius, 18px text at weight 500 and border and background transitions of 160ms; the label is 15px, weight 700, no case transform, in ink; and a hint under the control is 15px in ink-3
 - **CHECK** `npm run test-stories`: `stories/brand/Form.stories.tsx` › "Fields" passes
 
 #### Scenario: Required field
@@ -88,7 +88,7 @@ At Brand Scale a field SHALL render the brief's text field: 52px (textarea 120px
 
 #### Scenario: Invalid field
 - **WHEN** the Brand "Errors" story renders an `InputField` with an error
-- **THEN** the input carries `aria-invalid="true"` and an error-coloured border, and the error message shows a 20px round badge holding "!" before 15px text in the error colour
+- **THEN** the input carries `aria-invalid="true"` and an error-coloured border, the error message shows a 20px round badge holding "!" before 15px text at weight 600 in the error colour, and its `.kairos-field` box is as tall (`getBoundingClientRect().height`) as that of the same field rendered beside it without an error
 - **CHECK** `npm run test-stories`: `stories/brand/Form.stories.tsx` › "Errors" passes
 
 ### Requirement: Type ranks follow the scale

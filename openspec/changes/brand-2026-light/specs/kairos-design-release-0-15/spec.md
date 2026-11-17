@@ -12,12 +12,12 @@ Define what kairos-design 0.15.0 publishes (version, entry points, packed files)
 #### Scenario: Version and export
 - **WHEN** `package.json` is read
 - **THEN** `version` is `0.15.0`, `exports['./brand.css']` is `./dist/brand.css`, and the existing exports are unchanged
-- **CHECK** `tests/release.test.mjs` › "the version is 0.15.0 and brand.css is exported"; `tests/contract.test.mjs` › "every artifact is reachable through the package exports"
+- **CHECK** `tests/release.test.mjs` › "brand.css is exported and every 0.14 export is unchanged"; `tests/contract.test.mjs` › "every artifact is reachable through the package exports"; the version by `node -p "require('./package.json').version"` printing `0.15.0` in `checks/REPORT.md` (task 7.2) and the planner's registry check after the merge (no test pins the version, so a 0.15.1 fix still passes)
 
 #### Scenario: Manifest otherwise unchanged
 - **WHEN** `package.json` is compared with `git show 09dbce8:package.json`, ignoring `version` and the new export
 - **THEN** every other field is equal (files, peers, engines, scripts, devDependencies, overrides, publishConfig)
-- **CHECK** `checks/REPORT.md` holds the comparison output from task 6.1, saying `manifest: same (ignored version, exports['./brand.css'])`
+- **CHECK** `checks/REPORT.md` holds the comparison output from task 7.2, saying `manifest: same (ignored version, exports['./brand.css'])`
 
 ### Requirement: The packed files are 0.14's plus brand.css
 The tarball SHALL hold exactly the 0.14.0 file list plus `dist/brand.css`: no test fixture, story, workshop file, plan or font.
@@ -46,9 +46,19 @@ The release workflow SHALL push the version tag only after `npm publish` succeed
 - **CHECK** planner, after the merge: `gh run view <id> --log`, `npm view kairos-design dist-tags.latest`, `curl -sL <tarball> | tar -tz | grep dist/brand.css`, `git ls-remote --tags origin v0.15.0` (Workflow follow-up)
 
 ### Requirement: The docs describe the release
-The adoption guide SHALL have an "Upgrading to 0.15.0" section naming the font families an app must load, the Brand Scale switch and the renamed tokens; `docs/decisions.md` SHALL record 0.15.0; `tokens.css` SHALL name the brief as its source.
+The adoption guide SHALL have an "Upgrading to 0.15.0" section naming the font families an app must load, when an app's font actually changes, the Brand Scale switch and the renamed tokens; `docs/decisions.md` SHALL record 0.15.0; `tokens.css` SHALL name the brief as its source. The manifest, the preview page and the workshop SHALL name no 0.14 family, and the Colour page SHALL keep a swatch group for every light colour token.
 
 #### Scenario: Docs present
 - **WHEN** `docs/adoption.md`, `docs/decisions.md` and `dist/tokens.css` are read
-- **THEN** the adoption guide has a heading "Upgrading to 0.15.0" whose section names Archivo, Courier Prime, `brand.css` and `data-scale="brand"`; decisions.md has a heading containing "0.15.0"; the tokens.css header names "Kairos design brief v1" and no longer names `visual-spec.md`
+- **THEN** the adoption guide has a heading "Upgrading to 0.15.0" whose section names Archivo, Courier Prime, `brand.css`, `data-scale="brand"` and the three font tokens `--kairos-display`, `--kairos-body` and `--kairos-mono` (for apps that re-point them on `:root`); decisions.md has a heading containing "0.15.0"; the tokens.css header names "Kairos design brief v1" and no longer names `visual-spec.md`
 - **CHECK** `tests/release.test.mjs` › "the docs describe 0.15.0"
+
+#### Scenario: No 0.14 family named
+- **WHEN** `docs/kairos-ui.md`, `docs/preview.html`, `.storybook/` and `stories/` are searched for the 0.14 family names
+- **THEN** no line outside a code comment names Bebas or Epilogue, and `docs/preview.html` and `.storybook/preview-head.html` load Archivo and Courier Prime
+- **CHECK** `grep -rn -E "Bebas|Epilogue" docs/kairos-ui.md docs/preview.html .storybook stories | grep -v -E ':[0-9]+:\s*(//|/?\*)'` prints nothing, recorded in `checks/REPORT.md`
+
+#### Scenario: Every light colour token keeps its swatch
+- **WHEN** the first `:root {` block of `dist/tokens.css` (the block `stories/tokens.ts` reads) and the `group(themed, …)` stems in `stories/foundations/Colour.stories.tsx` are read
+- **THEN** every token in that block other than the `--kairos-shadow` tokens starts with one of the stems, so neither a renamed role nor a new colour role is missing from the Colour page
+- **CHECK** `tests/brand-tokens.test.mjs` › "the Colour page groups every light colour token"

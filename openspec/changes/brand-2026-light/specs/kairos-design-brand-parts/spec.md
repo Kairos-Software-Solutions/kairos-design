@@ -28,12 +28,17 @@ The new parts SHALL take every colour, spacing, radius, border weight, font size
 - **CHECK** `tests/contract.test.mjs` › "no raw hex outside the token layer"; `tests/scale.test.mjs` › "every spacing value is a step on the scale", "tracking, radius, and border weight come from tokens", "every font size is a step on the type scale", "every shadow comes from the stamp tokens", "no literal duration or easing", "every token is read by something"
 
 ### Requirement: Links follow the brief
-The text link SHALL be ink, weight 700, with a 3px highlight underline at a 5px offset and a tap target at least 44px tall. The menu link SHALL be at least 44px tall and mark the current page with a 3px highlight underline when it carries `aria-current="page"`. The language link SHALL show its 1px hairline separator on the menu and a 48px row variant.
+The text link SHALL be ink, weight 700, with a 3px highlight underline at a 5px offset and a tap target at least 44px tall; on hover its underline SHALL turn ink and its arrow nudge. The menu link SHALL be at least 44px tall, sweep a highlight marker in on hover, and mark the current page with a 3px highlight underline when it carries `aria-current="page"`. The language link SHALL show its 1px × 18px ink-3 separator on the menu and a 48px row variant.
 
 #### Scenario: Links at rest
 - **WHEN** the Brand "Links" story renders a text link, two menu links (one with `aria-current="page"`) and a language link in both variants
-- **THEN** the text link reports colour ink, weight 700, a 3px underline in highlight at 5px offset and a height of at least 44px; the menu links are at least 44px tall and only the current one shows the 3px underline; the row variant is 48px tall
+- **THEN** the text link reports colour ink, weight 700, a 3px underline in highlight at 5px offset and a height of at least 44px; the menu links are at least 44px tall and only the current one shows the 3px underline; the menu language link's separator (`getComputedStyle(el, '::before')`) is 1px wide and 18px tall with an ink-3 ground; the row variant is 48px tall
 - **CHECK** `npm run test-stories`: `stories/brand/Actions.stories.tsx` › "Links" passes
+
+#### Scenario: Link and menu hover
+- **WHEN** a reviewer hovers the Brand text link, the menu links and a footer link at 1366, and taps them at 390
+- **THEN** the text link's underline turns ink and its arrow moves right, the menu link's highlight marker sweeps in behind the word from the left, the footer link gains its underline, and each change runs on the scale's duration and curve tokens, matching the brief's state shots
+- **CHECK** planner browser check on the built workshop at 1366 and 390 against the brief's `state-nav-hover-1366.png` (Workflow follow-up)
 
 ### Requirement: Choice controls follow the brief
 The tick box, day grid and time-of-day switch SHALL be built on native checkbox and radio inputs, so keyboard picking is the browser's. A checked tick box SHALL fill with tint; a picked day SHALL fill with picked and show its 2px ink frame; the time switch pill SHALL be hidden until the first pick and then sit on the checked option; an invalid group SHALL draw its edge in the error colour.
@@ -65,6 +70,16 @@ The error line SHALL show a 20px round badge in the error colour holding "!" in 
 - **WHEN** the Brand "Errors" story renders a standalone `kairos-error-line`
 - **THEN** its badge is 20px wide and tall, fully round, filled with the error colour, holding "!", and its text is in the error colour
 - **CHECK** `npm run test-stories`: `stories/brand/Form.stories.tsx` › "Errors" passes
+
+#### Scenario: Error line shakes once
+- **WHEN** the `kairos-error-line` rules in `kairos.css` and the Brand-scoped Field error rule are read
+- **THEN** each runs an animation whose `@keyframes` is defined in `kairos.css`, for `var(--kairos-duration-shake)` (320ms in `tokens.css`), with an iteration count of 1, on an element carrying a `kairos-` class
+- **CHECK** `tests/brand-parts.test.mjs` › "the error line shakes once on a duration token"; planner browser check of the shake at 1366 (Workflow follow-up)
+
+#### Scenario: Reduced motion stills the error line
+- **WHEN** the reduced-motion block of `kairos.css` is matched against the error line, its badge and the Field error
+- **THEN** its selectors cover each of them (and their `::before`), so the shake runs once for `--kairos-duration-none` (1ms), and `brand.css` does not change that token
+- **CHECK** `tests/brand-parts.test.mjs` › "reduced motion stills the error line"; planner browser check with `prefers-reduced-motion: reduce` emulated (Workflow follow-up)
 
 #### Scenario: Required mark in Field
 - **WHEN** `dist/react/Field.tsx` is read
