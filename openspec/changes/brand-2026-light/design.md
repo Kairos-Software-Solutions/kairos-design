@@ -183,6 +183,7 @@ The core promise to the apps: with no `data-scale` attribute, 0.15 renders every
 New files (all under `node --test tests/*.test.mjs`, plain Node, no new dependency): `tests/brand-tokens.test.mjs`, `tests/product-scale.test.mjs`, `tests/brand-scale.test.mjs`, `tests/brand-parts.test.mjs`, `tests/release.test.mjs`, plus new tests in `tests/contrast.test.mjs`. Every new test is a top-level `test('<name>', …)`, as in the existing files (no `describe`), so a CHECK names it as `tests/<file>` › "<name>".
 
 Existing tests that change, and only these:
+
 - `tests/scale.test.mjs`: `surfaces` adds `dist/brand.css`, and "every token is read by something" also checks tokens declared in `brand.css` (so a knob only `brand.css` reads counts as read, and a dead Brand token fails).
 - `tests/contract.test.mjs` › "no custom property is referenced without a definition or a fallback": `all` adds `dist/brand.css`.
 - `tests/emit.test.mjs` › "an inline target replaces only the marked region": the assertion `/--kairos-bg: #fff8eb/` becomes `/--kairos-page: #fff8eb/` (the light block now declares the canonical name; `--kairos-bg` is `var(--kairos-page)` in the alias block). Nothing else in the test changes.
