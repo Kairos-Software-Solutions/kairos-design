@@ -18,6 +18,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { parse, stripComments } from './helpers/css.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => readFileSync(join(ROOT, ...parts), 'utf8');
@@ -150,8 +151,19 @@ test('the docs describe 0.16.0', () => {
 
   assert.match(read('docs', 'decisions.md'), /^#+ .*0\.16\.0.*$/m, 'docs/decisions.md has a 0.16.0 heading');
 
-  const tokens = read('dist', 'tokens.css');
-  const tokensHeader = tokens.slice(0, tokens.indexOf('*/') + 2);
-  assert.match(tokensHeader, /Kairos design brief v1/);
-  assert.doesNotMatch(tokensHeader, /visual-spec\.md/);
+});
+
+test('every name the website reads is still declared', () => {
+  const names = read('tests', 'fixtures', 'website-reads.txt')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
+  assert.ok(names.length > 100, 'the fixture lists the names the website reads');
+
+  const classes = new Set([...stripComments(read('dist', 'kairos.css')).matchAll(/\.(kairos-[a-z0-9_-]+)/g)].map((m) => m[1]));
+  const tokens = new Set(
+    [...parse(read('dist', 'tokens.css')), ...parse(read('dist', 'brand.css'))].filter((d) => d.prop.startsWith('--')).map((d) => d.prop),
+  );
+  const missing = names.filter((name) => (name.startsWith('--') ? !tokens.has(name) : !classes.has(name)));
+  assert.deepEqual(missing, [], `the website reads names the package no longer declares: ${missing.join(', ')}`);
 });

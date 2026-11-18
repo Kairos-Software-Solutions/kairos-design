@@ -14,7 +14,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 1. Baseline and guards
 
-- [ ] 1.1 Record the baseline on the untouched checkout (`d36d95c`), in this order:
+- [x] 1.1 Record the baseline on the untouched checkout (`d36d95c`), in this order:
   - `npm ci`
   - `npx playwright install --with-deps chromium`
   - `npm test` (note the totals)
@@ -29,7 +29,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
   Covers: the before figures that kairos-design-release-0-18 › "Pack list" and the group 7 counts compare against. Check: all five commands complete and the figures are recorded.
 
-- [ ] 1.2 Build the 0.17.0 guard and the website-names check.
+- [x] 1.2 Build the 0.17.0 guard and the website-names check.
   - Copy `dist/tokens.css`, `dist/base.css`, `dist/kairos.css` and `dist/brand.css` from `d36d95c` into `tests/fixtures/kairos-design-0.17.0/` byte for byte.
   - In `tests/product-scale.test.mjs`, add "the 0.17.0 fixture is the published 0.17.0", "every 0.17.0 declaration resolves the same at Product Scale, light and dark, apart from the 0.18 lists" and "a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed", with the constants `GONE_0_18`, `CHANGED_0_18` and `NEW_0_18` exactly as `design.md` › Apps against 0.17.0 gives them (core lists only).
   - Make the existing "a new rule on an existing class is Brand-scoped, or listed and inert at Product Scale" also accept `NEW_0_18` entries, as it accepts `NEW_0_17`. Change nothing else in that file.
