@@ -206,7 +206,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 7. Final checks
 
-- [ ] 7.1 Fresh install, then CI's commands once, in CI's order:
+- [x] 7.1 Fresh install, then CI's commands once, in CI's order:
   - `rm -rf node_modules storybook-static && npm ci`
   - `npm test`
   - `npm run typecheck`
@@ -229,7 +229,7 @@ Add no dependency. While working, run only the test files a task names; the full
   - `npm test` has 0 failed and more tests than 147.
   - Stories: `numFailedTests` 0, `numPendingTests` 0, `numTotalTests` equal to "Before".
   - 44 packed files.
-- [ ] 7.2 Diff audit and plan validation, written into `checks/REPORT.md`. Run and record:
+- [x] 7.2 Diff audit and plan validation, written into `checks/REPORT.md`. Run and record:
   - `git diff --stat d36d95c`;
   - `git diff --exit-code d36d95c -- dist/base.css dist/format dist/react bin .github` (exit 0);
   - `git diff d36d95c -- tests/scale.test.mjs tests/emit.test.mjs tests/contrast.test.mjs` (empty);

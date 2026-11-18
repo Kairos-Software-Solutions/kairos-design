@@ -1,0 +1,236 @@
+[
+  {
+    "id": "kairos-design@0.18.0",
+    "name": "kairos-design",
+    "version": "0.18.0",
+    "size": 160785,
+    "unpackedSize": 546482,
+    "shasum": "944dec638be36bbfdc073e84e13fbff71f6fcd78",
+    "integrity": "sha512-z3qSFToBqAnrYIeYKd1rE/OsGT7wKz2isUWjSkpDuLrIx3cQhS3J/gIirfiENZeW4Wd1hWGLddcroMzhZnsJFg==",
+    "filename": "kairos-design-0.18.0.tgz",
+    "files": [
+      {
+        "path": "README.md",
+        "size": 8295,
+        "mode": 420
+      },
+      {
+        "path": "bin/kairos-design.mjs",
+        "size": 10356,
+        "mode": 493
+      },
+      {
+        "path": "dist/base.css",
+        "size": 2221,
+        "mode": 420
+      },
+      {
+        "path": "dist/brand.css",
+        "size": 7933,
+        "mode": 420
+      },
+      {
+        "path": "dist/format/dates.ts",
+        "size": 6707,
+        "mode": 420
+      },
+      {
+        "path": "dist/format/money.ts",
+        "size": 7695,
+        "mode": 420
+      },
+      {
+        "path": "dist/kairos.css",
+        "size": 209661,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/AccountMenu.tsx",
+        "size": 4694,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/ActionSet.tsx",
+        "size": 19568,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/AppShell.tsx",
+        "size": 9253,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/AuthScreen.tsx",
+        "size": 5802,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Banner.tsx",
+        "size": 1134,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/BrandLockup.tsx",
+        "size": 2346,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Button.tsx",
+        "size": 5682,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/CollapsibleCard.tsx",
+        "size": 1473,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/confirm.ts",
+        "size": 2097,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/ConfirmDialog.tsx",
+        "size": 8057,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/CopyField.tsx",
+        "size": 5436,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/DataTable.tsx",
+        "size": 34345,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Dialog.tsx",
+        "size": 5074,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/DisclosureSection.tsx",
+        "size": 4155,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/EmptyState.tsx",
+        "size": 847,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Field.tsx",
+        "size": 7593,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/FilterBar.tsx",
+        "size": 5378,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/index.ts",
+        "size": 4822,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/OverflowMenu.tsx",
+        "size": 9954,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Panel.tsx",
+        "size": 7412,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Popover.tsx",
+        "size": 2890,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/ProductLockup.tsx",
+        "size": 3436,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/remember.ts",
+        "size": 2432,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/SectionTag.tsx",
+        "size": 1288,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Segmented.tsx",
+        "size": 1328,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Select.tsx",
+        "size": 7654,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/sort.ts",
+        "size": 4274,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/SortHeader.tsx",
+        "size": 1736,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/StateChip.tsx",
+        "size": 2505,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Steps.tsx",
+        "size": 2426,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/SubNav.tsx",
+        "size": 2006,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/theme.tsx",
+        "size": 9247,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Toast.tsx",
+        "size": 1424,
+        "mode": 420
+      },
+      {
+        "path": "dist/react/Tooltip.tsx",
+        "size": 2961,
+        "mode": 420
+      },
+      {
+        "path": "dist/tokens.css",
+        "size": 36158,
+        "mode": 420
+      },
+      {
+        "path": "docs/kairos-ui.md",
+        "size": 64490,
+        "mode": 420
+      },
+      {
+        "path": "package.json",
+        "size": 2237,
+        "mode": 420
+      }
+    ],
+    "entryCount": 44,
+    "bundled": []
+  }
+]
