@@ -5,6 +5,7 @@ Work in this order and commit after each group. Use npm, not yarn, on Node 24 if
 The look comes from Kairos design brief v3, lock revision 3, in `input/brief/`. Values and names come from `design.md` (Decided, Brand Scale, Apps against 0.17.0, Tests that change, Workshop, Docs).
 
 Shipped files may change only where a task says. Never edit:
+
 - `dist/base.css`, `dist/format/`, `dist/react/`, `bin/`;
 - `.github/`, `openspec/config.yaml`;
 - any `package.json` field other than `version`.
@@ -21,11 +22,13 @@ Add no dependency. While working, run only the test files a task names; the full
   - `npm pack --dry-run --json --ignore-scripts > checks/pack-before.json`
 
   Write the totals into `checks/ci-commands.md` under "Before". Expected from the planner's run:
+
   - `npm test` 147 pass, 0 fail;
   - 44 packed files, 159,992 bytes;
   - stories were not run by the planner. `Brand/Actions` › "Without The Switch" is expected to fail on 0.17.0, because it still asserts an uppercase button. Record every failing story and carry on.
 
   Covers: the before figures that kairos-design-release-0-18 › "Pack list" and the group 7 counts compare against. Check: all five commands complete and the figures are recorded.
+
 - [ ] 1.2 Build the 0.17.0 guard and the website-names check.
   - Copy `dist/tokens.css`, `dist/base.css`, `dist/kairos.css` and `dist/brand.css` from `d36d95c` into `tests/fixtures/kairos-design-0.17.0/` byte for byte.
   - In `tests/product-scale.test.mjs`, add "the 0.17.0 fixture is the published 0.17.0", "every 0.17.0 declaration resolves the same at Product Scale, light and dark, apart from the 0.18 lists" and "a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed", with the constants `GONE_0_18`, `CHANGED_0_18` and `NEW_0_18` exactly as `design.md` › Apps against 0.17.0 gives them (core lists only).
@@ -33,10 +36,12 @@ Add no dependency. While working, run only the test files a task names; the full
   - Copy `input/website-reads.txt` to `tests/fixtures/website-reads.txt`. Add "every name the website reads is still declared" to `tests/release.test.mjs` (`design.md` › Tests that change).
 
   Covers:
+
   - kairos-design-brand-tokens › "The 0.17.0 fixture is the published release", "Every 0.17.0 declaration resolves the same", "New 0.18 rules on 0.17 classes", "New rules on existing classes";
   - kairos-design-release-0-18 › "Names still declared".
 
   Check:
+
   - With the three 0.18 lists emptied for one run, the three 0.17.0 tests pass on the untouched code (0.17.0 against itself) and fail once you change one value in `dist/kairos.css` by hand. Try it, then revert both.
   - With the lists in place, "every 0.17.0 declaration resolves the same…" fails until task 3.2; that is expected.
   - `node --test tests/release.test.mjs` passes.
@@ -62,11 +67,13 @@ Add no dependency. While working, run only the test files a task names; the full
   - `tests/release.test.mjs` › "the docs describe 0.16.0": delete only the `tokensHeader` assertions.
 
   Covers:
+
   - kairos-design-brand-tokens › "Font stacks", "No font in the package", "Old name, same value", "A renamed role keeps its old name", "A theme set below the root";
   - kairos-design-brand-scale › "Imported, not switched on", "Values table", "Reduced motion still wins", "Ranks at Product Scale", "No width token", "No width rule in the brand layer";
   - kairos-design-release-0-16 › "Docs present".
 
   Check:
+
   - `node --test tests/brand-scale.test.mjs tests/brand-tokens.test.mjs tests/contract.test.mjs tests/release.test.mjs tests/contrast.test.mjs tests/emit.test.mjs` passes.
   - Every `tests/scale.test.mjs` test passes.
   - In `tests/product-scale.test.mjs` only "every 0.17.0 declaration resolves the same…" may still fail, on the marker's `transform` alone.
@@ -81,9 +88,11 @@ Add no dependency. While working, run only the test files a task names; the full
   - In `tests/brand-parts.test.mjs`, add "the compact title, card and time ranks read their tokens" (it also asserts that `docs/kairos-ui.md` names `kairos-type-title--compact` and `kairos-type-card--sm`, which the manifest check skips because they contain `--`) and add the three new rank classes to "every shared part from the brief has its class".
 
   Covers:
+
   - kairos-design-brand-scale › "Compact title", "Documented", "Values table", "Ranks at Product Scale".
 
   Check: `node --test tests/brand-parts.test.mjs tests/brand-scale.test.mjs tests/contract.test.mjs tests/scale.test.mjs` passes.
+
 - [ ] 3.2 P1, P2, P6 and P9 (Decided 10, 11, 8 and 13).
   - P1: in `kairos.css`, add `text-transform: none` to `.kairos-type-label, .kairos-type-price`, and the three declarations to `.kairos-site-footer-heading`.
   - P2: add `rotate` to `.kairos-title-bar::after`, and swap the marker's `transform` for `rotate`.
@@ -92,10 +101,12 @@ Add no dependency. While working, run only the test files a task names; the full
   - In `tests/brand-parts.test.mjs`, add "label ranks and the footer heading undo the heading capitals", "the title bar and the marker tilt with rotate, not transform", "tick list values read their own size knobs", "the statement tick list keeps the statement rank" and "phone menu rows are 23px and the current one is underlined".
 
   Covers:
+
   - kairos-design-brand-parts › "Label and footer rules", "Tilt rules", "Values read their own knobs", "The statement list keeps its rank", "Phone menu rules";
   - kairos-design-brand-tokens › "Every 0.17.0 declaration resolves the same", "New 0.18 rules on 0.17 classes".
 
   Check: `node --test tests/brand-parts.test.mjs tests/brand-scale.test.mjs tests/product-scale.test.mjs tests/contract.test.mjs tests/scale.test.mjs` passes, every `product-scale` test included.
+
 - [ ] 3.3 P8 and P10 (Decided 12 and 14).
   - Add `.kairos-text-link-text` to `kairos.css` and rewrite the `docs/kairos-ui.md` text-link row as `design.md` gives it.
   - Add the idle-spinner rule after `.kairos-button[aria-busy='true'] .kairos-button-pending`.
@@ -103,6 +114,7 @@ Add no dependency. While working, run only the test files a task names; the full
   - Add "a loadable button's spinner turns only while busy" to `tests/contract.test.mjs`, without editing its existing tests.
 
   Covers:
+
   - kairos-design-brand-parts › "Text link documented";
   - button › "Rule";
   - kairos-design-brand-tokens › "New rules on existing classes", "Every 0.14 declaration resolves the same", "New 0.18 rules on 0.17 classes".
@@ -119,11 +131,13 @@ Add no dependency. While working, run only the test files a task names; the full
   Keep every story export. Use `getComputedStyle`, `expect` and `userEvent` from `storybook/test`; no hover, no assertions on text width or the viewport. Then run `npx playwright install --with-deps chromium` and `npx vitest run --project stories stories/brand stories/foundations`.
 
   Covers:
+
   - kairos-design-brand-scale › "Switched on in the workshop", "Switched off again", "Ranks at Brand Scale", "Card heading and time line";
   - kairos-design-brand-parts › "On a heading in the workshop", "Tilt in the workshop", "Wrapped in the workshop", "Phone menu in the workshop";
   - button › "Idle and busy in the workshop".
 
   Check:
+
   - Every Brand and Foundations story passes with axe and none is skipped.
   - `npm run typecheck` exits 0.
   - `NODE_OPTIONS=--max-old-space-size=4096 npm run build-storybook` exits 0.
@@ -139,10 +153,12 @@ Add no dependency. While working, run only the test files a task names; the full
   - Earlier sections of `docs/decisions.md` and `docs/adoption.md` are history and stay.
 
   Covers:
+
   - kairos-design-release-0-18 › "Version and exports", "Docs present", "Brand files name no Archivo";
   - kairos-design-release-0-16 › "Docs present", "No 0.14 family named", "Every light colour token keeps its swatch".
 
   Check:
+
   - `npm test` passes.
   - `grep -niE "archivo|stretch" dist/brand.css` and `grep -rni "archivo" stories/brand` print nothing.
   - `grep -rn "Bebas" docs/kairos-ui.md docs/preview.html .storybook stories | grep -v -E ':[0-9]+:\s*(//|/?\*)'` prints nothing.
@@ -155,15 +171,18 @@ Add no dependency. While working, run only the test files a task names; the full
   - the three `font-stretch` declarations of the apps type block (`kairos.css:6158-6182`) go, every other declaration there stays, and the block's comments drop "Archivo" and "wide". A comment line that still names Archivo as history must name its release (0.16, 0.17 or 0.18) on the same line, or task 6.2's grep flags it; the same goes for `tokens.css`.
 
   Then the tests:
+
   - `tests/product-scale.test.mjs`: the `INTENTIONAL` font values, the group 6 additions to `CHANGED_0_18` and `GONE_0_18`, and "0.17.0's Product type block is kept apart from its widths";
   - `tests/brand-scale.test.mjs`: delete the font rows from `TABLE`; add "brand.css sets no font family" and "no stylesheet sets font-stretch";
   - `tests/brand-tokens.test.mjs`: rename "the font tokens name Archivo and Courier Prime" to "the font tokens name Epilogue and Courier Prime" and expect the Epilogue stack.
 
   Covers:
+
   - kairos-design-apps-epilogue › "Product font stacks", "One place for the family", "No width anywhere", "Case, weight and geometry kept";
   - kairos-design-brand-tokens › "Font stacks", "Every 0.14 declaration resolves the same", "Every 0.17.0 declaration resolves the same".
 
   Check: `npm test` passes in full.
+
 - [ ] 6.2 Do `design.md` › Apps follow Epilogue, step 5:
   - drop Archivo from the font links in `.storybook/preview-head.html` and `docs/preview.html`;
   - make "The families" on the Type page name Epilogue only;
@@ -174,10 +193,12 @@ Add no dependency. While working, run only the test files a task names; the full
   - add "the docs tell apps to load Epilogue" to `tests/release.test.mjs`.
 
   Covers:
+
   - kairos-design-apps-epilogue › "Grep", "Upgrading for apps";
   - kairos-design-release-0-16 › "No 0.14 family named".
 
   Check:
+
   - `npm test` passes.
   - `npx vitest run --project stories stories/brand stories/foundations` passes.
   - `grep -rn "Archivo" dist stories .storybook README.md docs/kairos-ui.md docs/preview.html | grep -v -E '0\.1[678]'` prints nothing.
@@ -197,11 +218,13 @@ Add no dependency. While working, run only the test files a task names; the full
   Record each exit code and total under "After" in `checks/ci-commands.md`, beside "Before".
 
   Covers:
+
   - kairos-design-release-0-18 › "Pack list";
   - kairos-design-brand-tokens › "The fixture is the published release";
   - every story scenario of task 4.1.
 
   Check:
+
   - Every command exits 0.
   - `npm test` has 0 failed and more tests than 147.
   - Stories: `numFailedTests` 0, `numPendingTests` 0, `numTotalTests` equal to "Before".
@@ -219,6 +242,7 @@ Add no dependency. While working, run only the test files a task names; the full
   Then validate the plan. `OPENSPEC_TELEMETRY=0 npx -y @fission-ai/openspec@1.16.0 validate brand-2026-epilogue --strict` stops on the `kairos-plans` store named in `openspec/config.yaml`. Run it in a copy of the repository under `$TMPDIR` with the `store:` line deleted from the copy's `openspec/config.yaml`; don't edit the real file. "Archive would refuse" INFO lines there are expected: the store holds the main specs.
 
   Finish `checks/REPORT.md` with:
+
   - each task, its check and its result;
   - every CHECK line of the seven spec files, with its test or command and result (planner-owned ones marked "planner");
   - every `NEW_0_18` entry beyond `design.md`'s table, with its reason;
@@ -226,6 +250,7 @@ Add no dependency. While working, run only the test files a task names; the full
   - anything not run in the sandbox.
 
   Covers:
+
   - kairos-design-brand-tokens › "base.css untouched";
   - kairos-design-release-0-18 › "Version and exports" (version), "Manifest otherwise unchanged", "Brand files name no Archivo";
   - kairos-design-release-0-16 › "No 0.14 family named";
@@ -242,6 +267,7 @@ Planner work, not builder tasks. The repository has no `qa` branch.
   - extras built with `json.dumps`: `npm-ci`, `npm-test`, `npm-typecheck`, `workshop`, `chromium`, `stories` (JSON), `pack`, `spec-validate` in a store-less copy, and `show-tests` (node junit per file).
 
   Then:
+
   - match every CHECK name against the passing tests and stories;
   - count `#### Scenario` against `- **CHECK**` per spec;
   - judge each `NEW_0_18` entry the builder added;
@@ -266,4 +292,5 @@ Planner work, not builder tasks. The repository has no `qa` branch.
   - `npm view kairos-design@^0.17.0 version` prints 0.17.0.
 
   Then the install test from npm (`npm-package-release.md` section 5 step 6, with `radix-ui@1 @tanstack/react-table@9`).
+
 - **Archive and follow-on.** Archive `kairos-design-brand-2026-epilogue` in the store (`openspec archive`, then `validate --all --strict`; fix any `TBD` Purpose) and log the PR, run ids and results. The website card pins 0.18.0. Each app's bump plan takes Epilogue (or Archivo, if group 6 was dropped) with shots before the reviewer's yes.

@@ -9,6 +9,7 @@
   - buttons, tabs and field labels in sentence case.
 
   It also made layout fixes and listed its changes in `tests/product-scale.test.mjs` (`CHANGED_0_17`, `NEW_0_17`). It did not update the store specs, and it did not update the "Without The Switch" story, which still expects an uppercase button. This change brings both in line.
+
 - **The brief.** Kairos design brief v3 (owner brief, 17 November 2026) is applied as technical lock revision 3:
   - Epilogue replaces Archivo everywhere. It is a variable font, weight 100-900, upright and italic, normal width only. Headings are 800, body 400 at 17px.
   - Courier Prime keeps labels, prices, times and dates.
@@ -16,6 +17,7 @@
   - The heading roles are re-sized to the new pairing. Lead, statement, body, small, legal, button, nav, field text and every Courier role keep their sizes.
 
   The builder has the approved lock in `input/brief/` (`design-brief.md` › "Lock revision 3" and "Type scale", `theme.css`, `shots/rev3-*`, `reference/`).
+
 - **Consumers.**
   - The Kairos website pins 0.16.0 today. Its next card pins 0.18.0, reads the package's names, and re-points the font tokens on `:root` with its `next/font` variable first.
   - Paykit, Card, Mailkit, Uptime and aikit pin `^0.14`. They get nothing from this release until their own bump plans.
@@ -31,6 +33,7 @@
 **Goals:** the Brand Scale on Epilogue at normal width with lock revision 3's sizes; P1-P6 and P8-P10 against 0.17.0; the apps' move to Epilogue as a task group that can be dropped whole; guards proving what apps see against 0.17.0 and that the website's names survive; release 0.18.0.
 
 **Non-Goals:**
+
 - P7, the day-grid date (Decided 9).
 - The brief's revision 2 parts the package lacks: dropdown, phone-menu group, accordion, alert, time grid, skeleton, contents list, article card, reading column, back link, done panel.
 - The review-line rank (Courier 15/400; the line's wording is site-only).
@@ -124,6 +127,7 @@ Each new token gets a Product Scale default in `tokens.css` (Decided 5-8). Each 
 ## Apps against 0.17.0 (the 0.17.0 guard)
 
 Copy `dist/tokens.css`, `dist/base.css`, `dist/kairos.css` and `dist/brand.css` from `d36d95c` into `tests/fixtures/kairos-design-0.17.0/` byte for byte. In `tests/product-scale.test.mjs`, add three tests. They reuse the file's own parsing and Product Scale resolution (light and dark), keyed as the 0.14 test keys them:
+
 - "the 0.17.0 fixture is the published 0.17.0": the four sha256 values above.
 - "every 0.17.0 declaration resolves the same at Product Scale, light and dark, apart from the 0.18 lists": tokens by name, and `base.css`/`kairos.css` declarations by context, selector and property.
 - "a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed".
@@ -152,6 +156,7 @@ The lists are constants in that file:
 A declaration whose selector names only new classes (`kairos-type-title--compact`, `kairos-type-card`, `kairos-type-time`, `kairos-text-link-text`) is not policed by the guard. If the build needs a new declaration on a 0.16.0 Brand part that the table misses, add it to `NEW_0_18` with its reason and name it in the summary. One on any other 0.17.0 class (an app class) is a finding: block the card.
 
 **Group 6 adds** (only when it runs):
+
 - `CHANGED_0_18`: `--kairos-display` and `--kairos-body` = `'Epilogue', ui-sans-serif, system-ui, sans-serif`, both themes. Token entries in `CHANGED_0_18` are applied to 0.17.0's token map before its declarations are resolved, as `INTENTIONAL` is in the 0.14 test, so the 14 declarations that read these two tokens (13 in `kairos.css`, 1 in `base.css`) resolve equal and need no entries of their own.
 - `GONE_0_18`: `font-stretch` on the three type-block rules at `kairos.css:6158-6182` (`:root:not([data-scale='brand']) :where(h1, h2, h3, h4, h5, h6)`, the section-heading rule, the product-name rule).
 - The 0.14 test's `INTENTIONAL` entries for `--kairos-display` and `--kairos-body` take the Epilogue stack.
@@ -161,6 +166,7 @@ A declaration whose selector names only new classes (`kairos-type-title--compact
 The reviewer's call: do the apps move from Archivo to Epilogue too? **Recommendation: yes.** The brand has one sans family, and the reviewer said earlier that the website's look is the brand for the apps.
 
 Group 6 does five things:
+
 1. `tokens.css` `--kairos-display` and `--kairos-body` name the Epilogue stack.
 2. `brand.css` deletes its two family lines.
 3. The three `font-stretch` declarations of 0.17.0's type block go. Every other declaration there stays: sentence case, weights 800/700, tracking, line height, Courier labels, the product name's capitals.
@@ -168,6 +174,7 @@ Group 6 does five things:
 5. The workshop, preview page, Type page, README, manifest and adoption guide stop naming Archivo except as history. The grep CHECK proves it.
 
 **If the answer is no**, group 6 (tasks 6.1-6.2) and `specs/kairos-design-apps-epilogue/` are deleted from this change. That is a plan edit and a new plan id. What remains ships:
+
 - Apps keep 0.17.0's Archivo with its 112%/106%/100% widths. `tokens.css` names Archivo.
 - `brand.css` carries Epilogue at (0,2,0), so the website must re-point its fonts under `:root[data-scale='brand']`. Otherwise the package's plain stack replaces its `next/font` stack and drops the metric-adjusted fallback.
 - The workshop and preview page load Archivo, Epilogue and Courier Prime.
@@ -192,6 +199,7 @@ Group 6 does five things:
   - "phone menu rows are 23px and the current one is underlined".
 
   Extend "every shared part from the brief has its class" with the four new classes.
+
 - `tests/contract.test.mjs`: add "a loadable button's spinner turns only while busy". Change no existing test.
 - `tests/release.test.mjs`:
   - In "the docs describe 0.16.0", delete only the `tokensHeader` assertions (they move to 0.18.0).
@@ -239,6 +247,7 @@ Group 6 does five things:
   - the core line of Decided 18.
 
   Group 6 replaces that line with the apps paragraph: load Epilogue, drop Archivo from the loader, keep re-pointing the tokens on `:root`, and expect normal-width headings.
+
 - `README.md` › Fonts: Epilogue for the Brand Scale; group 6 makes it every surface. It points at "Upgrading to 0.18.0". The Brand table row names "Kairos design brief v3".
 - `docs/kairos-ui.md`:
   - The type-rank row adds `kairos-type-title--compact`, `kairos-type-card`, `kairos-type-card--sm` and `kairos-type-time`, and drops "width".
