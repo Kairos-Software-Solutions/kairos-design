@@ -668,6 +668,11 @@
      tick drawn at 3px. */
   --kairos-tick-list-box: 28px;
   --kairos-tick-list-gap: 14px;
+  /* A tick list's values sit a step under the statement rank at the Brand
+     Scale; here they are the statement rank's own size and leading. */
+  --kairos-tick-list-value-size: var(--kairos-type-statement-size);
+  --kairos-tick-list-value-phone-size: var(--kairos-type-statement-size);
+  --kairos-tick-list-value-leading: var(--kairos-type-statement-leading);
   --kairos-tick-stroke: 3px;
 
   /* Step line: 42px boxes (40px under 520px) and the gap the line spans. */

@@ -132,6 +132,10 @@ Object.assign(TABLE, {
   '--kairos-type-time-weight': '400',
   '--kairos-type-time-leading': '1.6',
   '--kairos-type-time-tracking': '0',
+  // A tick list's values sit a step under the statement rank.
+  '--kairos-tick-list-value-size': 'clamp(19px, 1.6vw, 21px)',
+  '--kairos-tick-list-value-phone-size': '18px',
+  '--kairos-tick-list-value-leading': '1.35',
 });
 
 test('brand.css applies only under data-scale=brand on the root', () => {

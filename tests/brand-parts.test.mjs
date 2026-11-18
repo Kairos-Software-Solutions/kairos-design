@@ -236,3 +236,77 @@ test('the compact title, card and time ranks read their tokens', () => {
   }
   assert.doesNotMatch(manifest.split('\n').find((line) => line.startsWith('| `kairos-type-display`')) ?? '', /\bwidth\b/, 'the type-rank row says nothing of width');
 });
+
+/** Every declaration of every rule whose selector list names this exact selector, by property. */
+const declsOfSelector = (selector, context = []) =>
+  Object.fromEntries(
+    RULES.filter((d) => d.context.join(' | ') === context.join(' | ') && d.selector.split(', ').includes(selector)).map((d) => [d.prop, d.value]),
+  );
+
+test('label ranks and the footer heading undo the heading capitals', () => {
+  for (const selector of ['.kairos-type-label', '.kairos-type-price', '.kairos-type-time', '.kairos-site-footer-heading']) {
+    assert.equal(declsOfSelector(selector)['text-transform'], 'none', `${selector} sets text-transform: none`);
+  }
+  const footer = declsOfSelector('.kairos-site-footer-heading');
+  assert.equal(footer['line-height'], 'var(--kairos-type-label-leading)');
+  assert.equal(footer['letter-spacing'], 'var(--kairos-type-label-tracking)');
+  assert.equal(footer['font-family'], 'var(--kairos-mono)');
+  // 15px at 1.6 is the 24px line the brief draws.
+  assert.equal(brandValue('--kairos-type-label-size'), '15px');
+  assert.equal(brandValue('--kairos-type-label-leading'), '1.6');
+});
+
+test('the title bar and the marker tilt with rotate, not transform', () => {
+  for (const selector of ['.kairos-title-bar::after', '.kairos-marker::after']) {
+    const decls = declsOfSelector(selector);
+    assert.equal(decls.rotate, 'var(--kairos-marker-tilt)', `${selector} tilts with rotate`);
+    assert.ok(!('transform' in decls), `${selector} declares no transform`);
+  }
+  assert.equal(declsOfSelector('.kairos-marker::after')['transform-origin'], 'left center', 'the marker keeps its origin');
+  assert.equal(productValue('--kairos-marker-tilt'), '-1deg');
+  assert.equal(brandValue('--kairos-marker-tilt'), '-1deg');
+});
+
+test('tick list values read their own size knobs', () => {
+  const base = rule('.kairos-tick-list-value');
+  const phone = rule('.kairos-tick-list-value', ['@media (max-width: 520px)']);
+  assert.equal(base['font-size'], 'var(--kairos-tick-list-value-size)');
+  assert.equal(base['line-height'], 'var(--kairos-tick-list-value-leading)');
+  assert.equal(phone['font-size'], 'var(--kairos-tick-list-value-phone-size)', 'the 520px rule reads the phone knob');
+
+  // At the Product Scale each knob is the statement rank's value; at the Brand Scale the brief's.
+  assert.equal(productValue('--kairos-tick-list-value-size'), productValue('--kairos-type-statement-size'));
+  assert.equal(productValue('--kairos-tick-list-value-phone-size'), productValue('--kairos-type-statement-size'));
+  assert.equal(productValue('--kairos-tick-list-value-leading'), productValue('--kairos-type-statement-leading'));
+  assert.equal(brandValue('--kairos-tick-list-value-size'), 'clamp(19px, 1.6vw, 21px)');
+  assert.equal(brandValue('--kairos-tick-list-value-phone-size'), '18px');
+  assert.equal(brandValue('--kairos-tick-list-value-leading'), '1.35');
+});
+
+test('the statement tick list keeps the statement rank', () => {
+  const statement = rule('.kairos-tick-list--statement .kairos-tick-list-value');
+  assert.equal(statement['font-size'], 'var(--kairos-type-statement-size)');
+  assert.equal(statement['line-height'], 'var(--kairos-type-statement-leading)');
+  assert.ok(
+    position('.kairos-tick-list--statement .kairos-tick-list-value') > position('.kairos-tick-list-value', ['@media (max-width: 520px)']),
+    'it comes after the phone rule, so it wins at every width',
+  );
+});
+
+test('phone menu rows are 23px and the current one is underlined', () => {
+  assert.equal(productValue('--kairos-site-menu-row-size'), '23px');
+  assert.equal(brandValue('--kairos-site-menu-row-size'), '23px');
+  assert.equal(rule('.kairos-site-menu-row')['font-size'], 'var(--kairos-site-menu-row-size)');
+  assert.equal(rule('.kairos-site-menu-row')['font-weight'], '800');
+
+  const current = rule(".kairos-site-menu-row[aria-current='page']");
+  assert.equal(current['text-decoration-line'], 'underline');
+  assert.equal(current['text-underline-offset'], 'var(--kairos-menu-link-current-offset)');
+  assert.ok(!('text-decoration-color' in current) && !('text-decoration' in current) && !('color' in current), 'no colour: the row\'s own ink');
+  assert.equal(productValue('--kairos-menu-link-current-offset'), '6px');
+  assert.ok(position(".kairos-site-menu-row[aria-current='page']") > position('.kairos-site-menu-row'), 'it comes after the row');
+
+  const manifest = read('docs', 'kairos-ui.md');
+  const row = manifest.split('\n').find((line) => line.startsWith('| `kairos-site-menu`')) ?? '';
+  assert.match(row, /aria-current/, 'the manifest row names the current row');
+});

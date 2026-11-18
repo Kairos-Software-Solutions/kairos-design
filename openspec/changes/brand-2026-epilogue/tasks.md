@@ -93,7 +93,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
   Check: `node --test tests/brand-parts.test.mjs tests/brand-scale.test.mjs tests/contract.test.mjs tests/scale.test.mjs` passes.
 
-- [ ] 3.2 P1, P2, P6 and P9 (Decided 10, 11, 8 and 13).
+- [x] 3.2 P1, P2, P6 and P9 (Decided 10, 11, 8 and 13).
   - P1: in `kairos.css`, add `text-transform: none` to `.kairos-type-label, .kairos-type-price`, and the three declarations to `.kairos-site-footer-heading`.
   - P2: add `rotate` to `.kairos-title-bar::after`, and swap the marker's `transform` for `rotate`.
   - P6: add the three tick-list knobs to `tokens.css` (defaults) and `brand.css` (values, plus `TABLE` rows). Make `.kairos-tick-list-value` read them, add its 520px phone rule, and add the statement-list rule after it.

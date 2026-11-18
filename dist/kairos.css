@@ -4853,10 +4853,23 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 
 .kairos-tick-list-value {
   color: var(--kairos-ink);
-  font-size: var(--kairos-type-statement-size);
+  font-size: var(--kairos-tick-list-value-size);
   font-weight: var(--kairos-type-statement-weight);
-  line-height: var(--kairos-type-statement-leading);
+  line-height: var(--kairos-tick-list-value-leading);
   text-wrap: pretty;
+}
+
+@media (max-width: 520px) {
+  .kairos-tick-list-value {
+    font-size: var(--kairos-tick-list-value-phone-size);
+  }
+}
+
+/* A statement list keeps the statement rank itself, at every width. It comes
+   after the phone rule above, so it wins there too. */
+.kairos-tick-list--statement .kairos-tick-list-value {
+  font-size: var(--kairos-type-statement-size);
+  line-height: var(--kairos-type-statement-leading);
 }
 
 .kairos-tick-list--statement .kairos-tick-list-item {
@@ -5041,6 +5054,12 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   text-decoration: none;
 }
 
+/* The current page's row: underlined in the row's own ink. */
+.kairos-site-menu-row[aria-current='page'] {
+  text-decoration-line: underline;
+  text-underline-offset: var(--kairos-menu-link-current-offset);
+}
+
 .kairos-site-menu-toggle {
   appearance: none;
   display: inline-flex;
@@ -5100,6 +5119,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   font-family: var(--kairos-mono);
   font-size: var(--kairos-type-label-size);
   font-weight: var(--kairos-type-label-weight);
+  line-height: var(--kairos-type-label-leading);
+  letter-spacing: var(--kairos-type-label-tracking);
+  text-transform: none;
 }
 
 .kairos-site-footer-link {
@@ -5184,7 +5206,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   left: -0.05em;
   height: var(--kairos-marker-h);
   background: var(--kairos-highlight);
-  transform: rotate(var(--kairos-marker-tilt));
+  /* `rotate`, not `transform`: a site wipes the bar in with
+     `transform: scaleX()`, which would replace a rotation set there. */
+  rotate: var(--kairos-marker-tilt);
   transform-origin: left center;
 }
 
@@ -5195,6 +5219,7 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   height: var(--kairos-title-bar-h);
   margin-top: 0.18em;
   background: var(--kairos-highlight);
+  rotate: var(--kairos-marker-tilt);
   transform-origin: left center;
 }
 
@@ -5227,6 +5252,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 .kairos-type-label,
 .kairos-type-price {
   font-family: var(--kairos-mono);
+  /* The base heading rule makes every h1-h6 uppercase; a label or price set on
+     a heading keeps the brief's case. */
+  text-transform: none;
 }
 
 .kairos-type-display {
