@@ -117,13 +117,13 @@ export const Scale: Story = {
 
       <Section
         title="The families"
-        lede="Two, and never a third: Archivo across its weight and width axes, and Courier Prime. The host app loads them; these tokens only name the stack."
+        lede="Two, and never a third: Epilogue, variable and at its normal width, and Courier Prime. The host app loads them; these tokens only name the stack."
       >
         <div className="kairos-panel kairos-pad kairos-stack kairos-stack--lg">
           {(
             [
-              ['display', 'Archivo', 'Page titles in a tool; every heading rank at the Brand Scale, set wide and heavy.'],
-              ['body', 'Archivo', 'Everything that is read rather than glanced at.'],
+              ['display', 'Epilogue', 'Page titles in a tool; every heading rank at the Brand Scale, heavy, at normal width.'],
+              ['body', 'Epilogue', 'Everything that is read rather than glanced at.'],
               ['mono', 'Courier Prime', 'Identifiers, amounts in a column, labels and prices on a brand page.'],
             ] as const
           ).map(([token, name, use]) => (

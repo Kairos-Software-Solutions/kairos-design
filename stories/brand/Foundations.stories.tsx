@@ -69,53 +69,97 @@ export const Colours: Story = {
   },
 };
 
-const RANKS: Array<{ rank: string; sample: string }> = [
-  { rank: 'display', sample: 'Websites that bring you work' },
-  { rank: 'title', sample: 'About us' },
-  { rank: 'h2', sample: 'How it works' },
-  { rank: 'h3', sample: 'A call first' },
-  { rank: 'quote', sample: 'They answered the same day.' },
-  { rank: 'lead', sample: 'A short introduction under the page title.' },
-  { rank: 'statement', sample: 'One clear statement in a list.' },
-  { rank: 'body', sample: 'Body copy, read rather than glanced at.' },
-  { rank: 'small', sample: 'Small print beside a field or a photo.' },
-  { rank: 'legal', sample: 'The legal line in the footer.' },
-  { rank: 'label', sample: 'Pages' },
-  { rank: 'price', sample: '$ 1,200' },
-  { rank: 'button', sample: 'Book a call' },
-  { rank: 'nav', sample: 'About' },
+const RANKS: Array<{ rank: string; className: string; sample: string }> = [
+  { rank: 'display', className: 'kairos-type-display', sample: 'Websites that bring you work' },
+  { rank: 'title', className: 'kairos-type-title', sample: 'About us' },
+  { rank: 'title--compact', className: 'kairos-type-title kairos-type-title--compact', sample: 'Contact' },
+  { rank: 'h2', className: 'kairos-type-h2', sample: 'How it works' },
+  { rank: 'h3', className: 'kairos-type-h3', sample: 'A call first' },
+  { rank: 'card', className: 'kairos-type-card', sample: 'A website that works' },
+  { rank: 'card--sm', className: 'kairos-type-card kairos-type-card--sm', sample: 'Who it is for' },
+  { rank: 'quote', className: 'kairos-type-quote', sample: 'They answered the same day.' },
+  { rank: 'lead', className: 'kairos-type-lead', sample: 'A short introduction under the page title.' },
+  { rank: 'statement', className: 'kairos-type-statement', sample: 'One clear statement in a list.' },
+  { rank: 'body', className: 'kairos-type-body', sample: 'Body copy, read rather than glanced at.' },
+  { rank: 'small', className: 'kairos-type-small', sample: 'Small print beside a field or a photo.' },
+  { rank: 'legal', className: 'kairos-type-legal', sample: 'The legal line in the footer.' },
+  { rank: 'label', className: 'kairos-type-label', sample: 'Pages' },
+  { rank: 'price', className: 'kairos-type-price', sample: '$ 1,200' },
+  { rank: 'time', className: 'kairos-type-time', sample: '9:00 to 9:30' },
+  { rank: 'button', className: 'kairos-type-button', sample: 'Book a call' },
+  { rank: 'nav', className: 'kairos-type-nav', sample: 'About' },
 ];
 
 export const TypeRanks: Story = {
   render: () => (
     <div className="kairos-stack kairos-stack--lg">
-      {RANKS.map(({ rank, sample }) => (
+      {RANKS.map(({ rank, className, sample }) => (
         <div className="kairos-stack kairos-stack--xs" key={rank}>
           <span className="kairos-type-label">{rank}</span>
-          <p className={`kairos-type-${rank}`} data-rank={rank} style={{ margin: 0 }}>
+          <p className={className} data-rank={rank} style={{ margin: 0 }}>
             {sample}
           </p>
         </div>
       ))}
+      {/* A label set on a heading: the base heading rule must not capitalise it. */}
+      <div className="kairos-stack kairos-stack--xs">
+        <span className="kairos-type-label">label on a heading</span>
+        <h3 className="kairos-type-label" data-rank="label-heading" style={{ margin: 0 }}>
+          What we set up
+        </h3>
+      </div>
     </div>
   ),
   play: async ({ canvasElement }) => {
-    for (const { rank } of RANKS) await expect(canvasElement.querySelector(`.kairos-type-${rank}`)).not.toBeNull();
+    for (const { rank, className } of RANKS) {
+      const el = one(canvasElement, `[data-rank="${rank}"]`);
+      await expect(canvasElement.querySelector(`.${className.split(' ')[0]}`)).not.toBeNull();
+      // The brief: never set a width. Every rank computes the family's normal one.
+      await expect(style(el).fontStretch).toBe('100%');
+    }
 
     const display = style(one(canvasElement, '[data-rank="display"]'));
-    await expect(display.fontFamily).toMatch(/^"?Archivo"?,/);
+    await expect(display.fontFamily).toMatch(/^"?Epilogue"?,/);
     await expect(display.fontWeight).toBe('800');
-    await expect(display.fontStretch).toBe('118%');
+    await expect(display.fontStretch).toBe('100%');
 
     const body = style(one(canvasElement, '[data-rank="body"]'));
-    await expect(body.fontFamily).toMatch(/^"?Archivo"?,/);
+    await expect(body.fontFamily).toMatch(/^"?Epilogue"?,/);
     await expect(body.fontSize).toBe('17px');
     await expect(parseFloat(body.lineHeight) / parseFloat(body.fontSize)).toBeCloseTo(1.6, 5);
+
+    // The compact title is the title at its own size; that size follows the
+    // viewport, so only its weight and case are read here.
+    const compact = style(one(canvasElement, '[data-rank="title--compact"]'));
+    await expect(compact.fontFamily).toMatch(/^"?Epilogue"?,/);
+    await expect(compact.fontWeight).toBe('800');
+    await expect(compact.textTransform).toBe('none');
+
+    // The card heading: 20px at 800 and 1.15, no case change; the small one is 19px.
+    const card = style(one(canvasElement, '[data-rank="card"]'));
+    await expect(card.fontFamily).toMatch(/^"?Epilogue"?,/);
+    await expect(card.fontSize).toBe('20px');
+    await expect(card.fontWeight).toBe('800');
+    await expect(parseFloat(card.lineHeight) / parseFloat(card.fontSize)).toBeCloseTo(1.15, 5);
+    await expect(card.textTransform).toBe('none');
+    await expect(style(one(canvasElement, '[data-rank="card--sm"]')).fontSize).toBe('19px');
 
     for (const rank of ['label', 'price']) {
       const s = style(one(canvasElement, `[data-rank="${rank}"]`));
       await expect(s.fontFamily).toMatch(/^"?Courier Prime"?,/);
       await expect(s.fontWeight).toBe('700');
     }
+
+    // The time line is typed too, at 400 and 16px on a 1.6 line.
+    const time = style(one(canvasElement, '[data-rank="time"]'));
+    await expect(time.fontFamily).toMatch(/^"?Courier Prime"?,/);
+    await expect(time.fontWeight).toBe('400');
+    await expect(time.fontSize).toBe('16px');
+    await expect(parseFloat(time.lineHeight) / parseFloat(time.fontSize)).toBeCloseTo(1.6, 5);
+
+    // A label on an h3 keeps the brief's case: the base heading rule's capitals do not reach it.
+    const heading = style(one(canvasElement, '[data-rank="label-heading"]'));
+    await expect(heading.textTransform).toBe('none');
+    await expect(heading.fontFamily).toMatch(/^"?Courier Prime"?,/);
   },
 };

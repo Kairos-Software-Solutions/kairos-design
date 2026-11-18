@@ -18,6 +18,7 @@ import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { parse, stripComments } from './helpers/css.mjs';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => readFileSync(join(ROOT, ...parts), 'utf8');
@@ -150,8 +151,81 @@ test('the docs describe 0.16.0', () => {
 
   assert.match(read('docs', 'decisions.md'), /^#+ .*0\.16\.0.*$/m, 'docs/decisions.md has a 0.16.0 heading');
 
-  const tokens = read('dist', 'tokens.css');
-  const tokensHeader = tokens.slice(0, tokens.indexOf('*/') + 2);
-  assert.match(tokensHeader, /Kairos design brief v1/);
-  assert.doesNotMatch(tokensHeader, /visual-spec\.md/);
+});
+
+test('every name the website reads is still declared', () => {
+  const names = read('tests', 'fixtures', 'website-reads.txt')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line && !line.startsWith('#'));
+  assert.ok(names.length > 100, 'the fixture lists the names the website reads');
+
+  const classes = new Set([...stripComments(read('dist', 'kairos.css')).matchAll(/\.(kairos-[a-z0-9_-]+)/g)].map((m) => m[1]));
+  const tokens = new Set(
+    [...parse(read('dist', 'tokens.css')), ...parse(read('dist', 'brand.css'))].filter((d) => d.prop.startsWith('--')).map((d) => d.prop),
+  );
+  const missing = names.filter((name) => (name.startsWith('--') ? !tokens.has(name) : !classes.has(name)));
+  assert.deepEqual(missing, [], `the website reads names the package no longer declares: ${missing.join(', ')}`);
+});
+
+test('the docs describe 0.18.0', () => {
+  const adoption = read('docs', 'adoption.md');
+  const start = adoption.search(/^#+ .*Upgrading to 0\.18\.0.*$/m);
+  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.18.0" heading');
+  const level = adoption.slice(start).match(/^#+/)[0].length;
+  const rest = adoption.slice(start).split('\n').slice(1).join('\n');
+  const end = rest.search(new RegExp(`^#{1,${level}} `, 'm'));
+  const section = end === -1 ? rest : rest.slice(0, end);
+  for (const needle of [
+    'Epilogue',
+    'Courier Prime',
+    'next/font',
+    '--kairos-display',
+    '--kairos-body',
+    '--kairos-mono',
+    '-stretch',
+    'kairos-type-title--compact',
+    'kairos-type-card',
+    'kairos-type-time',
+    'kairos-text-link-text',
+  ]) {
+    assert.ok(section.includes(needle), `the upgrade section names ${needle}`);
+  }
+
+  assert.match(read('docs', 'decisions.md'), /^#+ .*0\.18\.0.*$/m, 'docs/decisions.md has a 0.18.0 heading');
+
+  const readme = read('README.md');
+  const fonts = readme.slice(readme.search(/^#+ Fonts$/m));
+  assert.match(fonts.slice(0, fonts.search(/\n#+ (?!Fonts)/)), /Epilogue/, "README's Fonts section names Epilogue");
+
+  // Both stylesheet headers name the brief's version, and not the first one.
+  for (const file of ['tokens.css', 'brand.css']) {
+    const source = read('dist', file);
+    const header = source.slice(0, source.indexOf('*/') + 2).replace(/\s+/g, ' ');
+    assert.match(header, /Kairos design brief v3/, `${file} header names brief v3`);
+    assert.doesNotMatch(header, /brief v1/, `${file} header does not name brief v1`);
+    assert.doesNotMatch(header, /visual-spec\.md/, `${file} header does not name the old visual spec`);
+  }
+});
+
+test('the docs tell apps to load Epilogue', () => {
+  const adoption = read('docs', 'adoption.md');
+  const start = adoption.search(/^#+ .*Upgrading to 0\.18\.0.*$/m);
+  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.18.0" heading');
+  const level = adoption.slice(start).match(/^#+/)[0].length;
+  const rest = adoption.slice(start).split('\n').slice(1).join('\n');
+  const end = rest.search(new RegExp(`^#{1,${level}} `, 'm'));
+  const section = end === -1 ? rest : rest.slice(0, end);
+  for (const needle of ['Epilogue', '100 900', 'Courier Prime', ':root', 'Archivo']) {
+    assert.ok(section.includes(needle), `the upgrade section names ${needle}`);
+  }
+
+  const decisions = read('docs', 'decisions.md');
+  const heading = decisions.search(/^#+ .*0\.18\.0.*$/m);
+  assert.notEqual(heading, -1, 'docs/decisions.md has a 0.18.0 heading');
+  const entry = decisions.slice(heading).split('\n').slice(1).join('\n');
+  const next = entry.search(/^## /m);
+  const text = next === -1 ? entry : entry.slice(0, next);
+  assert.ok(text.includes('font-stretch'), 'the entry names font-stretch');
+  assert.ok(text.includes('Epilogue'), 'the entry names Epilogue');
 });

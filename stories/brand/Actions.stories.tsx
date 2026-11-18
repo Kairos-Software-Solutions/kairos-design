@@ -82,6 +82,11 @@ export const Buttons: Story = {
     await expect(idle.hasAttribute('aria-busy')).toBe(false);
     await userEvent.click(busy);
     await expect(onBusyClick).not.toHaveBeenCalled();
+
+    // The ring is hidden while idle, and a hidden element still animates unless
+    // told not to: it turns only on the busy button.
+    await expect(style(one(idle, '.kairos-spin')).animationName).toBe('none');
+    await expect(style(one(busy, '.kairos-spin')).animationName).toBe('kairos-spin');
   },
 };
 
@@ -91,7 +96,9 @@ export const Links: Story = {
     <div className="kairos-stack kairos-stack--lg">
       <p className="kairos-type-body">
         <a className="kairos-text-link" href="#how-it-works" data-specimen="text">
-          See how it works <span className="kairos-text-link-arrow" aria-hidden="true">→</span>
+          <span className="kairos-text-link-text">
+            See how it works <span className="kairos-text-link-arrow" aria-hidden="true">→</span>
+          </span>
         </a>
       </p>
       <nav aria-label="Menu specimen" style={ROW}>
@@ -119,6 +126,15 @@ export const Links: Story = {
     await expect(t.textDecorationThickness).toBe('3px');
     await expect(t.textUnderlineOffset).toBe('5px');
     await expect(height(text)).toBeGreaterThanOrEqual(44);
+
+    // The label and the arrow sit in one wrapper, so the arrow is no flex item
+    // of the link and draws no underline of its own. A flex container blockifies
+    // its child, so the wrapper's `display: inline` computes to `block` here.
+    await expect(text.children).toHaveLength(1);
+    const wrapper = text.children[0] as HTMLElement;
+    await expect(wrapper.classList.contains('kairos-text-link-text')).toBe(true);
+    await expect(style(wrapper).display).toBe('block');
+    await expect(style(one(wrapper, '.kairos-text-link-arrow')).display).toBe('inline-block');
 
     const current = one(canvasElement, '[data-specimen="current"]');
     const other = one(canvasElement, '[data-specimen="other"]');
@@ -157,6 +173,7 @@ export const WithoutTheSwitch: Story = {
     await expect(s.borderTopLeftRadius).toBe('0px');
     await expect(height(button)).toBe(36);
     await expect(s.boxShadow).toBe(`${rgb('#16110b')} 4px 4px 0px 0px`);
-    await expect(s.textTransform).toBe('uppercase');
+    // 0.17.0's sentence-case label.
+    await expect(s.textTransform).toBe('none');
   },
 };

@@ -14,7 +14,7 @@ today, and where the two disagree, this repo wins.
 | Tokens | `kairos-design/tokens.css` | The `--kairos-*` custom properties, light and dark. The only file with raw hex in it. |
 | Vocabulary | `kairos-design/kairos.css` | The `kairos-*` class vocabulary, 220 classes. Consumes tokens only, no framework. |
 | Base | `kairos-design/base.css` | Element-level defaults. Opt-in, because a library that restyles a host app's bare `table` and `input` is invasive. |
-| Brand | `kairos-design/brand.css` | The Brand Scale of Kairos design brief v1: the website's geometry, type ranks and motion. Opt-in twice: import it, then set `data-scale="brand"` on `<html>`. Custom properties only; without the attribute it changes nothing. |
+| Brand | `kairos-design/brand.css` | The Brand Scale of Kairos design brief v3: the website's geometry, type ranks and motion. Opt-in twice: import it, then set `data-scale="brand"` on `<html>`. Custom properties only; without the attribute it changes nothing. |
 | Formatters | `kairos-design/format/money`, `/format/dates` | `TTD 8,500.00` and `24 Aug 2026`. One formatter, not five. |
 | React | `kairos-design/react` | Components emitting the classes above. Optional peer dependencies: `radix-ui` for anything that opens over the page, `@tanstack/react-table` for `DataTable`. |
 | Manifest | `docs/kairos-ui.md` | The canonical component list. Read it before building UI. |
@@ -99,12 +99,13 @@ See [docs/adoption.md](docs/adoption.md) for what each surface needs.
 
 ### Fonts
 
-The tokens name the families and the app loads them: Archivo for
-`--kairos-display` and `--kairos-body`, Courier Prime for `--kairos-mono`. The
-package never ships a font file, an `@font-face` or a font URL, and a test
-fails the release if one appears. Load them with `next/font/local` (pointing
-the three tokens at the variables it creates) or with a link; see
-[docs/adoption.md](docs/adoption.md), "Upgrading to 0.16.0".
+The tokens name the families and the app loads them: Epilogue for
+`--kairos-display` and `--kairos-body` on every surface, Courier Prime for
+`--kairos-mono`. Epilogue is variable, weight 100-900, normal width. The package never ships a font file, an
+`@font-face` or a font URL, and a test fails the release if one appears. Load
+them with `next/font/local` (pointing the tokens at the variables it creates)
+or with a link; see [docs/adoption.md](docs/adoption.md), "Upgrading to
+0.18.0".
 
 ### Surfaces with no bundler
 

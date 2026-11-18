@@ -1670,3 +1670,47 @@ Layout fixes found on the apps' screens in the same pass:
   line under it sat in the middle of a taller neighbour's column.
 - An identifier in a table cell breaks only when the whole of it cannot fit,
   so a column of keys is sized to its longest key instead of to one letter.
+
+## Brand type on Epilogue, 0.18.0
+
+The reviewer found Archivo "too stretched out and big". Kairos design brief
+v3 (17 November 2026, technical lock revision 3) sets every sans part in
+Epilogue at its normal width, headings at 800 and body at 400, keeps Courier
+Prime for labels, prices, times and dates, and says never to set
+`font-stretch`. 0.18.0 follows it.
+
+- **Epilogue at the Brand Scale, no widths, lock revision 3 sizes.** `brand.css`
+  names Epilogue for `--kairos-display` and `--kairos-body`; the package still
+  ships no font. Display is `clamp(31px, 3.8vw, 50px)` at every width, the page
+  title `clamp(35px, 4.6vw, 63px)`, h2 `clamp(26px, 2.7vw, 37px)`, h3
+  `clamp(19px, 1.8vw, 24px)` and the quote `clamp(21px, 2vw, 27px)`, with the
+  brief's line heights and tracking. Phone menu rows go from 26px to 23px.
+- **The 16 width tokens are removed**, with the 20 `font-stretch` declarations
+  that read them. A minor release may do this under 0.x: only the website uses
+  the 0.16+ tokens, and it reads none of these. The adoption guide lists them.
+- **QA package fixes, one line each.**
+  - P1: label, price and footer headings keep their case on a heading.
+  - P2: the title bar and the marker tilt through `rotate`, so a `transform`
+    wipe keeps the tilt.
+  - P3: `kairos-type-title--compact`, the form page title.
+  - P4: `kairos-type-card` and `--sm`, card headings.
+  - P5: `kairos-type-time`, a typed time line.
+  - P6: tick-list values read their own size knobs, a step under the statement
+    rank.
+  - P8: the text link wraps its label and arrow in `kairos-text-link-text`.
+  - P9: the phone menu marks the current page.
+  - P10: an idle button's spinner stands still.
+- **P7 is dropped.** Lock revision 2 puts the phone date on two lines under
+  560px on purpose, and P7's tracking would keep it on one line, which undoes
+  that. The two-line date becomes a package change when that work is planned.
+- **The apps moved to Epilogue and lost their widths.** The brand has one sans
+  family, so the Product Scale's `--kairos-display` and `--kairos-body` name
+  Epilogue, `brand.css` sets no family, and the three `font-stretch`
+  declarations of 0.17.0's apps type block (headings at 112%, section headings
+  at 106%, the product name at 100%) are gone. Sentence case, weights, tracking
+  and geometry stay as 0.17.0 had them. Epilogue runs about 12% wider than
+  Archivo at body sizes, so each app's bump plan checks its long lines.
+- **Guards.** The 0.17.0 stylesheets are a fixture, and a test checks that every
+  0.17.0 declaration resolves the same at the Product Scale apart from listed
+  changes (`GONE_0_18`, `CHANGED_0_18`, `NEW_0_18`). A test checks that every
+  class and token the website reads is still declared.

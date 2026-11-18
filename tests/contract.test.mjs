@@ -638,3 +638,22 @@ test('the icon-only theme toggle keeps the tap target in both dimensions', () =>
   assert.match(toggle, /title=\{description\}/, 'the title survives the variant');
   assert.match(toggle, /aria-label=\{description\}/, 'the accessible name survives the variant');
 });
+
+/**
+ * An idle loadable button's ring is hidden by `visibility`, which stops
+ * nothing: a hidden element still runs its animation, so every idle button
+ * kept an endless 800ms animation going. It turns only while busy.
+ */
+test("a loadable button's spinner turns only while busy", () => {
+  const spin = css.match(/\n\.kairos-spin \{([^}]*)\}/)?.[1] ?? '';
+  assert.match(spin, /animation:\s*kairos-spin 0\.8s linear infinite/, '.kairos-spin still turns');
+
+  const idle = css.match(/\n\.kairos-button:not\(\[aria-busy='true'\]\) \.kairos-button-pending \.kairos-spin \{([^}]*)\}/)?.[1];
+  assert.ok(idle, 'an idle button has a rule for the ring inside its pending label');
+  assert.match(idle, /animation:\s*none/, 'the idle ring runs no animation');
+  assert.ok(
+    css.indexOf(".kairos-button:not([aria-busy='true']) .kairos-button-pending .kairos-spin") > css.indexOf('.kairos-spin {'),
+    'it comes after the rule that turns the ring',
+  );
+  assert.ok(!/\.kairos-button\[aria-busy='true'\][^{]*\.kairos-spin[^{]*\{[^}]*animation:\s*none/.test(css), 'a busy button is never stilled');
+});

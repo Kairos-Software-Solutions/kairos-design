@@ -11,9 +11,9 @@
    `prefers-color-scheme` media query is an equally valid host choice; the
    token names and both value sets are not.
 
-   Source of truth: Kairos design brief v1, approved 17 November 2026. The
-   brief's role names are the token names; a 0.14 name a role replaced is kept
-   as an alias of it, so every earlier name still resolves.
+   Source of truth: Kairos design brief v3 (lock revision 3), 17 November
+   2026. The brief's role names are the token names; a 0.14 name a role
+   replaced is kept as an alias of it, so every earlier name still resolves.
    Do not edit an emitted copy of this file. Edit it here and release.
    ========================================================================== */
 
@@ -308,13 +308,14 @@
 
 :root {
   /* --- Typefaces --------------------------------------------------------
-     Archivo (variable weight and width) for body and display, Courier Prime
-     for typed labels, prices, dates and times. The host app loads the
-     families — next/font, a Google Fonts link, or self-hosted files. This
-     package ships no font file and no font face rule; these tokens only name
-     the stack. Never a third typeface. */
-  --kairos-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --kairos-body: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+     Epilogue (variable, weight 100-900, normal width) for body and display at
+     both scales since 0.18.0; Courier Prime for typed labels, prices, dates
+     and times. The host app loads the families — next/font, a Google Fonts
+     link, or self-hosted files — and re-points these tokens on `:root` to its
+     own loader's variable. This package ships no font file and no font face
+     rule; these tokens only name the stack. Never a third typeface. */
+  --kairos-display: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+  --kairos-body: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
   --kairos-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
   /* --- Space ------------------------------------------------------------
@@ -509,7 +510,6 @@
   --kairos-button-pad-x-sm: var(--kairos-space-md);
   --kairos-text-button-sm: var(--kairos-text-xs);
   --kairos-button-weight: 700;
-  --kairos-button-stretch: 100%;
   --kairos-button-case: none;
   /* The stamp the filled ranks wear at rest, on hover and on press. */
   --kairos-button-shadow-rest: var(--kairos-shadow);
@@ -532,7 +532,6 @@
   --kairos-input-label-size: var(--kairos-text-md);
   --kairos-input-label-case: none;
   --kairos-input-label-track: 0;
-  --kairos-input-label-stretch: 100%;
   /* One message slot under the control, sized from the type that fills it:
      17.4px here, as 0.14 drew it. The hint holds it and the error takes it. */
   --kairos-field-message-size: var(--kairos-text-sm);
@@ -553,72 +552,68 @@
   --kairos-type-display-size: var(--kairos-text-title);
   --kairos-type-display-phone-size: var(--kairos-text-title);
   --kairos-type-display-weight: 700;
-  --kairos-type-display-stretch: 100%;
   --kairos-type-display-leading: 1.2;
   --kairos-type-display-tracking: 0;
   --kairos-type-title-size: var(--kairos-text-title);
+  --kairos-type-title-compact-size: var(--kairos-text-title);
   --kairos-type-title-weight: 700;
-  --kairos-type-title-stretch: 100%;
   --kairos-type-title-leading: 1.2;
   --kairos-type-title-tracking: 0;
   --kairos-type-h2-size: var(--kairos-text-xl);
   --kairos-type-h2-weight: 700;
-  --kairos-type-h2-stretch: 100%;
   --kairos-type-h2-leading: 1.2;
   --kairos-type-h2-tracking: 0;
   --kairos-type-h3-size: var(--kairos-text-lg);
   --kairos-type-h3-weight: 700;
-  --kairos-type-h3-stretch: 100%;
   --kairos-type-h3-leading: 1.2;
   --kairos-type-h3-tracking: 0;
+  --kairos-type-card-size: var(--kairos-text-lg);
+  --kairos-type-card-sm-size: var(--kairos-text-lg);
+  --kairos-type-card-weight: 700;
+  --kairos-type-card-leading: 1.2;
+  --kairos-type-card-tracking: 0;
   --kairos-type-quote-size: var(--kairos-text-xl);
   --kairos-type-quote-weight: 700;
-  --kairos-type-quote-stretch: 100%;
   --kairos-type-quote-leading: 1.2;
   --kairos-type-quote-tracking: 0;
   --kairos-type-lead-size: var(--kairos-text-lg);
   --kairos-type-lead-weight: 400;
-  --kairos-type-lead-stretch: 100%;
   --kairos-type-lead-leading: 1.5;
   --kairos-type-lead-tracking: 0;
   --kairos-type-statement-size: var(--kairos-text-lg);
   --kairos-type-statement-weight: 700;
-  --kairos-type-statement-stretch: 100%;
   --kairos-type-statement-leading: 1.5;
   --kairos-type-statement-tracking: 0;
   --kairos-type-body-size: var(--kairos-text-body);
   --kairos-type-body-weight: 400;
-  --kairos-type-body-stretch: 100%;
   --kairos-type-body-leading: 1.5;
   --kairos-type-body-tracking: 0;
   --kairos-type-small-size: var(--kairos-text-md);
   --kairos-type-small-weight: 400;
-  --kairos-type-small-stretch: 100%;
   --kairos-type-small-leading: 1.5;
   --kairos-type-small-tracking: 0;
   --kairos-type-legal-size: var(--kairos-text-sm);
   --kairos-type-legal-weight: 400;
-  --kairos-type-legal-stretch: 100%;
   --kairos-type-legal-leading: 1.5;
   --kairos-type-legal-tracking: 0;
   --kairos-type-label-size: var(--kairos-text-sm);
   --kairos-type-label-weight: 700;
-  --kairos-type-label-stretch: 100%;
   --kairos-type-label-leading: 1.5;
   --kairos-type-label-tracking: 0;
   --kairos-type-price-size: var(--kairos-text-lg);
   --kairos-type-price-weight: 700;
-  --kairos-type-price-stretch: 100%;
   --kairos-type-price-leading: 1.5;
   --kairos-type-price-tracking: 0;
+  --kairos-type-time-size: var(--kairos-text-md);
+  --kairos-type-time-weight: 400;
+  --kairos-type-time-leading: 1.5;
+  --kairos-type-time-tracking: 0;
   --kairos-type-button-size: var(--kairos-text-button);
   --kairos-type-button-weight: 700;
-  --kairos-type-button-stretch: 100%;
   --kairos-type-button-leading: 1.5;
   --kairos-type-button-tracking: 0;
   --kairos-type-nav-size: var(--kairos-text-md);
   --kairos-type-nav-weight: 700;
-  --kairos-type-nav-stretch: 100%;
   --kairos-type-nav-leading: 1.5;
   --kairos-type-nav-tracking: 0;
 }
@@ -673,6 +668,11 @@
      tick drawn at 3px. */
   --kairos-tick-list-box: 28px;
   --kairos-tick-list-gap: 14px;
+  /* A tick list's values sit a step under the statement rank at the Brand
+     Scale; here they are the statement rank's own size and leading. */
+  --kairos-tick-list-value-size: var(--kairos-type-statement-size);
+  --kairos-tick-list-value-phone-size: var(--kairos-type-statement-size);
+  --kairos-tick-list-value-leading: var(--kairos-type-statement-leading);
   --kairos-tick-stroke: 3px;
 
   /* Step line: 42px boxes (40px under 520px) and the gap the line spans. */
@@ -683,7 +683,7 @@
   --kairos-inset-band-pad-y: clamp(28px, 4vw, 56px);
   --kairos-inset-band-pad-x: clamp(22px, 4.4vw, 64px);
   --kairos-site-menu-row-h: 56px;
-  --kairos-site-menu-row-size: 26px;
+  --kairos-site-menu-row-size: 23px;
   --kairos-site-footer-pad: 56px;
 
   /* Marks. The photo slot sits in a 6px white mat; the marker is a 0.3em bar
