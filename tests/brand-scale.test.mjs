@@ -2,7 +2,7 @@
  * The Brand Scale: one opt-in stylesheet and one root attribute.
  *
  * `brand.css` moves the existing parts to the geometry, type and motion of
- * Kairos design brief v1, and only where the root element carries
+ * Kairos design brief v3 (lock revision 3), and only where the root element carries
  * `data-scale="brand"`. An app that imports it and never sets the attribute
  * gets nothing from it, and an app that never imports it is the Product Scale
  * `tests/product-scale.test.mjs` pins.
@@ -12,7 +12,7 @@ import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { parse, resolve, stripComments, tokenMaps } from './helpers/css.mjs';
+import { parse, resolve, splitTop, stripComments, tokenMaps } from './helpers/css.mjs';
 
 const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
 const read = (...parts) => readFileSync(join(ROOT, ...parts), 'utf8');
@@ -39,7 +39,10 @@ function brandMap() {
 const SOFT_CARD = '0 14px 30px -20px rgba(71, 55, 40, 0.32)';
 const NONE = '0 0 0 0 transparent';
 const PRESS = '4px 4px 0 0 #16110b';
+const EPILOGUE = "'Epilogue', ui-sans-serif, system-ui, sans-serif";
 const TABLE = {
+  '--kairos-display': EPILOGUE,
+  '--kairos-body': EPILOGUE,
   '--kairos-radius-button': '3px',
   '--kairos-radius-input': '3px',
   '--kairos-radius-panel': '2px',
@@ -50,7 +53,6 @@ const TABLE = {
   '--kairos-text-button': '16px',
   '--kairos-text-button-sm': '16px',
   '--kairos-button-weight': '700',
-  '--kairos-button-stretch': '108%',
   '--kairos-button-case': 'none',
   '--kairos-track-button': '0.005em',
   '--kairos-button-shadow-rest': NONE,
@@ -79,7 +81,6 @@ const TABLE = {
   '--kairos-input-label-case': 'none',
   '--kairos-input-label-track': '0',
   '--kairos-input-label-color': '#16110b',
-  '--kairos-input-label-stretch': '105%',
   '--kairos-required-display': 'inline',
   '--kairos-error-badge-display': 'inline-flex',
   '--kairos-field-error-color': '#b3261e',
@@ -93,33 +94,32 @@ const TABLE = {
   '--kairos-duration-enter': '560ms',
   '--kairos-ease': 'cubic-bezier(0.2, 0.75, 0.25, 1)',
 };
-/** The brief's type scale: size, weight, width, line height, tracking. */
+/** The brief's type scale (lock revision 3): size, weight, line height, tracking. */
 const RANKS = {
-  display: ['clamp(38px, 4.4vw, 62px)', '800', '118%', '1.04', '-0.015em'],
-  title: ['clamp(42px, 5.6vw, 76px)', '800', '118%', '1.06', '-0.015em'],
-  h2: ['clamp(30px, 3.3vw, 44px)', '800', '118%', '1.08', '-0.01em'],
-  h3: ['clamp(22px, 2.2vw, 28px)', '800', '112%', '1.15', '0'],
-  quote: ['clamp(24px, 2.4vw, 32px)', '700', '108%', '1.3', '0'],
-  lead: ['clamp(18px, 1.55vw, 20px)', '400', '100%', '1.55', '0'],
-  statement: ['clamp(19px, 1.7vw, 22px)', '600', '100%', '1.4', '0'],
-  body: ['17px', '400', '100%', '1.6', '0'],
-  small: ['15px', '400', '100%', '1.6', '0'],
-  legal: ['14px', '400', '100%', '1.6', '0'],
-  label: ['15px', '700', '100%', '1.6', '0'],
-  price: ['21px', '700', '100%', '1.6', '0'],
-  button: ['16px', '700', '108%', '1.6', '0.005em'],
-  nav: ['16px', '600', '100%', '1.6', '0'],
+  display: ['clamp(31px, 3.8vw, 50px)', '800', '1.06', '-0.02em'],
+  title: ['clamp(35px, 4.6vw, 63px)', '800', '1.06', '-0.02em'],
+  h2: ['clamp(26px, 2.7vw, 37px)', '800', '1.08', '-0.015em'],
+  h3: ['clamp(19px, 1.8vw, 24px)', '800', '1.15', '0'],
+  quote: ['clamp(21px, 2vw, 27px)', '700', '1.3', '0'],
+  lead: ['clamp(18px, 1.55vw, 20px)', '400', '1.55', '0'],
+  statement: ['clamp(19px, 1.7vw, 22px)', '600', '1.4', '0'],
+  body: ['17px', '400', '1.6', '0'],
+  small: ['15px', '400', '1.6', '0'],
+  legal: ['14px', '400', '1.6', '0'],
+  label: ['15px', '700', '1.6', '0'],
+  price: ['21px', '700', '1.6', '0'],
+  button: ['16px', '700', '1.6', '0.005em'],
+  nav: ['16px', '600', '1.6', '0'],
 };
-for (const [rank, [size, weight, stretch, leading, tracking]] of Object.entries(RANKS)) {
+for (const [rank, [size, weight, leading, tracking]] of Object.entries(RANKS)) {
   Object.assign(TABLE, {
     [`--kairos-type-${rank}-size`]: size,
     [`--kairos-type-${rank}-weight`]: weight,
-    [`--kairos-type-${rank}-stretch`]: stretch,
     [`--kairos-type-${rank}-leading`]: leading,
     [`--kairos-type-${rank}-tracking`]: tracking,
   });
 }
-TABLE['--kairos-type-display-phone-size'] = 'clamp(34px, 9.4vw, 40px)';
+TABLE['--kairos-type-display-phone-size'] = 'clamp(31px, 3.8vw, 50px)';
 
 test('brand.css applies only under data-scale=brand on the root', () => {
   const css = stripComments(brand);
@@ -198,4 +198,23 @@ test('every type rank has a Product Scale size from the 0.14 type scale', () => 
     .filter(([, value]) => !steps.has(value))
     .map(([name, value]) => `${name} is ${value}`);
   assert.deepEqual(off, []);
+});
+
+test('no width token is declared', () => {
+  for (const [name, source] of [['tokens.css', tokens], ['brand.css', brand]]) {
+    const offenders = parse(source).filter((d) => /-stretch$/.test(d.prop)).map((d) => d.prop);
+    assert.deepEqual(offenders, [], `${name} declares no width token`);
+  }
+  assert.doesNotMatch(stripComments(brand), /stretch/i, 'brand.css holds no stretch');
+});
+
+test("kairos.css sets font-stretch only in the apps' type block", () => {
+  const stretch = parse(kairos).filter((d) => d.prop === 'font-stretch');
+  const prefix = ":root:not([data-scale='brand'])";
+  const outside = stretch.filter((d) => !splitTop(d.selector, ',').every((part) => part.trim().startsWith(prefix)));
+  assert.deepEqual(
+    outside.map((d) => d.selector),
+    [],
+    'every font-stretch rule begins :root:not([data-scale=brand])',
+  );
 });

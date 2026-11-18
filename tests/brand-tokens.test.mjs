@@ -182,6 +182,17 @@ test('the font tokens name Archivo and Courier Prime', () => {
   assert.equal(value('light', '--kairos-mono'), "'Courier Prime', 'Courier New', ui-monospace, monospace");
 });
 
+test('at the Brand Scale the font tokens name Epilogue and Courier Prime', () => {
+  const map = new Map(MAPS.light);
+  for (const d of parse(read('dist', 'brand.css'))) map.set(d.prop, d.value);
+  for (const name of ['--kairos-body', '--kairos-display']) {
+    assert.match(resolve(`var(${name})`, map), /^'Epilogue', \S/, `${name} begins with Epilogue and falls back`);
+  }
+  assert.match(resolve('var(--kairos-mono)', map), /^'Courier Prime', \S/, 'mono begins with Courier Prime and falls back');
+  assert.equal(resolve('var(--kairos-body)', map), "'Epilogue', ui-sans-serif, system-ui, sans-serif");
+  assert.equal(resolve('var(--kairos-mono)', map), "'Courier Prime', 'Courier New', ui-monospace, monospace");
+});
+
 test('the decorative rule is never a control edge', () => {
   // A control boundary owes 3:1 and `--kairos-rule` is an 18% hairline, so
   // a control drawn with it has no findable edge at rest. These are the

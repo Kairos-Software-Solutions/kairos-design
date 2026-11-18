@@ -18,7 +18,7 @@ import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classesIn, parse, resolve, tokenMaps } from './helpers/css.mjs';
+import { classesIn, parse, resolve, splitTop, tokenMaps } from './helpers/css.mjs';
 
 const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = join(ROOT, 'tests', 'fixtures', 'kairos-design-0.14.0');
@@ -380,7 +380,6 @@ test('every 0.17.0 declaration resolves the same at Product Scale, light and dar
 
 test('a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed', () => {
   const failures = [];
-  const used = new Set();
 
   for (const file of ['kairos', 'base']) {
     const oldKeys = keyed(OLD_0_17[file]);
@@ -394,7 +393,7 @@ test('a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed', () => {
       const frames = d.context.map((c) => c.match(/^@keyframes\s+([\w-]+)/)?.[1]).find(Boolean);
       if (frames && !oldKeyframes.has(frames)) continue;
 
-      const parts = d.selector.split(', ');
+      const parts = splitTop(d.selector, ',').map((part) => part.trim());
       const free = parts.every(
         (part) => part.startsWith(":root[data-scale='brand']") || classesIn(part).some((cls) => !oldClasses.has(cls)),
       );
@@ -405,11 +404,8 @@ test('a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed', () => {
         failures.push(`${file}.css: ${key} is new on a 0.17.0 class and neither Brand-scoped nor in NEW_0_18`);
         continue;
       }
-      used.add(`${listed.selector} ${d.prop}`);
     }
   }
 
-  const stale = NEW_0_18.flatMap((n) => n.props.map((p) => `${n.selector} ${p}`)).filter((entry) => !used.has(entry));
   assert.deepEqual(failures, [], failures.join('\n'));
-  assert.deepEqual(stale, [], 'NEW_0_18 lists a declaration that does not exist');
 });

@@ -48,7 +48,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 2. Brand fonts, lock revision 3 type, no width
 
-- [ ] 2.1 Apply Decided 2, 3, 4 and 16 and `design.md` › Brand Scale, without the new ranks and tick knobs (group 3 adds those).
+- [x] 2.1 Apply Decided 2, 3, 4 and 16 and `design.md` › Brand Scale, without the new ranks and tick knobs (group 3 adds those).
   - `dist/tokens.css`:
     - delete the 16 `-stretch` tokens;
     - set `--kairos-site-menu-row-size` to 23px;
