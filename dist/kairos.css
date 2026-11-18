@@ -2182,6 +2182,12 @@ button.kairos-step {
   visibility: visible;
 }
 
+/* The ring is hidden while the button is idle, but a hidden element still
+   animates; it turns only while the button is busy. */
+.kairos-button:not([aria-busy='true']) .kairos-button-pending .kairos-spin {
+  animation: none;
+}
+
 /* Checkboxes and radios were shipping the browser default, which paints them
    in the operating system accent — blue on most machines, and the one colour
    the brand never uses. `accent-color` restyles the native control without
@@ -4377,6 +4383,14 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 
 .kairos-text-link:hover .kairos-text-link-arrow {
   transform: translateX(var(--kairos-space-2xs));
+}
+
+/* The label and the arrow go inside one span. As a direct child of the
+   inline-flex link the arrow is a flex item and draws an underline of its
+   own; inside this span only the words are underlined and the arrow follows
+   them. */
+.kairos-text-link-text {
+  display: inline;
 }
 
 /* An arrow pointing out of the site moves up and out instead. */

@@ -51,6 +51,8 @@ const SHARED = [
   'kairos-type-card',
   'kairos-type-card--sm',
   'kairos-type-time',
+  // 0.18.0: the label and arrow wrapper of the text link.
+  'kairos-text-link-text',
   'kairos-wrap',
 ];
 
@@ -309,4 +311,20 @@ test('phone menu rows are 23px and the current one is underlined', () => {
   const manifest = read('docs', 'kairos-ui.md');
   const row = manifest.split('\n').find((line) => line.startsWith('| `kairos-site-menu`')) ?? '';
   assert.match(row, /aria-current/, 'the manifest row names the current row');
+});
+
+test('the text link wraps its label and arrow in one span', () => {
+  assert.equal(rule('.kairos-text-link-text').display, 'inline');
+  assert.deepEqual(Object.keys(rule('.kairos-text-link-text')), ['display'], 'it only names the part');
+  assert.equal(rule('.kairos-text-link-arrow').display, 'inline-block', 'the arrow stays inline-block');
+  assert.ok(
+    RULES.some((d) => d.selector === '.kairos-text-link:hover .kairos-text-link-arrow' && d.prop === 'transform'),
+    'the hover nudge still reaches the arrow through the wrapper',
+  );
+
+  const manifest = read('docs', 'kairos-ui.md');
+  const row = manifest.split('\n').find((line) => line.startsWith('| `kairos-text-link`')) ?? '';
+  assert.match(row, /kairos-text-link-text/, 'the manifest row names the wrapper');
+  assert.match(row, /one `kairos-text-link-text` span/, 'the label and the arrow go inside one span');
+  assert.match(row, /<a class="kairos-text-link"><span class="kairos-text-link-text">Words <span class="kairos-text-link-arrow">→<\/span><\/span><\/a>/, 'the row gives the markup');
 });

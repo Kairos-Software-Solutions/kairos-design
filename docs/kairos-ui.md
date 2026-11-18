@@ -448,7 +448,7 @@ the package's.
 
 | Class | Use for | Do not use for | Modifiers |
 | --- | --- | --- | --- |
-| `kairos-text-link` | An inline call to action written as a link: ink at 700 over a 3px highlight underline that turns ink on hover, 44px tall. A trailing `kairos-text-link-arrow` (→) nudges on hover | Navigation in the header, which is `kairos-menu-link`; a primary action, which is a button | `--external` for ↗, which moves up and out |
+| `kairos-text-link` | An inline call to action written as a link: ink at 700 over a 3px highlight underline that turns ink on hover, 44px tall. The label and its trailing `kairos-text-link-arrow` (→, which nudges on hover) go inside one `kairos-text-link-text` span, so the underline runs under the words only: `<a class="kairos-text-link"><span class="kairos-text-link-text">Words <span class="kairos-text-link-arrow">→</span></span></a>` | Navigation in the header, which is `kairos-menu-link`; a primary action, which is a button | `--external` for ↗, which moves up and out |
 | `kairos-menu-link` | A header menu item, 44px: a highlight marker sweeps in behind the word on hover, and `aria-current="page"` carries a 3px underline | Links in running text | — |
 | `kairos-lang-link` | The other language, named in that language, with `lang` and `hreflang`: the last menu item, set off by a 1px by 18px ink-3 hairline | Choosing between more than two languages | `--row` for its own 48px row in the phone menu, with the link underline |
 | `kairos-required` | The asterisk after a required field's label, always `aria-hidden="true"`; the control carries `required`. `Field` writes it from `required`. Shown at the Brand Scale | The only signal that a field is required | — |

@@ -107,7 +107,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
   Check: `node --test tests/brand-parts.test.mjs tests/brand-scale.test.mjs tests/product-scale.test.mjs tests/contract.test.mjs tests/scale.test.mjs` passes, every `product-scale` test included.
 
-- [ ] 3.3 P8 and P10 (Decided 12 and 14).
+- [x] 3.3 P8 and P10 (Decided 12 and 14).
   - Add `.kairos-text-link-text` to `kairos.css` and rewrite the `docs/kairos-ui.md` text-link row as `design.md` gives it.
   - Add the idle-spinner rule after `.kairos-button[aria-busy='true'] .kairos-button-pending`.
   - Add "the text link wraps its label and arrow in one span" to `tests/brand-parts.test.mjs`, plus `kairos-text-link-text` to "every shared part from the brief has its class".
