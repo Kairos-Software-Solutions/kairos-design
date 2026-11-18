@@ -308,14 +308,14 @@
 
 :root {
   /* --- Typefaces --------------------------------------------------------
-     Archivo names the apps' family at the Product Scale (0.17.0); `brand.css`
-     sets Epilogue at the Brand Scale (0.18.0). Courier Prime is typed labels,
-     prices, dates and times at both. The host app loads the families —
-     next/font, a Google Fonts link, or self-hosted files. This package ships
-     no font file and no font face rule; these tokens only name the stack.
-     Never a third typeface. */
-  --kairos-display: 'Archivo', ui-sans-serif, system-ui, sans-serif;
-  --kairos-body: 'Archivo', ui-sans-serif, system-ui, sans-serif;
+     Epilogue (variable, weight 100-900, normal width) for body and display at
+     both scales since 0.18.0; Courier Prime for typed labels, prices, dates
+     and times. The host app loads the families — next/font, a Google Fonts
+     link, or self-hosted files — and re-points these tokens on `:root` to its
+     own loader's variable. This package ships no font file and no font face
+     rule; these tokens only name the stack. Never a third typeface. */
+  --kairos-display: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+  --kairos-body: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
   --kairos-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
   /* --- Space ------------------------------------------------------------

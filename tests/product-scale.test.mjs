@@ -33,8 +33,8 @@ const THEMES = ['light', 'dark'];
  * primary hover fill.
  */
 const INTENTIONAL = [
-  { theme: 'both', token: '--kairos-display', value: "'Archivo', ui-sans-serif, system-ui, sans-serif" },
-  { theme: 'both', token: '--kairos-body', value: "'Archivo', ui-sans-serif, system-ui, sans-serif" },
+  { theme: 'both', token: '--kairos-display', value: "'Epilogue', ui-sans-serif, system-ui, sans-serif" },
+  { theme: 'both', token: '--kairos-body', value: "'Epilogue', ui-sans-serif, system-ui, sans-serif" },
   { theme: 'both', token: '--kairos-mono', value: "'Courier Prime', 'Courier New', ui-monospace, monospace" },
   { theme: 'light', token: '--kairos-accent-hover', value: '#ffb627' },
   // 0.17.0: the tracking that went with capital buttons and tabs.
@@ -118,6 +118,15 @@ const GONE_0_18 = {
     { selector: ":root[data-scale='brand'] .kairos-input-label", prop: 'font-stretch' },
     // P2: the marker tilts through `rotate`.
     { selector: '.kairos-marker::after', prop: 'transform' },
+    // 0.18.0 takes the width out of 0.17.0's apps type block too: headings,
+    // section headings and the product name. Every other declaration stays.
+    { selector: ":root:not([data-scale='brand']) :where(h1, h2, h3, h4, h5, h6)", prop: 'font-stretch' },
+    {
+      selector:
+        ":root:not([data-scale='brand']) :where(.kairos-app-shell) :where(h2, h3, h4, h5, h6), :root:not([data-scale='brand']) :is(.kairos-panel-heading, .kairos-panel-subheading, .kairos-section-title, .kairos-record-row-title, .kairos-tile-heading, .kairos-disclosure-title, .kairos-dialog-title)",
+      prop: 'font-stretch',
+    },
+    { selector: ":root:not([data-scale='brand']) :is(.kairos-product-name, .kairos-wordmark, .kairos-print-header-business)", prop: 'font-stretch' },
   ],
 };
 
@@ -127,6 +136,10 @@ const GONE_0_18 = {
  * for 0.14); a declaration entry names the value the key now resolves to.
  */
 const CHANGED_0_18 = [
+  // The apps move from Archivo to Epilogue. The 14 declarations that read
+  // these two tokens (13 in kairos.css, 1 in base.css) resolve equal.
+  { token: '--kairos-display', value: "'Epilogue', ui-sans-serif, system-ui, sans-serif" },
+  { token: '--kairos-body', value: "'Epilogue', ui-sans-serif, system-ui, sans-serif" },
   // Lock revision 3: phone menu rows from 26px to 23px.
   { token: '--kairos-site-menu-row-size', value: '23px' },
   { selector: '.kairos-site-menu-row', prop: 'font-size', value: '23px' },
@@ -407,5 +420,28 @@ test('a new 0.18 rule on a 0.17.0 class is Brand-scoped or listed', () => {
     }
   }
 
+  assert.deepEqual(failures, [], failures.join('\n'));
+});
+
+test("0.17.0's Product type block is kept apart from its widths", () => {
+  const now = keyed(NEW.kairos);
+  const failures = [];
+  let checked = 0;
+  for (const [key, d] of keyed(OLD_0_17.kairos)) {
+    if (!d.selector.startsWith(PRODUCT_TYPE_PREFIX)) continue;
+    checked += 1;
+    const found = now.get(key);
+    if (d.prop === 'font-stretch') {
+      if (found) failures.push(`${key} still sets a width`);
+    } else if (!found) {
+      failures.push(`${key} is gone`);
+    } else if (found.value !== d.value) {
+      failures.push(`${key} was ${d.value}, is ${found.value}`);
+    }
+  }
+  assert.ok(checked > 20, 'the fixture has the type block');
+  for (const [key, d] of now) {
+    if (d.selector.startsWith(PRODUCT_TYPE_PREFIX) && d.prop === 'font-stretch') failures.push(`${key} sets a width`);
+  }
   assert.deepEqual(failures, [], failures.join('\n'));
 });

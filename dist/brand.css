@@ -19,10 +19,10 @@
 
    One rule, custom properties only. No colour value (colours come from
    tokens.css through var()), no class rule, no font face and no url. The
-   families are named, never shipped: the host loads Epilogue and Courier
-   Prime (next/font, a link or self-hosted files). Every
-   token set here has a Product Scale default in tokens.css, which is what an
-   app gets without the switch. The selector, (0,2,0), outranks the light and
+   families are named in tokens.css and never shipped: the host loads Epilogue
+   and Courier Prime (next/font, a link or self-hosted files). Every token set
+   here has a Product Scale default in tokens.css, which is what an app gets
+   without the switch. The selector, (0,2,0), outranks the light and
    dark blocks without !important, so import order does not decide it.
 
    `--kairos-duration-none` is not set here: reduced motion keeps its 1ms.
@@ -96,13 +96,9 @@
 
   /* --- Type --------------------------------------------------------------
      The brief's type scale at lock revision 3. Everything is Epilogue at its
-     normal width, headings at 800; label and price are Courier Prime (the
-     rank classes pick the family). The two family tokens are named here so
-     the Brand Scale takes Epilogue without the host re-pointing anything;
-     the mono token is untouched. */
-  --kairos-display: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
-  --kairos-body: 'Epilogue', ui-sans-serif, system-ui, sans-serif;
-
+     normal width, headings at 800; label, price and time are Courier Prime
+     (the rank classes pick the family). The families themselves are named in
+     tokens.css, so a host re-points them on `:root` at either scale. */
   --kairos-text-body: 17px;
   --kairos-text-body-lh: 1.6;
 

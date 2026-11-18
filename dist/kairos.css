@@ -6186,8 +6186,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 
    The apps take Kairos design brief v2's type and keep their own geometry:
    the same 36px controls, ink edges and stamps, at the same density. What
-   changes is the voice. Headings are Archivo set wide and heavy, in sentence
-   case, where they were Bebas Neue capitals. Small labels, the eyebrow over a
+   changes is the voice. Headings are heavy, at the family's normal width, in
+   sentence case, where they were Bebas Neue capitals (the family is Epilogue
+   from 0.18.0). Small labels, the eyebrow over a
    group, a table's column names, a definition's term and a state chip, are
    typed in Courier Prime capitals, the way the website sets "What we take care
    of". Buttons, tabs and switch options read in sentence case.
@@ -6198,35 +6199,30 @@ th[aria-sort='descending'] .kairos-sort-header::after {
    tokens.css, so those changes live there, as defaults brand.css re-points.
    ========================================================================== */
 
-/* Headings: wide, heavy, sentence case. Archivo has a width axis; 112% is the
-   brief's "set wide" at app sizes, where the website's 118% would push a long
-   page title onto a second line on a laptop. `:where` keeps this at the
-   specificity of the in-shell rule below, which comes later and wins for
-   section headings. */
+/* Headings: heavy, sentence case, at the family's normal width. `:where` keeps
+   this at the specificity of the in-shell rule below, which comes later and
+   wins for section headings. */
 :root:not([data-scale='brand']) :where(h1, h2, h3, h4, h5, h6) {
   font-weight: 800;
-  font-stretch: 112%;
   letter-spacing: -0.01em;
   line-height: 1.12;
   text-transform: none;
 }
 
 /* Section headings inside the tool stay a step quieter than the page title:
-   still Archivo, still wide, at 700 and the body size the shell gives them. */
+   still the display family, at 700 and the body size the shell gives them. */
 :root:not([data-scale='brand']) :where(.kairos-app-shell) :where(h2, h3, h4, h5, h6),
 :root:not([data-scale='brand']) :is(.kairos-panel-heading, .kairos-panel-subheading, .kairos-section-title, .kairos-record-row-title, .kairos-tile-heading, .kairos-disclosure-title, .kairos-dialog-title) {
   font-family: var(--kairos-display);
   font-weight: 700;
-  font-stretch: 106%;
   letter-spacing: 0;
 }
 
 /* The product name beside the mark keeps its capitals: it sits next to the
-   logo's own capital wordmark. Archivo is drawn at every weight, so the
+   logo's own capital wordmark. The family is drawn at every weight, so the
    lockup takes the heavy one rather than Bebas Neue's only weight. */
 :root:not([data-scale='brand']) :is(.kairos-product-name, .kairos-wordmark, .kairos-print-header-business) {
   font-weight: 800;
-  font-stretch: 100%;
   letter-spacing: var(--kairos-track-display);
 }
 
@@ -6234,9 +6230,9 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   text-transform: none;
 }
 
-/* Typed labels: Courier Prime capitals. The face is wider than Archivo at the
-   same size, so the tracking comes down to keep a column name the width it
-   was. */
+/* Typed labels: Courier Prime capitals. The face is wider than the sans at
+   the same size, so the tracking comes down to keep a column name the width
+   it was. */
 :root:not([data-scale='brand']) :is(.kairos-label-caps, .kairos-definition-grid dt, .kairos-kicker, .kairos-nav-group, .kairos-table th, .kairos-record-card-detail-label, .kairos-section-tag > :first-child, .kairos-state-chip, .kairos-skip-link, .kairos-theme-toggle, .kairos-bottom-nav-link) {
   font-family: var(--kairos-mono);
   font-weight: 700;

@@ -165,7 +165,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 6. Apps follow Epilogue (separable: the reviewer's call)
 
-- [ ] 6.1 Do `design.md` › Apps follow Epilogue, steps 1-4:
+- [x] 6.1 Do `design.md` › Apps follow Epilogue, steps 1-4:
   - `tokens.css` names the Epilogue stack for `--kairos-display` and `--kairos-body`, and its typefaces comment says so;
   - `brand.css` deletes its two family lines;
   - the three `font-stretch` declarations of the apps type block (`kairos.css:6158-6182`) go, every other declaration there stays, and the block's comments drop "Archivo" and "wide". A comment line that still names Archivo as history must name its release (0.16, 0.17 or 0.18) on the same line, or task 6.2's grep flags it; the same goes for `tokens.css`.

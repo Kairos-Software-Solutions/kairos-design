@@ -7,7 +7,7 @@
  * gets nothing from it, and an app that never imports it is the Product Scale
  * `tests/product-scale.test.mjs` pins.
  */
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve as resolvePath } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
@@ -39,10 +39,7 @@ function brandMap() {
 const SOFT_CARD = '0 14px 30px -20px rgba(71, 55, 40, 0.32)';
 const NONE = '0 0 0 0 transparent';
 const PRESS = '4px 4px 0 0 #16110b';
-const EPILOGUE = "'Epilogue', ui-sans-serif, system-ui, sans-serif";
 const TABLE = {
-  '--kairos-display': EPILOGUE,
-  '--kairos-body': EPILOGUE,
   '--kairos-radius-button': '3px',
   '--kairos-radius-input': '3px',
   '--kairos-radius-panel': '2px',
@@ -215,6 +212,19 @@ test('every type rank has a Product Scale size from the 0.14 type scale', () => 
     .filter(([, value]) => !steps.has(value))
     .map(([name, value]) => `${name} is ${value}`);
   assert.deepEqual(off, []);
+});
+
+test('brand.css sets no font family', () => {
+  const families = BRAND.filter((d) => ['--kairos-display', '--kairos-body', '--kairos-mono'].includes(d.prop)).map((d) => d.prop);
+  assert.deepEqual(families, [], 'the families live in tokens.css alone');
+});
+
+test('no stylesheet sets font-stretch', () => {
+  const sheets = readdirSync(join(ROOT, 'dist')).filter((name) => name.endsWith('.css'));
+  assert.ok(sheets.includes('kairos.css') && sheets.includes('tokens.css') && sheets.includes('brand.css'), 'the stylesheets are found');
+  for (const name of sheets) {
+    assert.doesNotMatch(stripComments(read('dist', name)), /font-stretch/, `${name} holds no font-stretch declaration`);
+  }
 });
 
 test('no width token is declared', () => {

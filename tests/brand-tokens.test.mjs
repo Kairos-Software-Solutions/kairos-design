@@ -171,14 +171,15 @@ test('the new colour roles take interim dark values from the 0.14 dark palette',
   assert.deepEqual(failures, []);
 });
 
-test('the font tokens name Archivo and Courier Prime', () => {
+test('the font tokens name Epilogue and Courier Prime', () => {
   for (const theme of ['light', 'dark']) {
     for (const name of ['--kairos-body', '--kairos-display']) {
-      assert.match(value(theme, name), /^'Archivo', \S/, `${name} begins with Archivo and falls back`);
+      assert.match(value(theme, name), /^'Epilogue', \S/, `${name} begins with Epilogue and falls back`);
     }
     assert.match(value(theme, '--kairos-mono'), /^'Courier Prime', \S/, 'mono begins with Courier Prime and falls back');
   }
-  assert.equal(value('light', '--kairos-body'), "'Archivo', ui-sans-serif, system-ui, sans-serif");
+  assert.equal(value('light', '--kairos-body'), "'Epilogue', ui-sans-serif, system-ui, sans-serif");
+  assert.equal(value('light', '--kairos-display'), "'Epilogue', ui-sans-serif, system-ui, sans-serif");
   assert.equal(value('light', '--kairos-mono'), "'Courier Prime', 'Courier New', ui-monospace, monospace");
 });
 
