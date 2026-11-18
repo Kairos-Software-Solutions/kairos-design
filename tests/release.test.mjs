@@ -207,3 +207,25 @@ test('the docs describe 0.18.0', () => {
     assert.doesNotMatch(header, /visual-spec\.md/, `${file} header does not name the old visual spec`);
   }
 });
+
+test('the docs tell apps to load Epilogue', () => {
+  const adoption = read('docs', 'adoption.md');
+  const start = adoption.search(/^#+ .*Upgrading to 0\.18\.0.*$/m);
+  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.18.0" heading');
+  const level = adoption.slice(start).match(/^#+/)[0].length;
+  const rest = adoption.slice(start).split('\n').slice(1).join('\n');
+  const end = rest.search(new RegExp(`^#{1,${level}} `, 'm'));
+  const section = end === -1 ? rest : rest.slice(0, end);
+  for (const needle of ['Epilogue', '100 900', 'Courier Prime', ':root', 'Archivo']) {
+    assert.ok(section.includes(needle), `the upgrade section names ${needle}`);
+  }
+
+  const decisions = read('docs', 'decisions.md');
+  const heading = decisions.search(/^#+ .*0\.18\.0.*$/m);
+  assert.notEqual(heading, -1, 'docs/decisions.md has a 0.18.0 heading');
+  const entry = decisions.slice(heading).split('\n').slice(1).join('\n');
+  const next = entry.search(/^## /m);
+  const text = next === -1 ? entry : entry.slice(0, next);
+  assert.ok(text.includes('font-stretch'), 'the entry names font-stretch');
+  assert.ok(text.includes('Epilogue'), 'the entry names Epilogue');
+});

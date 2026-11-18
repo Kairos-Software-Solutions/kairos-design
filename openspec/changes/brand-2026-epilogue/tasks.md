@@ -183,7 +183,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
   Check: `npm test` passes in full.
 
-- [ ] 6.2 Do `design.md` › Apps follow Epilogue, step 5:
+- [x] 6.2 Do `design.md` › Apps follow Epilogue, step 5:
   - drop Archivo from the font links in `.storybook/preview-head.html` and `docs/preview.html`;
   - make "The families" on the Type page name Epilogue only;
   - make README › Fonts name Epilogue for every surface;

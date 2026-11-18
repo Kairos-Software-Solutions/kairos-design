@@ -1703,6 +1703,13 @@ Prime for labels, prices, times and dates, and says never to set
 - **P7 is dropped.** Lock revision 2 puts the phone date on two lines under
   560px on purpose, and P7's tracking would keep it on one line, which undoes
   that. The two-line date becomes a package change when that work is planned.
+- **The apps moved to Epilogue and lost their widths.** The brand has one sans
+  family, so the Product Scale's `--kairos-display` and `--kairos-body` name
+  Epilogue, `brand.css` sets no family, and the three `font-stretch`
+  declarations of 0.17.0's apps type block (headings at 112%, section headings
+  at 106%, the product name at 100%) are gone. Sentence case, weights, tracking
+  and geometry stay as 0.17.0 had them. Epilogue runs about 12% wider than
+  Archivo at body sizes, so each app's bump plan checks its long lines.
 - **Guards.** The 0.17.0 stylesheets are a fixture, and a test checks that every
   0.17.0 declaration resolves the same at the Product Scale apart from listed
   changes (`GONE_0_18`, `CHANGED_0_18`, `NEW_0_18`). A test checks that every

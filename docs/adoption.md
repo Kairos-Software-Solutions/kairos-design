@@ -50,20 +50,26 @@ With a link:
 `family=Epilogue:ital,wght@0,100..900;1,100..900&family=Courier+Prime:wght@400;700`.
 
 **The font tokens.** `--kairos-display` and `--kairos-body` are
-`'Epilogue', ui-sans-serif, system-ui, sans-serif` at the Brand Scale, and
+`'Epilogue', ui-sans-serif, system-ui, sans-serif` at both scales, and
 `--kairos-mono` stays `'Courier Prime', 'Courier New', ui-monospace, monospace`.
-At the Product Scale `--kairos-display` and `--kairos-body` still name Archivo
-until the apps move. `brand.css` sets its two families inside
-`:root[data-scale='brand']`, which outranks a plain `:root` override, so at the
-Brand Scale re-point `--kairos-display` and `--kairos-body` under
-`:root[data-scale='brand']`, with the `next/font` variable first:
+`brand.css` sets no family, so a host re-points the tokens on `:root`, at
+either scale, with the `next/font` variable first:
 
 ```css
-:root[data-scale='brand'] {
+:root {
   --kairos-display: var(--font-epilogue), 'Epilogue', ui-sans-serif, system-ui, sans-serif;
   --kairos-body: var(--font-epilogue), 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+  --kairos-mono: var(--font-courier-prime), 'Courier Prime', 'Courier New', ui-monospace, monospace;
 }
 ```
+
+**Apps move to Epilogue too.** An app that bumps to 0.18.0 loads Epilogue
+(variable, weight 100-900, no width axis) and Courier Prime, drops Archivo from
+its loader, keeps re-pointing the font tokens on `:root`, and expects
+normal-width headings: the three `font-stretch` declarations of 0.17.0's apps
+type block are gone, and every other declaration there stays (sentence case,
+weights, tracking, Courier Prime labels, the product name's capitals).
+Epilogue runs about 12% wider than Archivo at body sizes, so check long lines.
 
 **Removed: every width token.** Lock revision 3 says never to set
 `font-stretch`, so the 16 `-stretch` tokens are gone from `tokens.css` and

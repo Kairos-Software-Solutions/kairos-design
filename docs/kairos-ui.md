@@ -88,7 +88,7 @@ half-pixel ones.
 | `--kairos-text-body` | 0.875rem | Body, table cells |
 | `--kairos-text-lg` | 16px | Panel headings, and every text input |
 | `--kairos-text-xl` | 20px | A large figure |
-| `--kairos-text-title` | 24px | The page title, in the display family (Archivo), once per screen |
+| `--kairos-text-title` | 24px | The page title, in the display family, once per screen |
 
 Role aliases: `--kairos-text-heading`, `--kairos-text-label`,
 `--kairos-text-chip`, `--kairos-text-button`, `--kairos-text-meta`,

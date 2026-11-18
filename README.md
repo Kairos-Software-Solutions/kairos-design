@@ -100,9 +100,8 @@ See [docs/adoption.md](docs/adoption.md) for what each surface needs.
 ### Fonts
 
 The tokens name the families and the app loads them: Epilogue for
-`--kairos-display` and `--kairos-body` at the Brand Scale (Archivo in the apps
-until their own bump), Courier Prime for `--kairos-mono`. Epilogue is variable,
-weight 100-900, normal width. The package never ships a font file, an
+`--kairos-display` and `--kairos-body` on every surface, Courier Prime for
+`--kairos-mono`. Epilogue is variable, weight 100-900, normal width. The package never ships a font file, an
 `@font-face` or a font URL, and a test fails the release if one appears. Load
 them with `next/font/local` (pointing the tokens at the variables it creates)
 or with a link; see [docs/adoption.md](docs/adoption.md), "Upgrading to
