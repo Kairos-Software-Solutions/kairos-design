@@ -146,7 +146,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 5. Release and docs
 
-- [ ] 5.1 Set the version and write the docs.
+- [x] 5.1 Set the version and write the docs.
   - Set `package.json` › `version` to `0.18.0`, and the two top `version` fields of `package-lock.json` to match. Change nothing else in either file.
   - Add "the docs describe 0.18.0" to `tests/release.test.mjs` (kairos-design-release-0-18 › "Docs present"; no test asserts the version literal).
   - Write `design.md` › Docs (core text): the 0.18.0 section of `docs/decisions.md`, "Upgrading to 0.18.0" in `docs/adoption.md` with Decided 18's line, README › Fonts and its Brand row, and any `docs/kairos-ui.md` row not yet done.

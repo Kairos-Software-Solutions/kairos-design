@@ -167,3 +167,43 @@ test('every name the website reads is still declared', () => {
   const missing = names.filter((name) => (name.startsWith('--') ? !tokens.has(name) : !classes.has(name)));
   assert.deepEqual(missing, [], `the website reads names the package no longer declares: ${missing.join(', ')}`);
 });
+
+test('the docs describe 0.18.0', () => {
+  const adoption = read('docs', 'adoption.md');
+  const start = adoption.search(/^#+ .*Upgrading to 0\.18\.0.*$/m);
+  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.18.0" heading');
+  const level = adoption.slice(start).match(/^#+/)[0].length;
+  const rest = adoption.slice(start).split('\n').slice(1).join('\n');
+  const end = rest.search(new RegExp(`^#{1,${level}} `, 'm'));
+  const section = end === -1 ? rest : rest.slice(0, end);
+  for (const needle of [
+    'Epilogue',
+    'Courier Prime',
+    'next/font',
+    '--kairos-display',
+    '--kairos-body',
+    '--kairos-mono',
+    '-stretch',
+    'kairos-type-title--compact',
+    'kairos-type-card',
+    'kairos-type-time',
+    'kairos-text-link-text',
+  ]) {
+    assert.ok(section.includes(needle), `the upgrade section names ${needle}`);
+  }
+
+  assert.match(read('docs', 'decisions.md'), /^#+ .*0\.18\.0.*$/m, 'docs/decisions.md has a 0.18.0 heading');
+
+  const readme = read('README.md');
+  const fonts = readme.slice(readme.search(/^#+ Fonts$/m));
+  assert.match(fonts.slice(0, fonts.search(/\n#+ (?!Fonts)/)), /Epilogue/, "README's Fonts section names Epilogue");
+
+  // Both stylesheet headers name the brief's version, and not the first one.
+  for (const file of ['tokens.css', 'brand.css']) {
+    const source = read('dist', file);
+    const header = source.slice(0, source.indexOf('*/') + 2).replace(/\s+/g, ' ');
+    assert.match(header, /Kairos design brief v3/, `${file} header names brief v3`);
+    assert.doesNotMatch(header, /brief v1/, `${file} header does not name brief v1`);
+    assert.doesNotMatch(header, /visual-spec\.md/, `${file} header does not name the old visual spec`);
+  }
+});

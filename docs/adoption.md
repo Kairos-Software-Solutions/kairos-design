@@ -18,6 +18,80 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
+## Upgrading to 0.18.0
+
+The brand type release. Kairos design brief v3 (lock revision 3) sets every
+sans part in Epilogue at its normal width, so the Brand Scale names Epilogue
+and carries no width at all. See "Brand type on Epilogue, 0.18.0" in
+[decisions.md](decisions.md). Minor: under 0.x, `^0.17.0` stops below it, so
+an app gets it only when its own plan bumps it.
+
+**Load Epilogue and Courier Prime.** The package ships no font. A host that
+sets the Brand Scale loads:
+
+- Epilogue, variable, weight 100-900, normal width only (no width axis). With
+  `next/font/local`, `weight: '100 900'`, the upright file preloaded and the
+  italic not, and no `font-stretch` declaration.
+- Courier Prime at 400 and 700.
+
+```tsx
+const epilogue = localFont({
+  src: [
+    { path: './fonts/epilogue.woff2', style: 'normal' },
+    { path: './fonts/epilogue-italic.woff2', style: 'italic', preload: false },
+  ],
+  weight: '100 900',
+  variable: '--font-epilogue',
+  display: 'swap',
+});
+```
+
+With a link:
+`family=Epilogue:ital,wght@0,100..900;1,100..900&family=Courier+Prime:wght@400;700`.
+
+**The font tokens.** `--kairos-display` and `--kairos-body` are
+`'Epilogue', ui-sans-serif, system-ui, sans-serif` at the Brand Scale, and
+`--kairos-mono` stays `'Courier Prime', 'Courier New', ui-monospace, monospace`.
+At the Product Scale `--kairos-display` and `--kairos-body` still name Archivo
+until the apps move. `brand.css` sets its two families inside
+`:root[data-scale='brand']`, which outranks a plain `:root` override, so at the
+Brand Scale re-point `--kairos-display` and `--kairos-body` under
+`:root[data-scale='brand']`, with the `next/font` variable first:
+
+```css
+:root[data-scale='brand'] {
+  --kairos-display: var(--font-epilogue), 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+  --kairos-body: var(--font-epilogue), 'Epilogue', ui-sans-serif, system-ui, sans-serif;
+}
+```
+
+**Removed: every width token.** Lock revision 3 says never to set
+`font-stretch`, so the 16 `-stretch` tokens are gone from `tokens.css` and
+`brand.css`: `--kairos-button-stretch`, `--kairos-input-label-stretch` and
+`--kairos-type-<rank>-stretch` for the 14 ranks (display, title, h2, h3,
+quote, lead, statement, body, small, legal, label, price, button, nav). No rule
+in the brand layer reads one. An app that read one stops getting a value.
+
+**New classes and tokens.**
+
+- `kairos-type-title--compact`: the form page title (Contact, Reschedule,
+  Cancel), `--kairos-type-title-compact-size`.
+- `kairos-type-card` and `kairos-type-card--sm`: card headings, 20px and 19px
+  at the Brand Scale.
+- `kairos-type-time`: a typed time line, Courier Prime 16px at 400.
+- `kairos-text-link-text`: the text link now wraps its label and arrow in one
+  span, so the underline runs under the words only:
+  `<a class="kairos-text-link"><span class="kairos-text-link-text">Words <span class="kairos-text-link-arrow">→</span></span></a>`.
+- `--kairos-tick-list-value-size`, `--kairos-tick-list-value-phone-size` and
+  `--kairos-tick-list-value-leading`: tick-list values sit a step under the
+  statement rank.
+
+**Changed at the Brand Scale:** the display, title, h2, h3 and quote ranks
+take lock revision 3's sizes; phone menu rows are 23px and the current row is
+underlined; label, price and footer headings keep their case on a heading;
+the title bar and the marker tilt through `rotate`; an idle button's spinner
+stands still.
+
 ## Upgrading to 0.17.0
 
 The apps take the brief's type. See "Product type on the brief, 0.17.0" in
