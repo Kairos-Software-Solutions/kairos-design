@@ -112,6 +112,7 @@
   --kairos-type-display-leading: 1.06;
   --kairos-type-display-tracking: -0.02em;
   --kairos-type-title-size: clamp(35px, 4.6vw, 63px);
+  --kairos-type-title-compact-size: clamp(35px, 3.8vw, 52px);
   --kairos-type-title-weight: 800;
   --kairos-type-title-leading: 1.06;
   --kairos-type-title-tracking: -0.02em;
@@ -123,6 +124,11 @@
   --kairos-type-h3-weight: 800;
   --kairos-type-h3-leading: 1.15;
   --kairos-type-h3-tracking: 0;
+  --kairos-type-card-size: 20px;
+  --kairos-type-card-sm-size: 19px;
+  --kairos-type-card-weight: 800;
+  --kairos-type-card-leading: 1.15;
+  --kairos-type-card-tracking: 0;
   --kairos-type-quote-size: clamp(21px, 2vw, 27px);
   --kairos-type-quote-weight: 700;
   --kairos-type-quote-leading: 1.3;
@@ -155,6 +161,10 @@
   --kairos-type-price-weight: 700;
   --kairos-type-price-leading: 1.6;
   --kairos-type-price-tracking: 0;
+  --kairos-type-time-size: 16px;
+  --kairos-type-time-weight: 400;
+  --kairos-type-time-leading: 1.6;
+  --kairos-type-time-tracking: 0;
   --kairos-type-button-size: 16px;
   --kairos-type-button-weight: 700;
   --kairos-type-button-leading: 1.6;

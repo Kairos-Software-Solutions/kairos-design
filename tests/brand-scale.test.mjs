@@ -120,6 +120,19 @@ for (const [rank, [size, weight, leading, tracking]] of Object.entries(RANKS)) {
   });
 }
 TABLE['--kairos-type-display-phone-size'] = 'clamp(31px, 3.8vw, 50px)';
+// The compact title, card headings and the time line (0.18.0).
+Object.assign(TABLE, {
+  '--kairos-type-title-compact-size': 'clamp(35px, 3.8vw, 52px)',
+  '--kairos-type-card-size': '20px',
+  '--kairos-type-card-sm-size': '19px',
+  '--kairos-type-card-weight': '800',
+  '--kairos-type-card-leading': '1.15',
+  '--kairos-type-card-tracking': '0',
+  '--kairos-type-time-size': '16px',
+  '--kairos-type-time-weight': '400',
+  '--kairos-type-time-leading': '1.6',
+  '--kairos-type-time-tracking': '0',
+});
 
 test('brand.css applies only under data-scale=brand on the root', () => {
   const css = stripComments(brand);

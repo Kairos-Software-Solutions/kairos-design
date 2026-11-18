@@ -1,5 +1,5 @@
 /**
- * The shared parts of Kairos design brief v1, as package classes.
+ * The shared parts of Kairos design brief v3, as package classes.
  *
  * The brief's Component vocabulary marks each part shared or site. The shared
  * ones are class blocks here; the site ones must never reach the package,
@@ -46,6 +46,11 @@ const SHARED = [
   ...['display', 'title', 'h2', 'h3', 'quote', 'lead', 'statement', 'body', 'small', 'legal', 'label', 'price', 'button', 'nav'].map(
     (rank) => `kairos-type-${rank}`,
   ),
+  // 0.18.0: the form page title, card headings and the time line.
+  'kairos-type-title--compact',
+  'kairos-type-card',
+  'kairos-type-card--sm',
+  'kairos-type-time',
   'kairos-wrap',
 ];
 
@@ -167,4 +172,67 @@ test('reduced motion stills the error line', () => {
   assert.equal(reduced.find((d) => d.prop === 'animation-iteration-count')?.value, '1');
   assert.equal(resolve('var(--kairos-duration-none)', tokenMaps(tokens).light), '1ms');
   assert.doesNotMatch(stripComments(brand), /--kairos-duration-none/, 'brand.css leaves it alone');
+});
+
+/** The tokens at each scale (light): the Product Scale, and the Brand Scale rule applied over it. */
+const PRODUCT_MAP = tokenMaps(tokens).light;
+const BRAND_MAP = new Map(PRODUCT_MAP);
+for (const d of parse(brand)) BRAND_MAP.set(d.prop, d.value);
+const productValue = (name) => resolve(`var(${name})`, PRODUCT_MAP);
+const brandValue = (name) => resolve(`var(${name})`, BRAND_MAP);
+/** The declarations of the rule whose selector is exactly this, outside any at-rule, by property. */
+const rule = (selector, context = []) =>
+  Object.fromEntries(RULES.filter((d) => d.selector === selector && d.context.join(' | ') === context.join(' | ')).map((d) => [d.prop, d.value]));
+/** The position of a rule's first declaration in the sheet, to say one comes after another. */
+const position = (selector, context = []) =>
+  RULES.findIndex((d) => d.selector === selector && d.context.join(' | ') === context.join(' | '));
+
+test('the compact title, card and time ranks read their tokens', () => {
+  // Compact title: the title rank at its own size, in a rule after the title's.
+  assert.equal(rule('.kairos-type-title--compact')['font-size'], 'var(--kairos-type-title-compact-size)');
+  assert.deepEqual(Object.keys(rule('.kairos-type-title--compact')), ['font-size'], 'weight, leading and tracking stay the title\'s');
+  assert.ok(position('.kairos-type-title--compact') > position('.kairos-type-title'), 'it comes after .kairos-type-title');
+  assert.equal(brandValue('--kairos-type-title-compact-size'), 'clamp(35px, 3.8vw, 52px)');
+  assert.equal(productValue('--kairos-type-title-compact-size'), productValue('--kairos-text-title'), 'the 24px title at the Product Scale');
+
+  // Card heading: 20px/800 at 1.15, 19px small; the h3 rank's steps at the Product Scale.
+  const card = rule('.kairos-type-card');
+  assert.equal(card['font-family'], 'var(--kairos-display)');
+  assert.equal(card.margin, '0');
+  assert.equal(card['text-transform'], 'none');
+  assert.equal(card['text-wrap'], 'balance');
+  for (const part of ['size', 'weight', 'leading', 'tracking']) {
+    const prop = { size: 'font-size', weight: 'font-weight', leading: 'line-height', tracking: 'letter-spacing' }[part];
+    assert.equal(card[prop], `var(--kairos-type-card-${part})`, `.kairos-type-card ${prop} reads the card ${part}`);
+  }
+  assert.equal(rule('.kairos-type-card--sm')['font-size'], 'var(--kairos-type-card-sm-size)');
+  assert.ok(position('.kairos-type-card--sm') > position('.kairos-type-card'), 'the small step comes after the card');
+  assert.deepEqual(
+    ['size', 'sm-size', 'weight', 'leading', 'tracking'].map((part) => brandValue(`--kairos-type-card-${part}`)),
+    ['20px', '19px', '800', '1.15', '0'],
+  );
+  assert.deepEqual(
+    ['size', 'sm-size', 'weight', 'leading', 'tracking'].map((part) => productValue(`--kairos-type-card-${part}`)),
+    [productValue('--kairos-text-lg'), productValue('--kairos-text-lg'), '700', '1.2', '0'],
+  );
+
+  // Time line: Courier Prime 16px at 400, 1.6.
+  const time = rule('.kairos-type-time');
+  assert.equal(time['font-family'], 'var(--kairos-mono)');
+  assert.equal(time['text-transform'], 'none');
+  for (const [part, prop] of [['size', 'font-size'], ['weight', 'font-weight'], ['leading', 'line-height'], ['tracking', 'letter-spacing']]) {
+    assert.equal(time[prop], `var(--kairos-type-time-${part})`, `.kairos-type-time ${prop} reads the time ${part}`);
+  }
+  assert.deepEqual(['size', 'weight', 'leading', 'tracking'].map((part) => brandValue(`--kairos-type-time-${part}`)), ['16px', '400', '1.6', '0']);
+  assert.deepEqual(
+    ['size', 'weight', 'leading', 'tracking'].map((part) => productValue(`--kairos-type-time-${part}`)),
+    [productValue('--kairos-text-md'), '400', '1.5', '0'],
+  );
+
+  // Documented: the manifest names the two classes the class-block check skips (they contain `--`).
+  const manifest = read('docs', 'kairos-ui.md');
+  for (const cls of ['kairos-type-title--compact', 'kairos-type-card', 'kairos-type-card--sm', 'kairos-type-time']) {
+    assert.ok(manifest.includes(`\`${cls}\``), `docs/kairos-ui.md names ${cls}`);
+  }
+  assert.doesNotMatch(manifest.split('\n').find((line) => line.startsWith('| `kairos-type-display`')) ?? '', /\bwidth\b/, 'the type-rank row says nothing of width');
 });

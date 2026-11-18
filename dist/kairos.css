@@ -5200,8 +5200,8 @@ th[aria-sort='descending'] .kairos-sort-header::after {
 
 /* Type ranks. Each reads its `--kairos-type-<rank>-*` tokens, so a rank is
    one of the 0.14 type steps at the Product Scale and the brief's size,
-   weight, width, leading and tracking at the Brand Scale. Headings balance
-   their lines and text avoids a lone last word. Label and price are mono. */
+   weight, leading and tracking at the Brand Scale. Headings balance their
+   lines and text avoids a lone last word. Label, price and time are mono. */
 .kairos-type-display,
 .kairos-type-title,
 .kairos-type-h2,
@@ -5249,6 +5249,12 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   letter-spacing: var(--kairos-type-title-tracking);
 }
 
+/* The form page title (Contact, Reschedule, Cancel): the title rank at its own
+   size; weight, leading and tracking are the title's. */
+.kairos-type-title--compact {
+  font-size: var(--kairos-type-title-compact-size);
+}
+
 .kairos-type-h2 {
   font-size: var(--kairos-type-h2-size);
   font-weight: var(--kairos-type-h2-weight);
@@ -5261,6 +5267,23 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   font-weight: var(--kairos-type-h3-weight);
   line-height: var(--kairos-type-h3-leading);
   letter-spacing: var(--kairos-type-h3-tracking);
+}
+
+/* Card headings: a service card's name, a who card, a link card. `--sm` is the
+   step under it. */
+.kairos-type-card {
+  margin: 0;
+  font-family: var(--kairos-display);
+  font-size: var(--kairos-type-card-size);
+  font-weight: var(--kairos-type-card-weight);
+  line-height: var(--kairos-type-card-leading);
+  letter-spacing: var(--kairos-type-card-tracking);
+  text-transform: none;
+  text-wrap: balance;
+}
+
+.kairos-type-card--sm {
+  font-size: var(--kairos-type-card-sm-size);
 }
 
 .kairos-type-quote {
@@ -5317,6 +5340,16 @@ th[aria-sort='descending'] .kairos-sort-header::after {
   font-weight: var(--kairos-type-price-weight);
   line-height: var(--kairos-type-price-leading);
   letter-spacing: var(--kairos-type-price-tracking);
+}
+
+/* A typed time line: mono at 400, where the price is 700. */
+.kairos-type-time {
+  font-family: var(--kairos-mono);
+  font-size: var(--kairos-type-time-size);
+  font-weight: var(--kairos-type-time-weight);
+  line-height: var(--kairos-type-time-leading);
+  letter-spacing: var(--kairos-type-time-tracking);
+  text-transform: none;
 }
 
 .kairos-type-button {

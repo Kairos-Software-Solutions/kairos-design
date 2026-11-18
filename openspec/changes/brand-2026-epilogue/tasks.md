@@ -80,7 +80,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 3. QA package fixes (P1-P6, P8-P10; P7 dropped)
 
-- [ ] 3.1 P3, P4 and P5 (Decided 5, 6, 7 and 15).
+- [x] 3.1 P3, P4 and P5 (Decided 5, 6, 7 and 15).
   - Add the Product Scale defaults to `tokens.css` and the Brand values to `brand.css` (`design.md` › Brand Scale table).
   - Add the `kairos.css` rules: `.kairos-type-title--compact` after `.kairos-type-title`, `.kairos-type-card`, `.kairos-type-card--sm` and `.kairos-type-time`, each its own block.
   - Name the four classes in the `docs/kairos-ui.md` type-rank row and drop "width" from it.
