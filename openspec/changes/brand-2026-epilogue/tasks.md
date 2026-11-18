@@ -78,7 +78,7 @@ Add no dependency. While working, run only the test files a task names; the full
   - Add the `kairos.css` rules: `.kairos-type-title--compact` after `.kairos-type-title`, `.kairos-type-card`, `.kairos-type-card--sm` and `.kairos-type-time`, each its own block.
   - Name the four classes in the `docs/kairos-ui.md` type-rank row and drop "width" from it.
   - Add the new rows to `TABLE` in `tests/brand-scale.test.mjs`.
-  - In `tests/brand-parts.test.mjs`, add "the compact title, card and time ranks read their tokens" and add the three new rank classes to "every shared part from the brief has its class".
+  - In `tests/brand-parts.test.mjs`, add "the compact title, card and time ranks read their tokens" (it also asserts that `docs/kairos-ui.md` names `kairos-type-title--compact` and `kairos-type-card--sm`, which the manifest check skips because they contain `--`) and add the three new rank classes to "every shared part from the brief has its class".
 
   Covers:
   - kairos-design-brand-scale › "Compact title", "Documented", "Values table", "Ranks at Product Scale".
@@ -198,6 +198,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
   Covers:
   - kairos-design-release-0-18 › "Pack list";
+  - kairos-design-brand-tokens › "The fixture is the published release";
   - every story scenario of task 4.1.
 
   Check:
@@ -246,7 +247,7 @@ Planner work, not builder tasks. The repository has no `qa` branch.
   - judge each `NEW_0_18` entry the builder added;
   - confirm the 0.17.0 fixture's sha256 values again.
 - **Browser checks** on the built workshop at 1366 and 390, `cdp('Page.bringToFront')` first:
-  - kairos-design-brand-parts › "Wrapped in the workshop": one underline runs under the words and the arrow, with no second underline under the arrow alone.
+  - kairos-design-brand-parts › "Wrapped in the workshop": the words are underlined and the arrow has no underline of its own, judged against the reference page's text link.
   - The title bar and marker tilt during and after a `transform: scaleX()` wipe applied in the page.
   - The phone menu's current row.
   - Brand stories against `shots/rev3-*` and a computed-style compare against `reference/index.html`, `about.html`, `contact.html` and `services-website.html`: display, title, compact title (Contact), h2, h3, card heading, time line, label, footer heading, tick values, phone menu rows. Compare font, size, weight, `font-stretch`, line height and tracking.

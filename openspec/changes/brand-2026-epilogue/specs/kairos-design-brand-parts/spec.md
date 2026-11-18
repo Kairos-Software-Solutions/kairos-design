@@ -49,7 +49,7 @@ The text link's documented markup SHALL put the label and its trailing `kairos-t
 
 #### Scenario: Wrapped in the workshop
 - **WHEN** the Brand "Links" story renders `<a class="kairos-text-link"><span class="kairos-text-link-text">… <span class="kairos-text-link-arrow">→</span></span></a>`
-- **THEN** the wrapper reports `display: inline`, the arrow `inline-block`, and the anchor has exactly one element child
+- **THEN** the anchor has exactly one element child, the wrapper, which reports `display: block` (a flex container's child is blockified, so the static `display: inline` rule computes to `block` here), and the arrow inside it reports `inline-block`
 - **CHECK** `npm run test-stories`: `stories/brand/Actions.stories.tsx` › "Links" passes; planner browser check at 1366 and 390 that one underline runs under the words and the arrow (Workflow follow-up)
 
 ### Requirement: The phone menu follows lock revision 3 and marks the current page
