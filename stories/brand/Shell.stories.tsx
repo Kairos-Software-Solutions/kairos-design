@@ -86,6 +86,16 @@ export const HeaderAndFooter: Story = {
     await expect(style(footer).borderTopStyle).toBe('solid');
     await expect(style(footer).borderTopColor).toBe(colour('--kairos-rule'));
     await expect(style(footer).borderTopColor).toBe('rgba(22, 17, 11, 0.18)');
+
+    // The headings are h2 elements: the base heading rule's capitals, tracking
+    // and line height of 1 must not reach them. 15px at 1.6 is a 24px line.
+    const headings = all(footer, '.kairos-site-footer-heading');
+    await expect(headings).toHaveLength(2);
+    for (const heading of headings) {
+      await expect(heading.tagName).toBe('H2');
+      await expect(style(heading).textTransform).toBe('none');
+      await expect(style(heading).lineHeight).toBe('24px');
+    }
   },
 };
 
@@ -118,7 +128,7 @@ function PhoneMenuSpecimen() {
       <nav className="kairos-site-menu" id="phone-menu" aria-label="Phone menu" hidden={!open} data-specimen="menu">
         <div>
           <a className="kairos-site-menu-row" href="#home-menu">Home</a>
-          <a className="kairos-site-menu-row" href="#about-menu">About</a>
+          <a className="kairos-site-menu-row" href="#about-menu" aria-current="page" data-specimen="current-row">About</a>
           <a className="kairos-site-menu-row" href="#contact-menu">Contact</a>
         </div>
         <a className="kairos-lang-link kairos-lang-link--row" href="#es-menu" lang="es" hrefLang="es">Español</a>
@@ -156,6 +166,16 @@ export const PhoneMenu: Story = {
         expect(Math.abs(a)).toBeLessThan(0.71);
       });
     }
-    await expect(all(menu, '.kairos-site-menu-row')).toHaveLength(3);
+    const rows = all(menu, '.kairos-site-menu-row');
+    await expect(rows).toHaveLength(3);
+
+    // Every row is 23px; the current page's row is underlined in its own ink,
+    // 6px under the text, and the others are not underlined.
+    const current = one(menu, '[data-specimen="current-row"]');
+    for (const row of rows) await expect(style(row).fontSize).toBe('23px');
+    await expect(style(current).textDecorationLine).toBe('underline');
+    await expect(style(current).textUnderlineOffset).toBe('6px');
+    await expect(style(current).textDecorationColor).toBe(style(current).color);
+    for (const row of rows.filter((r) => r !== current)) await expect(style(row).textDecorationLine).toBe('none');
   },
 };

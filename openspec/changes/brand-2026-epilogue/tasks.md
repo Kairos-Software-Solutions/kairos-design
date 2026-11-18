@@ -123,7 +123,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 4. Workshop
 
-- [ ] 4.1 Do `design.md` › Workshop:
+- [x] 4.1 Do `design.md` › Workshop:
   - the font link in `.storybook/preview-head.html` and `docs/preview.html` (Decided 17);
   - the story edits in `stories/brand/` ("Type Ranks", "Buttons", "Links", "Without The Switch", "Header And Footer", "Phone Menu", "Placeholders And Marker");
   - "The families" in `stories/foundations/Type.stories.tsx`.

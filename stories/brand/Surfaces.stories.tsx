@@ -158,5 +158,12 @@ export const PlaceholdersAndMarker: Story = {
     const marker = one(canvasElement, '[data-specimen="marker"]');
     await expect(style(marker, '::after').backgroundColor).toBe(colour('--kairos-highlight'));
     await expect(style(one(canvasElement, '.kairos-title-bar'), '::after').backgroundColor).toBe(colour('--kairos-highlight'));
+
+    // Both tilt a degree through `rotate`, and set no `transform`, so a host that
+    // wipes them in with `transform: scaleX()` keeps the tilt.
+    for (const el of [marker, one(canvasElement, '.kairos-title-bar')]) {
+      await expect(style(el, '::after').rotate).toBe('-1deg');
+      await expect(style(el, '::after').transform).toBe('none');
+    }
   },
 };
