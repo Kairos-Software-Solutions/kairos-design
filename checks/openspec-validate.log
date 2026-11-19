@@ -1,0 +1,15 @@
+--- config in the copy:
+schema: spec-driven
+
+# Project context (optional)
+--- validate (store-less copy)
+Change 'kairos-design-release-0-19' is valid
+ℹ [INFO] kairos-design-brand-scale/spec.md: Archive would refuse this delta: kairos-design-brand-scale: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.
+ℹ [INFO] kairos-design-brand-tokens/spec.md: Archive would refuse this delta: kairos-design-brand-tokens: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.
+VALIDATE_EXIT=0
+--- validate in place (real config, store line present)
+Warning: /home/agent/studio/jobs/job-090/openspec/config.yaml declares store 'kairos-plans', but this directory is a real OpenSpec root; the declaration is ignored.
+Change 'kairos-design-release-0-19' is valid
+ℹ [INFO] kairos-design-brand-scale/spec.md: Archive would refuse this delta: kairos-design-brand-scale: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.
+ℹ [INFO] kairos-design-brand-tokens/spec.md: Archive would refuse this delta: kairos-design-brand-tokens: target spec does not exist; only ADDED requirements are allowed for new specs. MODIFIED and RENAMED operations require an existing spec.
+INPLACE_EXIT=0

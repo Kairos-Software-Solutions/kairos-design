@@ -1,0 +1,60 @@
+diff --git a/dist/kairos.css b/dist/kairos.css
+index 5d6f506..12acff0 100644
+--- a/dist/kairos.css
++++ b/dist/kairos.css
+@@ -1904,16 +1904,18 @@ button.kairos-step {
+ /* The one amber action on a screen. The treatment lives here rather than as
+    inline custom properties on `PageHeader`'s link, so a primary that is a
+    button — one that opens a dialog instead of navigating — is the same rank as
+-   one that is a link, with nothing to keep in step by hand. */
++   one that is a link, with nothing to keep in step by hand. It reads the same
++   button stamp knobs as `kairos-button--primary`, so it keeps the stamp at the
++   Product Scale and is the brand's main button at the Brand Scale. */
+ .kairos-page-header-primary {
+   --button-bg: var(--kairos-accent);
+   --button-hover-bg: var(--kairos-accent-hover);
+   --button-color: var(--kairos-accent-text);
+   --button-border: var(--kairos-border);
+   --button-border-width: 2px;
+-  --button-shadow: var(--kairos-shadow);
+-  --button-shadow-hover: var(--kairos-shadow-card);
+-  --button-shadow-active: var(--kairos-shadow-pressed);
++  --button-shadow: var(--kairos-button-shadow-rest);
++  --button-shadow-hover: var(--kairos-button-shadow-hover);
++  --button-shadow-active: var(--kairos-button-shadow-active);
+   text-decoration: none;
+ }
+ 
+@@ -1964,11 +1966,12 @@ button.kairos-step {
+   text-transform: uppercase;
+ }
+ 
+-/* Shadow Rank: an offset shadow means "this floats above the page". It is a
+-   rank, not a texture, and it belongs to raised interactive layers only —
+-   buttons, menus, and modals. A panel is the page; giving every panel a stamp
+-   spends the only elevation signal the brand has on the thing that needs it
+-   least, and leaves a real popover with nothing left to say. */
++/* Shadow Rank: the hard ink stamp is the rank-1 button's and nothing else's.
++   A panel is the page; giving every panel a stamp spends the only elevation
++   signal the brand has on the thing that needs it least, and makes a card look
++   as pressable as a button. Since 0.19.0 a panel, card, menu or dialog wears
++   the brief's soft card shadow, through `--kairos-shadow-card` and the other
++   two surface tokens. */
+ .kairos-panel {
+   background: var(--kairos-surface);
+   border: var(--kairos-border-w) solid var(--kairos-border);
+@@ -1976,10 +1979,10 @@ button.kairos-step {
+   box-shadow: var(--kairos-shadow-card);
+ }
+ 
+-/* A panel inside a panel is not raised off the one holding it, and two stamps
+-   stacked read as a printing error rather than as depth. One rule, so nobody
+-   has to decide: the outermost panel on a region stamps and everything nested
+-   in it is flat. */
++/* A panel inside a panel is not raised off the one holding it, and two soft
++   shadows stacked muddy rather than give depth. One rule, so nobody has to
++   decide: the outermost panel on a region is raised and everything nested in
++   it is flat. */
+ .kairos-panel .kairos-panel,
+ .kairos-panel .kairos-card,
+ .kairos-panel .kairos-subpanel,
