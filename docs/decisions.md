@@ -1714,3 +1714,49 @@ Prime for labels, prices, times and dates, and says never to set
   0.17.0 declaration resolves the same at the Product Scale apart from listed
   changes (`GONE_0_18`, `CHANGED_0_18`, `NEW_0_18`). A test checks that every
   class and token the website reads is still declared.
+
+## Phone text and the main action's stamp, 0.19.0
+
+The first review of an app's redesign found two package values that make the
+apps hard work on a phone: "Body text is 14 px and button labels 12 px
+(kairos-design tokens), small for one-handed use between jobs. Every panel
+wears the hard 6 px ink stamp, so cards look as pressable as buttons and
+compete with the main action." The reviewer decided on 16px body text on
+phones and the stamp only on primary buttons, and said to publish. 0.19.0
+follows it.
+
+- **Phones are below 900px.** `@media screen and (max-width: 899px)`, the
+  boundary where the sidebar goes and the bottom bar appears. A tablet in
+  portrait (768 to 899px) is on the bottom bar, so it gets the phone sizes too;
+  767px, the table-to-card swap, would have left that layout at 14px. The query
+  names `screen` so paper keeps 14px: a printed A4 page is narrower than 900px.
+- **16px body, 14px and 13px buttons.** `--kairos-text-body` is `1rem`, still in
+  rem so a reader's browser setting moves it. Button labels are 14px and small
+  ones 13px: a 700-weight label at 14px reads at least as large as 16px body at
+  400, it keeps the label one step under the body, and both are steps the scale
+  already has, so no step was added. From 900px every size stands.
+- **The stamp is for rank-1 buttons.** Two new tokens, `--kairos-shadow-stamp`
+  (4px) and `--kairos-shadow-stamp-hover` (6px), carry it with
+  `--kairos-shadow-pressed` (2px), through the button knobs. Primary, the
+  confirmation's destructive solid (rank 1 in a confirmation) and the page
+  header's primary keep it. Secondary, tertiary, ghost and outline danger stay
+  flat, as before.
+- **The surface tokens were re-pointed, not each rule.** `--kairos-shadow`,
+  `--kairos-shadow-card` and `--kairos-shadow-lg` became
+  `--kairos-shadow-soft-card`, which is what `brand.css` already makes them at
+  the Brand Scale. Re-pointing the tokens takes the ten package surfaces and
+  any app surface that reads them, and leaves the rules as they were. Nested
+  panels stay flat. Dark surfaces take the interim soft shadow colour, and
+  keep their 1px border.
+- **The page header's primary reads the button knobs**, so it keeps its stamp at
+  the Product Scale and is the brand's main button at the Brand Scale.
+- **Not changed:** headings, field labels, hints, chips and table headers on
+  phones (below 900px, `--kairos-text-heading` is 16px, the same size as body
+  text, and differs by weight); control heights; `brand.css`, `base.css` and
+  every React module.
+- **Guards.** The 0.18.0 stylesheets are a fixture. A test checks that every
+  0.18.0 declaration resolves the same at the Product Scale apart from the
+  listed changes (`CHANGED_0_19`: three tokens and ten surface shadows) and
+  that the only new width-scoped token rule is the phone one (`PHONE_0_19`).
+  Further tests pin the phone sizes, the Brand Scale's sizes on phones and the
+  stamp on rank-1 buttons only.

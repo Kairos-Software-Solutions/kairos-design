@@ -97,7 +97,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 5. Release and docs
 
-- [ ] 5.1 Set the version and write the docs.
+- [x] 5.1 Set the version and write the docs.
 
     - Set `package.json` › `version` to `0.19.0`, and the two top `version` fields of `package-lock.json` (the root `version` and `packages[""].version`) to match. Change nothing else in either file.
     - Write `design.md` › Docs: "Upgrading to 0.19.0" in `docs/adoption.md` above "Upgrading to 0.18.0", the 0.19.0 section at the end of `docs/decisions.md`, and any `docs/kairos-ui.md` edit not yet done. Earlier sections of both files are history and stay.
