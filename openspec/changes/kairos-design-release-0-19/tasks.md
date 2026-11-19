@@ -56,7 +56,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 3. The stamp only on rank-1 buttons
 
-- [ ] 3.1 Apply Decided 6-13.
+- [x] 3.1 Apply Decided 6-13.
 
     - `dist/tokens.css`:
         - add `--kairos-shadow-stamp` and `--kairos-shadow-stamp-hover` beside `--kairos-shadow-pressed` in the light block, and remove `--kairos-shadow`, `--kairos-shadow-card` and `--kairos-shadow-lg` from it;

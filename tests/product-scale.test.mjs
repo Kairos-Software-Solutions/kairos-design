@@ -269,8 +269,13 @@ test('every 0.14 declaration resolves the same at Product Scale, light and dark'
         failures.push(`tokens.css ${theme}: ${name} is no longer declared`);
         continue;
       }
-      const expected = resolve(value, before[theme]);
       const actual = resolve(after[theme].get(name), after[theme]);
+      const soft = CHANGED_0_19.tokens.find((c) => c.token === name);
+      if (soft) {
+        if (actual !== soft.value[theme]) failures.push(`tokens.css ${theme}: ${name} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
+        continue;
+      }
+      const expected = resolve(value, before[theme]);
       if (expected !== actual) failures.push(`tokens.css ${theme}: ${name} was ${expected}, is ${actual}`);
     }
   }
@@ -286,11 +291,16 @@ test('every 0.14 declaration resolves the same at Product Scale, light and dark'
         continue;
       }
       const changed = file === 'kairos' && !d.context.length ? CHANGED_0_17.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
+      const soft = file === 'kairos' && !d.context.length ? CHANGED_0_19.declarations.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       for (const theme of THEMES) {
         const actual = resolve(now.value, after[theme]);
         if (changed) {
           const want = typeof changed.value === 'string' ? changed.value : changed.value[theme];
           if (actual !== want) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_17 says ${want}`);
+          continue;
+        }
+        if (soft) {
+          if (actual !== soft.value[theme]) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
           continue;
         }
         const expected = resolve(d.value, before[theme]);
@@ -380,8 +390,13 @@ test('every 0.17.0 declaration resolves the same at Product Scale, light and dar
         failures.push(`tokens.css ${theme}: ${name} is no longer declared`);
         continue;
       }
-      const expected = resolve(value, before[theme]);
       const actual = resolve(after[theme].get(name), after[theme]);
+      const soft = CHANGED_0_19.tokens.find((c) => c.token === name);
+      if (soft) {
+        if (actual !== soft.value[theme]) failures.push(`tokens.css ${theme}: ${name} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
+        continue;
+      }
+      const expected = resolve(value, before[theme]);
       if (expected !== actual) failures.push(`tokens.css ${theme}: ${name} was ${expected}, is ${actual}`);
     }
   }
@@ -406,10 +421,15 @@ test('every 0.17.0 declaration resolves the same at Product Scale, light and dar
       }
       const changed = top ? CHANGED_0_18.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       if (changed) changedUsed.add(changed);
+      const soft = top ? CHANGED_0_19.declarations.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       for (const theme of THEMES) {
         const actual = resolve(now.value, after[theme]);
         if (changed) {
           if (actual !== changed.value) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_18 says ${changed.value}`);
+          continue;
+        }
+        if (soft) {
+          if (actual !== soft.value[theme]) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
           continue;
         }
         const expected = resolve(d.value, before[theme]);

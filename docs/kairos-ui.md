@@ -156,28 +156,37 @@ Radius is sharp by default: `--kairos-radius-button` is 0,
 families and to nothing in a tool.
 
 The stamp is flat, offset bottom-right, zero blur, zero spread, and it inverts
-to linen on dark. It has four ranks and they mean something:
+to linen on dark. Since 0.19.0 it belongs to the rank-1 button and to nothing
+else, and it has three sizes, which are the button's three states:
 
 | Token | Offset | On |
 | --- | --- | --- |
-| `--kairos-shadow-pressed` | 2px | A filled button while it is held |
-| `--kairos-shadow` | 4px | A filled button at rest, and a card |
-| `--kairos-shadow-card` | 6px | A panel, and a filled button under the cursor |
-| `--kairos-shadow-lg` | 8px | A dialog |
+| `--kairos-shadow-pressed` | 2px | A rank-1 button while it is held |
+| `--kairos-shadow-stamp` | 4px | A rank-1 button at rest |
+| `--kairos-shadow-stamp-hover` | 6px | A rank-1 button under the cursor |
 
-**A top-level panel stamps; anything nested inside one is flat.** One rule, so
-nobody has to decide. Two stamps stacked read as a printing error rather than
-as depth, and `kairos.css` enforces it — `.kairos-panel .kairos-panel`,
-`.kairos-card`, and `.kairos-subpanel` all drop to `none`.
+An app's own button that wants the stamp reads `--kairos-shadow-stamp`.
+
+Every surface takes the brief's soft card shadow. `--kairos-shadow`,
+`--kairos-shadow-card` and `--kairos-shadow-lg` are all
+`--kairos-shadow-soft-card` now (they were the 4px, 6px and 8px stamps), on
+cards, panels, menus, dialogs, popovers, toasts and the skip link. The names
+stay so that an app's own card that reads one goes soft with the package's.
+
+**A top-level panel is raised; anything nested inside one is flat.** One rule,
+so nobody has to decide. Two shadows stacked muddy rather than give depth, and
+`kairos.css` enforces it — `.kairos-panel .kairos-panel`, `.kairos-card`, and
+`.kairos-subpanel` all drop to `none`.
 
 That guard is written against this package's classes and so cannot see an
-app's. A `kairos-panel` inside a surface's own stamped block is nested to the
+app's. A `kairos-panel` inside a surface's own raised block is nested to the
 reader and top-level to the selector, which is how the card's QR frame came to
-stamp `6px` inside a face already stamping `8px`. Where the enclosing block is
-an app's class, the call site says it: `kairos-panel--flat`.
+wear its own shadow inside a face already wearing one. Where the enclosing block
+is an app's class, the call site says it: `kairos-panel--flat`.
 
-Only the filled button ranks carry a stamp at all. An outline button is already
-drawing its own boundary, and a stamp under it reads as a second border.
+Only rank-1 buttons carry the stamp: primary, the confirmation's destructive
+solid, and the page header's primary. An outline button is already drawing its
+own boundary, and a stamp under it reads as a second border.
 
 ### Motion
 
@@ -231,9 +240,9 @@ drawing its own boundary, and a stamp under it reads as a second border.
 | `kairos-record-card` | The same records below 768px | Desktop lists | `--inert` |
 | `kairos-collapsible-card` | Detail-heavy cards, collapsed by default | Cards of 3 fields or fewer | — |
 | `kairos-disclosure` | A section of a screen that stays closed until wanted: a record's related list, a form's optional group, the rare things at the bottom. Closed it is one row: `-caret`, `-heading` holding `-title` and the `-meta` line that says what is inside, then `-count`; open it shows `-body`. On `<details>`. `DisclosureSection` renders it | The record's essentials — who, how much, what state — which stay open; a sequence, which is `kairos-steps` | — |
-| `kairos-disclosure-group` | Several `kairos-disclosure` sections in one panel, ruled apart: one stamp for a record's related lists rather than one each | A single section, which is already a panel | — |
+| `kairos-disclosure-group` | Several `kairos-disclosure` sections in one panel, ruled apart: one raised panel for a record's related lists rather than one each | A single section, which is already a panel | — |
 | `kairos-state-chip` | Status of a record | Counts, labels, categories | `--settled` `--overdue` `--awaiting` `--draft` `--neutral` |
-| `kairos-panel` | Bordered container: ground, border, radius, and the `6px` stamp — pair it with `kairos-pad` | A panel nested in another one, which is flat; take `--flat` where the enclosing block is an app's own class | `--flat` |
+| `kairos-panel` | Bordered container: ground, border, radius, and the soft card shadow — pair it with `kairos-pad` | A panel nested in another one, which is flat; take `--flat` where the enclosing block is an app's own class | `--flat` |
 | `kairos-pad` | The padding inside a panel or card | Spacing between blocks; that is `kairos-stack` | `--xs` `--sm` `--lg` |
 | `kairos-empty-state` | A list or table with no records | Errors; use `kairos-banner` | — |
 | `kairos-metric` | A single figure with its label | A figure inside a table cell | — |
@@ -256,7 +265,7 @@ every table the registry rendered floated on the page with no container at all.
 `.kairos-table-panel:not(.kairos-panel)` now draws a dashed red outline so the
 mistake is unmissable rather than invisible, and a test fails on it.
 
-`kairos-panel` paints the border, the ground, the radius, and the stamp; the
+`kairos-panel` paints the border, the ground, the radius, and the soft card shadow; the
 padding is `kairos-pad`, a separate class. A panel written by hand takes both. The
 `Panel` component applies `kairos-pad` for you and drops it when you pass
 `flush`, so a table can supply its own — which is the whole meaning of that
@@ -462,7 +471,7 @@ the package's.
 | `kairos-tick-box` | A checkbox with its label: `kairos-tick-box-input` (native, visually hidden) then `kairos-tick-box-label`, a 24px square that shows a tick on tint once checked, in a 46px row. Wrap a set in `kairos-tick-box-group` (a `fieldset`) | A filter toggle, which is `kairos-segmented`; a dense form row, which is `kairos-checkbox-row` | — |
 | `kairos-day-grid` | Picking one day: a radio group of `kairos-day-grid-cell` labels, each a `kairos-day-grid-input` then `kairos-day-grid-face` holding `-weekday` over `-date`. 5 columns of 62px cells; the picked day fills with picked and pops its ink frame. `aria-invalid="true"` turns the outer edge to the error colour | More than one pick, or a full calendar | — |
 | `kairos-time-switch` | Picking one of 2 to 5 short options (morning, afternoon, evening): `kairos-time-switch-option` labels holding `-input` and `-label`, then one `kairos-time-switch-pill`, hidden until the first pick, that slides to the checked option. `aria-invalid="true"` on the track for its error edge | Six or more options; actions | — |
-| `kairos-card--soft` | The brief's card on `kairos-card`: card fill, no border, the soft card shadow, square corners | A tool's raised card, which keeps the stamp | `kairos-card--soft-rounded` for 2px corners on panels and lists |
+| `kairos-card--soft` | The brief's card on `kairos-card`: card fill, no border, the soft card shadow, square corners | A tool's bordered card (`kairos-card`) | `kairos-card--soft-rounded` for 2px corners on panels and lists |
 | `kairos-inset-band` | A tint box inside the content width, for a closing call to action | A full-width band; never against a `kairos-section-band` without cream or white between them | — |
 | `kairos-section-band` | The band ground across the full width behind one section | More than one section per page | — |
 | `kairos-tint-card` | A flat tint box | A raised card | `--band` for the band ground |

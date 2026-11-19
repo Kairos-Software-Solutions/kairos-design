@@ -101,9 +101,21 @@ test('every solid colour token is plain hex', () => {
 test('every 0.14 token name still resolves, to its 0.14 value unless listed', () => {
   const LISTED = {
     // 0.17.0: buttons, tabs and switches read in sentence case, so their
-    // tracking comes down from the old capitals' 0.14em.
-    light: { '--kairos-accent-hover': ['#e6a92d', '#ffb627'], '--kairos-track-button': ['0.14em', '0.01em'] },
-    dark: { '--kairos-track-button': ['0.14em', '0.01em'] },
+    // tracking comes down from the old capitals' 0.14em. 0.19.0: the three
+    // surface shadows take the brief's soft card shadow.
+    light: {
+      '--kairos-accent-hover': ['#e6a92d', '#ffb627'],
+      '--kairos-track-button': ['0.14em', '0.01em'],
+      '--kairos-shadow': ['4px 4px 0 #16110b', '0 14px 30px -20px rgba(71, 55, 40, 0.32)'],
+      '--kairos-shadow-card': ['6px 6px 0 #16110b', '0 14px 30px -20px rgba(71, 55, 40, 0.32)'],
+      '--kairos-shadow-lg': ['8px 8px 0 #16110b', '0 14px 30px -20px rgba(71, 55, 40, 0.32)'],
+    },
+    dark: {
+      '--kairos-track-button': ['0.14em', '0.01em'],
+      '--kairos-shadow': ['4px 4px 0 #f5f1e8', '0 14px 30px -20px rgba(0, 0, 0, 0.5)'],
+      '--kairos-shadow-card': ['6px 6px 0 #f5f1e8', '0 14px 30px -20px rgba(0, 0, 0, 0.5)'],
+      '--kairos-shadow-lg': ['8px 8px 0 #f5f1e8', '0 14px 30px -20px rgba(0, 0, 0, 0.5)'],
+    },
     both: ['--kairos-display', '--kairos-body', '--kairos-mono'],
   };
   const failures = [];
