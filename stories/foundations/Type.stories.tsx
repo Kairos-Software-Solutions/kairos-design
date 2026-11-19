@@ -1,4 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
+import Button from '../../dist/react/Button';
+import { one, style } from '../brand/computed';
 import { constant, group } from '../tokens';
 import { Note, Page, Section, Values } from '../Specimen';
 
@@ -65,6 +68,12 @@ export const Scale: Story = {
           them — 0.8, 0.8125, 0.82, 0.84, 0.85 and 0.86rem — sat inside one pixel of each other.
           Nobody can tell 12.8px from 13.1px, so it was never a decision; it was six guesses at the
           same rank. Set in one column, the remaining eight are eight.
+        </Note>
+        <Note>
+          Below 900px, where the bottom bar replaces the sidebar, the body step is 16px and the
+          button roles are 14px and 13px (small). From 900px, and on paper, the body step is 14px
+          and the buttons 12px and 11px. The rows below are drawn at whichever width this page is
+          viewed at; <em>Phone Sizes</em> pins the phone branch.
         </Note>
         <div className="kairos-panel kairos-pad">
           {SIZES.map((step) => <Step key={step} step={step} />)}
@@ -200,4 +209,33 @@ export const OneFamilyPerJob: Story = {
       </Note>
     </Page>
   ),
+};
+
+/**
+ * The phone branch of the Product Scale, asserted at the workshop's
+ * `narrow` viewport (419px, under the 900px boundary). The first assertion
+ * is the query itself, so a story left at the default 1200px fails there
+ * rather than on a size. Nothing here sets the Brand Scale: that scale keeps
+ * its own sizes at every width.
+ */
+export const PhoneSizes: Story = {
+  globals: { viewport: { value: 'narrow' } },
+  render: () => (
+    <div className="kairos-stack kairos-stack--md">
+      <p className="kairos-body">Three invoices are past their due date.</p>
+      <div className="kairos-row kairos-row--md">
+        <Button variant="primary">Send reminder</Button>
+        <Button variant="secondary" size="sm">
+          Remind later
+        </Button>
+      </div>
+    </div>
+  ),
+  play: async ({ canvasElement }) => {
+    await expect(window.matchMedia('screen and (max-width: 899px)').matches).toBe(true);
+    await expect(document.documentElement.hasAttribute('data-scale')).toBe(false);
+    await expect(style(one(canvasElement, 'p.kairos-body')).fontSize).toBe('16px');
+    await expect(style(one(canvasElement, '.kairos-button--primary')).fontSize).toBe('14px');
+    await expect(style(one(canvasElement, '.kairos-button--sm')).fontSize).toBe('13px');
+  },
 };

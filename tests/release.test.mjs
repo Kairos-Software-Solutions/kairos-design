@@ -229,3 +229,38 @@ test('the docs tell apps to load Epilogue', () => {
   assert.ok(text.includes('font-stretch'), 'the entry names font-stretch');
   assert.ok(text.includes('Epilogue'), 'the entry names Epilogue');
 });
+
+test('the docs describe 0.19.0', () => {
+  const adoption = read('docs', 'adoption.md');
+  const start = adoption.search(/^#+ .*Upgrading to 0\.19\.0.*$/m);
+  assert.notEqual(start, -1, 'docs/adoption.md has an "Upgrading to 0.19.0" heading');
+  const level = adoption.slice(start).match(/^#+/)[0].length;
+  const rest = adoption.slice(start).split('\n').slice(1).join('\n');
+  const end = rest.search(new RegExp(`^#{1,${level}} `, 'm'));
+  const section = end === -1 ? rest : rest.slice(0, end);
+  for (const needle of [
+    '--kairos-text-body',
+    '1rem',
+    '899px',
+    '--kairos-text-button',
+    '--kairos-text-button-sm',
+    '--kairos-shadow-stamp',
+    '--kairos-shadow-stamp-hover',
+    '--kairos-shadow-pressed',
+    '--kairos-shadow-card',
+    '--kairos-shadow-soft-card',
+  ]) {
+    assert.ok(section.includes(needle), `the upgrade section names ${needle}`);
+  }
+  assert.ok(adoption.indexOf('Upgrading to 0.19.0') < adoption.indexOf('Upgrading to 0.18.0'), '0.19.0 sits above 0.18.0');
+
+  assert.match(read('docs', 'decisions.md'), /^#+ .*0\.19\.0.*$/m, 'docs/decisions.md has a 0.19.0 heading');
+
+  const manifest = read('docs', 'kairos-ui.md');
+  assert.ok(manifest.includes('--kairos-shadow-stamp'), 'the manifest names --kairos-shadow-stamp');
+  assert.ok(manifest.includes('--kairos-shadow-stamp-hover'), 'the manifest names --kairos-shadow-stamp-hover');
+  assert.ok(manifest.includes('below 900px'), 'the manifest says "below 900px"');
+  const panelRow = manifest.split('\n').find((line) => line.startsWith('| `kairos-panel` |'));
+  assert.ok(panelRow, 'the manifest has a kairos-panel row');
+  assert.ok(!panelRow.includes('6px'), 'the kairos-panel row no longer promises a 6px stamp');
+});

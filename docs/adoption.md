@@ -18,6 +18,43 @@ Adopt in this order. Each step is independently shippable.
 3. **Base.** Import `base.css` last, once the app no longer depends on its own
    element defaults.
 
+## Upgrading to 0.19.0
+
+The phone text and stamp release. At the Product Scale, body text is 16px on
+phones and the hard ink stamp stays on rank-1 buttons only. See "Phone text and
+the main action's stamp, 0.19.0" in [decisions.md](decisions.md). Minor: under
+0.x, `^0.18.0` and earlier ranges stop below it, so an app or site gets it only
+when its own plan bumps it.
+
+**Phone sizes.** Below 900px (`@media screen and (max-width: 899px)`, the
+boundary where the bottom bar replaces the sidebar) `--kairos-text-body` is
+`1rem` (16px), `--kairos-text-button` is 14px and `--kairos-text-button-sm` is
+13px. From 900px nothing moves: 14px, 12px and 11px. Paper keeps 14px, because
+the query names `screen`. The Brand Scale is unchanged: it sets its own body
+and button sizes, which outrank the phone rule at every width. Everything that
+reads those tokens follows with no edit: page text, table cells, banners,
+choice rows, page header descriptions and `kairos-type-body`. Field labels,
+hints, chips, table headers and nav rows keep their sizes.
+
+Check an app's own dense tables between 768px and 899px. They are still tables
+there, now at 16px, and may scroll sideways sooner.
+
+**The stamp.** Only rank-1 buttons wear it: `kairos-button--primary`,
+`kairos-button--danger-solid` and the page header's primary. It comes from
+`--kairos-shadow-stamp` (4px, at rest), `--kairos-shadow-stamp-hover` (6px,
+under the cursor) and `--kairos-shadow-pressed` (2px, held), read through the
+`--kairos-button-shadow-rest`, `-hover` and `-active` knobs. An app's own button
+that wants the stamp reads `--kairos-shadow-stamp`.
+
+**Soft surfaces.** `--kairos-shadow`, `--kairos-shadow-card` and
+`--kairos-shadow-lg` are now `--kairos-shadow-soft-card`, the brief's soft card
+shadow, so panels, cards, disclosures, dialogs, popovers, menus, toasts and the
+skip link go soft. An app's own card that reads one of the three goes soft too.
+A panel or card nested in a panel stays flat.
+
+**Delete local overrides.** An app that carried its own override for a 16px
+phone body or for soft panels deletes it on this repin.
+
 ## Upgrading to 0.18.0
 
 The brand type release. Kairos design brief v3 (lock revision 3) sets every

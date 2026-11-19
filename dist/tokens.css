@@ -128,14 +128,17 @@
      linen on dark: an ink shadow on a #1A1410 page is invisible, and the
      offset is the whole point of the mark. */
   --kairos-shadow-color: #16110b;
-  /* Four ranks. The pressed one is smaller than the resting one, so a press
-     reads as the control moving toward the page rather than as a new colour.
-     Only the filled button ranks carry a stamp at all: an outline button is
-     drawing its own boundary and a stamp under it reads as two borders. */
+  /* The stamp is the rank-1 button's, at rest, under the cursor and held, and
+     nothing else wears it: an outline button is drawing its own boundary and a
+     stamp under it reads as two borders, and a card that wore one would look
+     as pressable as a button. The pressed one is smaller than the resting one,
+     so a press reads as the control moving toward the page rather than as a
+     new colour. Since 0.19.0 surfaces (panels, cards, menus, dialogs, toasts)
+     take the brief's soft card shadow through the three older names,
+     `--kairos-shadow`, `-card` and `-lg`, declared in the alias block below. */
   --kairos-shadow-pressed: 2px 2px 0 var(--kairos-shadow-color);
-  --kairos-shadow: 4px 4px 0 var(--kairos-shadow-color);
-  --kairos-shadow-card: 6px 6px 0 var(--kairos-shadow-color);
-  --kairos-shadow-lg: 8px 8px 0 var(--kairos-shadow-color);
+  --kairos-shadow-stamp: 4px 4px 0 var(--kairos-shadow-color);
+  --kairos-shadow-stamp-hover: 6px 6px 0 var(--kairos-shadow-color);
 
   /* --- Brand grounds, marks and states ---------------------------------
      The roles Kairos design brief v1 adds. Ink, ink-2 and ink-3 clear 4.5:1
@@ -198,6 +201,13 @@
   --kairos-shadow-soft-photo: 0 10px 22px -12px var(--kairos-shadow-soft-color);
   --kairos-shadow-press: 4px 4px 0 0 var(--kairos-shadow-color);
   --kairos-shadow-hairline: 0 1px 0 0 var(--kairos-rule);
+  /* Surfaces: the soft card shadow. These three were the 4px, 6px and 8px ink
+     stamps until 0.18.0; the names stay so an app's own surface that reads one
+     goes soft with the package's. They sit here, not with the stamp, so they
+     follow a theme set below the root as the soft shadow does. */
+  --kairos-shadow: var(--kairos-shadow-soft-card);
+  --kairos-shadow-card: var(--kairos-shadow-soft-card);
+  --kairos-shadow-lg: var(--kairos-shadow-soft-card);
 
   /* Component knobs that name a colour. Their defaults are what 0.14 painted;
      `brand.css` re-points them at the Brand Scale. Here rather than in the
@@ -511,9 +521,9 @@
   --kairos-text-button-sm: var(--kairos-text-xs);
   --kairos-button-weight: 700;
   --kairos-button-case: none;
-  /* The stamp the filled ranks wear at rest, on hover and on press. */
-  --kairos-button-shadow-rest: var(--kairos-shadow);
-  --kairos-button-shadow-hover: var(--kairos-shadow-card);
+  /* The stamp rank 1 wears at rest, on hover and on press. */
+  --kairos-button-shadow-rest: var(--kairos-shadow-stamp);
+  --kairos-button-shadow-hover: var(--kairos-shadow-stamp-hover);
   --kairos-button-shadow-active: var(--kairos-shadow-pressed);
   /* Rank 2 stays flat at the Product Scale: a hover-only stamp would make the
      ranks identical on touch. */
@@ -707,6 +717,19 @@
 @media (max-width: 899px) {
   :root {
     --kairos-site-header-h: 66px;
+  }
+}
+
+/* Phones: below the sidebar boundary, the 899/900 boundary of the register
+   below, body text is 16px and button labels 14px (13px small). From 900px
+   the sizes above stand. The Brand Scale sets all three at (0,2,0), which
+   outranks this rule, so it is unchanged. `screen`: paper keeps 14px, since
+   a printed A4 page is narrower than 900px. */
+@media screen and (max-width: 899px) {
+  :root {
+    --kairos-text-body: 1rem;
+    --kairos-text-button: 0.875rem;
+    --kairos-text-button-sm: var(--kairos-text-md);
   }
 }
 

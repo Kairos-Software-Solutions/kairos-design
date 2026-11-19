@@ -1,12 +1,13 @@
 /**
- * Product Scale renders as 0.14.0 did.
+ * Product Scale renders as 0.14.0, 0.17.0 and 0.18.0 did.
  *
  * The promise every app relies on when it bumps: with no `data-scale`
  * attribute on the root, every class 0.14.0 shipped draws the same thing in
- * 0.16, light and dark, apart from a short list of intentional changes. The
- * comparison is against byte copies of the published 0.14.0 stylesheets in
- * `tests/fixtures/kairos-design-0.14.0/`, not against git history, so it
- * keeps meaning the same thing after the history moves on.
+ * 0.19, light and dark, apart from a short list of intentional changes. The
+ * comparison is against byte copies of the published 0.14.0, 0.17.0 and
+ * 0.18.0 stylesheets in `tests/fixtures/kairos-design-<version>/`, not
+ * against git history, so it keeps meaning the same thing after the history
+ * moves on.
  *
  * Values are compared resolved: a rule that read `2px` and now reads a knob
  * whose default is `2px` passes, and a knob default that differs by a hair
@@ -23,6 +24,7 @@ import { classesIn, parse, resolve, splitTop, tokenMaps } from './helpers/css.mj
 const ROOT = resolvePath(dirname(fileURLToPath(import.meta.url)), '..');
 const FIXTURE = join(ROOT, 'tests', 'fixtures', 'kairos-design-0.14.0');
 const FIXTURE_0_17 = join(ROOT, 'tests', 'fixtures', 'kairos-design-0.17.0');
+const FIXTURE_0_18 = join(ROOT, 'tests', 'fixtures', 'kairos-design-0.18.0');
 const read = (...parts) => readFileSync(join(...parts), 'utf8');
 
 const THEMES = ['light', 'dark'];
@@ -170,6 +172,39 @@ const NEW_0_18 = [
 const newEntry0_18 = (context, selector, prop) =>
   NEW_0_18.find((n) => (n.context ?? '') === context && n.selector === selector && n.props.includes(prop));
 
+/**
+ * 0.19.0 against the published 0.18.0 (`tests/fixtures/kairos-design-0.18.0/`).
+ *
+ * `CHANGED_0_19` is every 0.18.0 key whose value changes on purpose: the three
+ * surface shadow tokens take the brief's soft card shadow, and so do the ten
+ * surfaces that read them. A listed token or declaration is compared with its
+ * listed value; everything else, the buttons and the page header's primary
+ * included, must resolve as before. The entries are not applied to the old
+ * token map, which would make every button reader resolve soft on the old side.
+ * `PHONE_0_19` is the one new rule in a width query (`tokenMaps()` skips them).
+ * `NEW_0_19` lists new declarations on 0.18.0 classes that are not
+ * Brand-scoped; it is empty.
+ */
+const SOFT_0_19 = { light: '0 14px 30px -20px rgba(71, 55, 40, 0.32)', dark: '0 14px 30px -20px rgba(0, 0, 0, 0.5)' };
+const CHANGED_0_19 = {
+  // The three surface tokens take the brief's soft card shadow (decision 6).
+  tokens: ['--kairos-shadow', '--kairos-shadow-card', '--kairos-shadow-lg'].map((token) => ({ token, value: SOFT_0_19 })),
+  // The ten surfaces that read them, top-level kairos.css rules.
+  declarations: [
+    '.kairos-skip-link', '.kairos-disclosure', '.kairos-disclosure-group', '.kairos-panel', '.kairos-card',
+    '.kairos-dialog-content', '.kairos-overflow-menu', '.kairos-combobox-menu', '.kairos-popover', '.kairos-toast',
+  ].map((selector) => ({ selector, prop: 'box-shadow', value: SOFT_0_19 })),
+};
+const PHONE_0_19 = [
+  { context: '@media screen and (max-width: 899px)', selector: ':root', prop: '--kairos-text-body', value: '1rem' },
+  { context: '@media screen and (max-width: 899px)', selector: ':root', prop: '--kairos-text-button', value: '0.875rem' },
+  { context: '@media screen and (max-width: 899px)', selector: ':root', prop: '--kairos-text-button-sm', value: 'var(--kairos-text-md)' },
+];
+const NEW_0_19 = [];
+const newEntry0_19 = (context, selector, prop) =>
+  NEW_0_19.find((n) => (n.context ?? '') === context && n.selector === selector && n.props.includes(prop));
+const valueFor = (entry, theme) => (typeof entry.value === 'string' ? entry.value : entry.value[theme]);
+
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex');
 }
@@ -189,6 +224,11 @@ const OLD_0_17 = {
   tokens: read(FIXTURE_0_17, 'tokens.css'),
   base: read(FIXTURE_0_17, 'base.css'),
   kairos: read(FIXTURE_0_17, 'kairos.css'),
+};
+const OLD_0_18 = {
+  tokens: read(FIXTURE_0_18, 'tokens.css'),
+  base: read(FIXTURE_0_18, 'base.css'),
+  kairos: read(FIXTURE_0_18, 'kairos.css'),
 };
 const OLD = { tokens: read(FIXTURE, 'tokens.css'), base: read(FIXTURE, 'base.css'), kairos: read(FIXTURE, 'kairos.css') };
 const NEW = {
@@ -229,8 +269,13 @@ test('every 0.14 declaration resolves the same at Product Scale, light and dark'
         failures.push(`tokens.css ${theme}: ${name} is no longer declared`);
         continue;
       }
-      const expected = resolve(value, before[theme]);
       const actual = resolve(after[theme].get(name), after[theme]);
+      const soft = CHANGED_0_19.tokens.find((c) => c.token === name);
+      if (soft) {
+        if (actual !== soft.value[theme]) failures.push(`tokens.css ${theme}: ${name} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
+        continue;
+      }
+      const expected = resolve(value, before[theme]);
       if (expected !== actual) failures.push(`tokens.css ${theme}: ${name} was ${expected}, is ${actual}`);
     }
   }
@@ -246,11 +291,16 @@ test('every 0.14 declaration resolves the same at Product Scale, light and dark'
         continue;
       }
       const changed = file === 'kairos' && !d.context.length ? CHANGED_0_17.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
+      const soft = file === 'kairos' && !d.context.length ? CHANGED_0_19.declarations.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       for (const theme of THEMES) {
         const actual = resolve(now.value, after[theme]);
         if (changed) {
           const want = typeof changed.value === 'string' ? changed.value : changed.value[theme];
           if (actual !== want) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_17 says ${want}`);
+          continue;
+        }
+        if (soft) {
+          if (actual !== soft.value[theme]) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
           continue;
         }
         const expected = resolve(d.value, before[theme]);
@@ -340,8 +390,13 @@ test('every 0.17.0 declaration resolves the same at Product Scale, light and dar
         failures.push(`tokens.css ${theme}: ${name} is no longer declared`);
         continue;
       }
-      const expected = resolve(value, before[theme]);
       const actual = resolve(after[theme].get(name), after[theme]);
+      const soft = CHANGED_0_19.tokens.find((c) => c.token === name);
+      if (soft) {
+        if (actual !== soft.value[theme]) failures.push(`tokens.css ${theme}: ${name} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
+        continue;
+      }
+      const expected = resolve(value, before[theme]);
       if (expected !== actual) failures.push(`tokens.css ${theme}: ${name} was ${expected}, is ${actual}`);
     }
   }
@@ -366,10 +421,15 @@ test('every 0.17.0 declaration resolves the same at Product Scale, light and dar
       }
       const changed = top ? CHANGED_0_18.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       if (changed) changedUsed.add(changed);
+      const soft = top ? CHANGED_0_19.declarations.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
       for (const theme of THEMES) {
         const actual = resolve(now.value, after[theme]);
         if (changed) {
           if (actual !== changed.value) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_18 says ${changed.value}`);
+          continue;
+        }
+        if (soft) {
+          if (actual !== soft.value[theme]) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_19 says ${soft.value[theme]}`);
           continue;
         }
         const expected = resolve(d.value, before[theme]);
@@ -443,5 +503,137 @@ test("0.17.0's Product type block is kept apart from its widths", () => {
   for (const [key, d] of now) {
     if (d.selector.startsWith(PRODUCT_TYPE_PREFIX) && d.prop === 'font-stretch') failures.push(`${key} sets a width`);
   }
+  assert.deepEqual(failures, [], failures.join('\n'));
+});
+
+test('the 0.18.0 fixture is the published 0.18.0', () => {
+  assert.equal(sha256(join(FIXTURE_0_18, 'tokens.css')), '5b62f0ced3f19ab7346b2987838d8f4ddd3106ab7f17ea29c88098e8c4b6e99e');
+  assert.equal(sha256(join(FIXTURE_0_18, 'base.css')), '6f0ad07bc2fb1e3ecdcf877d35673fe3c0ae479be0e50544d708dd02961b79a5');
+  assert.equal(sha256(join(FIXTURE_0_18, 'kairos.css')), 'de60d565f5be8232ea932b06803be2574bd13ec546e13c469dd7eec1ecae9190');
+  assert.equal(sha256(join(FIXTURE_0_18, 'brand.css')), '24bba37742a7df07cfd0c24c4ce414bbc10a905c1ac8eb528b2f46c0b334cfec');
+});
+
+test('every 0.18.0 declaration resolves the same at Product Scale, light and dark, apart from the 0.19 lists', () => {
+  const before = maps(OLD_0_18.tokens);
+  const after = maps(NEW.tokens);
+  const failures = [];
+
+  // tokens.css by token name and theme.
+  for (const theme of THEMES) {
+    for (const [name, value] of before[theme]) {
+      if (!after[theme].has(name)) {
+        failures.push(`tokens.css ${theme}: ${name} is no longer declared`);
+        continue;
+      }
+      const actual = resolve(after[theme].get(name), after[theme]);
+      const changed = CHANGED_0_19.tokens.find((c) => c.token === name);
+      if (changed) {
+        if (actual !== changed.value[theme]) failures.push(`tokens.css ${theme}: ${name} is ${actual}, CHANGED_0_19 says ${changed.value[theme]}`);
+        continue;
+      }
+      const expected = resolve(value, before[theme]);
+      if (expected !== actual) failures.push(`tokens.css ${theme}: ${name} was ${expected}, is ${actual}`);
+    }
+  }
+
+  // kairos.css and base.css by at-rule context, selector and property.
+  const changedUsed = new Set();
+  for (const file of ['kairos', 'base']) {
+    const newKeys = keyed(NEW[file]);
+    for (const [key, d] of keyed(OLD_0_18[file])) {
+      const now = newKeys.get(key);
+      if (!now) {
+        failures.push(`${file}.css: ${key} is gone`);
+        continue;
+      }
+      const top = file === 'kairos' && !d.context.length;
+      const changed = top ? CHANGED_0_19.declarations.find((c) => c.selector === d.selector && c.prop === d.prop) : null;
+      if (changed) changedUsed.add(changed);
+      for (const theme of THEMES) {
+        const actual = resolve(now.value, after[theme]);
+        if (changed) {
+          if (actual !== changed.value[theme]) failures.push(`${file}.css ${theme}: ${key} is ${actual}, CHANGED_0_19 says ${changed.value[theme]}`);
+          continue;
+        }
+        const expected = resolve(d.value, before[theme]);
+        if (expected !== actual) failures.push(`${file}.css ${theme}: ${key} was ${expected}, is ${actual}`);
+      }
+    }
+  }
+
+  // Every list entry must still point at something real, and a token entry must change.
+  for (const c of CHANGED_0_19.tokens) {
+    for (const theme of THEMES) {
+      if (!before[theme].has(c.token)) {
+        failures.push(`CHANGED_0_19 lists ${c.token}, which 0.18.0 does not declare`);
+      } else if (resolve(before[theme].get(c.token), before[theme]) === c.value[theme]) {
+        failures.push(`CHANGED_0_19 lists ${c.token}, which does not change in ${theme}`);
+      }
+    }
+  }
+  for (const c of CHANGED_0_19.declarations) {
+    if (!changedUsed.has(c)) failures.push(`CHANGED_0_19 lists ${c.selector} ${c.prop}, which 0.18.0 does not declare`);
+  }
+
+  assert.deepEqual(failures, [], `Product Scale moved since 0.18.0:\n${failures.join('\n')}`);
+});
+
+test('a new 0.19 rule on a 0.18.0 class is Brand-scoped or listed', () => {
+  const failures = [];
+
+  for (const file of ['kairos', 'base']) {
+    const oldKeys = keyed(OLD_0_18[file]);
+    const oldClasses = new Set([...OLD_0_18[file].matchAll(/\.(kairos-[a-z0-9-]+)/g)].map((m) => m[1]));
+    const oldKeyframes = new Set([...OLD_0_18[file].matchAll(/@keyframes\s+([\w-]+)/g)].map((m) => m[1]));
+
+    for (const [key, d] of keyed(NEW[file])) {
+      if (oldKeys.has(key)) continue;
+
+      // A step of a keyframes block 0.18.0 did not have belongs to a new part.
+      const frames = d.context.map((c) => c.match(/^@keyframes\s+([\w-]+)/)?.[1]).find(Boolean);
+      if (frames && !oldKeyframes.has(frames)) continue;
+
+      const parts = splitTop(d.selector, ',').map((part) => part.trim());
+      const free = parts.every(
+        (part) => part.startsWith(":root[data-scale='brand']") || classesIn(part).some((cls) => !oldClasses.has(cls)),
+      );
+      if (free) continue;
+
+      const listed = file === 'kairos' ? newEntry0_19(d.context.join(' | '), d.selector, d.prop) : null;
+      if (!listed) failures.push(`${file}.css: ${key} is new on a 0.18.0 class and neither Brand-scoped nor in NEW_0_19`);
+    }
+  }
+
+  assert.deepEqual(failures, [], failures.join('\n'));
+});
+
+test('tokens.css adds only the phone type rule to its width queries', () => {
+  // `tokenMaps()` skips every custom property that sits inside an at-rule other
+  // than `@media not print`, so the phone rule would pass every other guard unseen.
+  const widthScoped = (source) => {
+    const out = new Map();
+    for (const d of parse(source)) {
+      if (!d.prop.startsWith('--') || !d.context.length || d.context.join(' | ') === '@media not print') continue;
+      out.set(`${d.context.join(' | ')} :: ${d.selector} :: ${d.prop}`, d.value);
+    }
+    return out;
+  };
+  const before = widthScoped(OLD_0_18.tokens);
+  const after = widthScoped(NEW.tokens);
+  const phone = new Map(PHONE_0_19.map((p) => [`${p.context} :: ${p.selector} :: ${p.prop}`, p.value]));
+  const failures = [];
+
+  assert.ok(before.size > 0, 'the 0.18.0 fixture has width-scoped custom properties');
+  for (const [key, value] of before) {
+    if (!after.has(key)) failures.push(`${key} is gone`);
+    else if (after.get(key) !== value) failures.push(`${key} was ${value}, is ${after.get(key)}`);
+  }
+  for (const [key, value] of after) {
+    if (before.has(key)) continue;
+    if (!phone.has(key)) failures.push(`${key} is new and not in PHONE_0_19`);
+    else if (phone.get(key) !== value) failures.push(`${key} is ${value}, PHONE_0_19 says ${phone.get(key)}`);
+  }
+  for (const key of phone.keys()) if (!after.has(key)) failures.push(`PHONE_0_19 lists ${key}, which tokens.css does not declare`);
+
   assert.deepEqual(failures, [], failures.join('\n'));
 });
