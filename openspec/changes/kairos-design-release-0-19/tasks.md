@@ -44,7 +44,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 2. Phone type
 
-- [ ] 2.1 Apply Decided 2-5.
+- [x] 2.1 Apply Decided 2-5.
 
     - `dist/tokens.css`: add the phone rule of Decided 5, with its comment, after the existing `@media (max-width: 899px)` site-header block. Change no other value.
     - Create `tests/product-type-and-stamp.test.mjs` with "below 900px body text is 16px and button labels 14px and 13px", "from 900px body text and button labels keep their 0.18.0 sizes" and "the Brand Scale keeps its body and button sizes on phones" (`design.md` › Tests that change). Top-level `test()`, no `describe`.

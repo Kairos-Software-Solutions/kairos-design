@@ -710,6 +710,19 @@
   }
 }
 
+/* Phones: below the sidebar boundary, the 899/900 boundary of the register
+   below, body text is 16px and button labels 14px (13px small). From 900px
+   the sizes above stand. The Brand Scale sets all three at (0,2,0), which
+   outranks this rule, so it is unchanged. `screen`: paper keeps 14px, since
+   a printed A4 page is narrower than 900px. */
+@media screen and (max-width: 899px) {
+  :root {
+    --kairos-text-body: 1rem;
+    --kairos-text-button: 0.875rem;
+    --kairos-text-button-sm: var(--kairos-text-md);
+  }
+}
+
 /* ==========================================================================
    Breakpoints
    ==========================================================================

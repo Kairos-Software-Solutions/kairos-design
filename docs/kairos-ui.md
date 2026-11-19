@@ -83,9 +83,9 @@ half-pixel ones.
 | --- | --- | --- |
 | `--kairos-text-2xs` | 10px | A count on a nav row |
 | `--kairos-text-xs` | 11px | State chips, table headers |
-| `--kairos-text-sm` | 12px | Buttons, field labels, hints |
+| `--kairos-text-sm` | 12px | Field labels, hints |
 | `--kairos-text-md` | 13px | Nav rows, secondary body |
-| `--kairos-text-body` | 0.875rem | Body, table cells |
+| `--kairos-text-body` | 0.875rem | Body, table cells; `1rem` (16px) below 900px |
 | `--kairos-text-lg` | 16px | Panel headings, and every text input |
 | `--kairos-text-xl` | 20px | A large figure |
 | `--kairos-text-title` | 24px | The page title, in the display family, once per screen |
@@ -94,6 +94,12 @@ Role aliases: `--kairos-text-heading`, `--kairos-text-label`,
 `--kairos-text-chip`, `--kairos-text-button`, `--kairos-text-meta`,
 `--kairos-text-input`. An input takes 16px because below that Safari zooms the
 page when the field is focused.
+
+Buttons read `--kairos-text-button` (12px) and, small, `--kairos-text-button-sm`
+(11px). Below 900px (`screen and (max-width: 899px)`, where the bottom bar
+replaces the sidebar) body text is 16px, `--kairos-text-button` is 14px and
+`--kairos-text-button-sm` 13px; from 900px, and on paper, nothing moves. The
+Brand Scale sets its own sizes and is not touched by this.
 
 ### Tracking
 
