@@ -4,11 +4,11 @@ Define what the apps' Product Scale (no `data-scale` attribute) draws where kair
 ## ADDED Requirements
 
 ### Requirement: Body text and button labels are larger on phones
-At the Product Scale, below 900px (`max-width: 899px`, the sidebar boundary), `--kairos-text-body` SHALL be `1rem` (16px), `--kairos-text-button` `0.875rem` (14px) and `--kairos-text-button-sm` the 13px step, set by one `:root` rule in `tokens.css`. From 900px all three SHALL keep their 0.18.0 values (14px, 12px, 11px). Every rule and role that reads them follows without its own edit.
+At the Product Scale, on a screen below 900px (`screen and (max-width: 899px)`, the sidebar boundary), `--kairos-text-body` SHALL be `1rem` (16px), `--kairos-text-button` `0.875rem` (14px) and `--kairos-text-button-sm` the 13px step, set by one `:root` rule in `tokens.css`. From 900px and on paper all three SHALL keep their 0.18.0 values (14px, 12px, 11px). Every rule and role that reads them follows without its own edit.
 
 #### Scenario: Phone sizes
-- **WHEN** the `@media (max-width: 899px)` rule on `:root` in `dist/tokens.css` is read and its values are resolved through the light token map
-- **THEN** it sets `--kairos-text-body` to `1rem`, `--kairos-text-button` to `0.875rem` and `--kairos-text-button-sm` to `var(--kairos-text-md)`, which resolve to `1rem`, `0.875rem` and `13px`
+- **WHEN** the `@media screen and (max-width: 899px)` rule on `:root` in `dist/tokens.css` is read and its values are resolved through the light token map
+- **THEN** its query names `screen`, so print keeps 0.18.0's sizes, and it sets `--kairos-text-body` to `1rem`, `--kairos-text-button` to `0.875rem` and `--kairos-text-button-sm` to `var(--kairos-text-md)`, which resolve to `1rem`, `0.875rem` and `13px`
 - **CHECK** `tests/product-type-and-stamp.test.mjs` › "below 900px body text is 16px and button labels 14px and 13px"
 
 #### Scenario: Desktop sizes kept
@@ -17,8 +17,8 @@ At the Product Scale, below 900px (`max-width: 899px`, the sidebar boundary), `-
 - **CHECK** `tests/product-type-and-stamp.test.mjs` › "from 900px body text and button labels keep their 0.18.0 sizes"
 
 #### Scenario: Phone sizes in the workshop
-- **WHEN** the Type page's "Phone Sizes" story renders a `kairos-body` paragraph, a primary button and a small button without the Brand Scale
-- **THEN** with `matchMedia('(max-width: 899px)')` matching, their computed font sizes are 16px, 14px and 13px, and otherwise 14px, 12px and 11px
+- **WHEN** the Type page's "Phone Sizes" story, set to the workshop's `narrow` viewport (419px) with `globals: { viewport: { value: 'narrow' } }`, renders a `kairos-body` paragraph, a primary button and a small button without the Brand Scale
+- **THEN** `matchMedia('screen and (max-width: 899px)')` matches and their computed font sizes are 16px, 14px and 13px
 - **CHECK** `npm run test-stories`: `stories/foundations/Type.stories.tsx` › "Phone Sizes" passes
 
 ### Requirement: The Brand Scale keeps its type on phones
@@ -56,11 +56,11 @@ At the Product Scale `--kairos-shadow`, `--kairos-shadow-card` and `--kairos-sha
 - **CHECK** `tests/product-type-and-stamp.test.mjs` › "surfaces wear the soft card shadow at the Product Scale"
 
 #### Scenario: Elevation in the workshop
-- **WHEN** the Geometry page's "Elevation" story renders a panel holding a nested panel, a card, a primary and a secondary button without the Brand Scale
+- **WHEN** the Geometry page's "Elevation" story renders, without the Brand Scale, a panel holding a nested panel, and beside the outer panel (not inside it) a card, a primary and a secondary button
 - **THEN** the outer panel and the card report the soft card shadow, the nested panel `none`, the primary `rgb(22, 17, 11) 4px 4px 0px 0px`, and the secondary no shadow
 - **CHECK** `npm run test-stories`: `stories/foundations/Geometry.stories.tsx` › "Elevation" passes
 
 #### Scenario: Before and after in the workshop
 - **WHEN** the Product Scale stories (Components/Button, Forms, Overlays, Feedback, Density, Screens/Record list, Sign in) and the Brand stories are built once with the 0.18.0 fixture CSS and once with 0.19.0, and computed styles are compared per element at 390, 820 and 1366, light and dark
-- **THEN** at the Product Scale the only differences are font sizes reading the body or button steps below 900px and the box shadows of the ten surfaces, and the Brand stories that switch the Brand Scale on show none
+- **THEN** at the Product Scale the only differences are font sizes reading the body or button steps below 900px, the line heights and box sizes that follow from those larger sizes, and the box shadows of the ten surfaces, and the Brand stories that switch the Brand Scale on show none
 - **CHECK** planner, before the pull request (Workflow follow-up)

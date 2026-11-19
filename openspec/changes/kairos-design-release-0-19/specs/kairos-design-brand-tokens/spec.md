@@ -81,5 +81,5 @@ Without the Brand Scale, every token and every `base.css` and `kairos.css` decla
 
 #### Scenario: Width-scoped token rules
 - **WHEN** every custom property inside a width `@media` in the 0.18.0 fixture's and in `dist/`'s `tokens.css` is listed by context, selector, name and value
-- **THEN** every 0.18.0 entry is still there with the same value, and the only new entries are the three of `PHONE_0_19`, under `@media (max-width: 899px)` on `:root`
+- **THEN** every 0.18.0 entry is still there with the same value, and the only new entries are the three of `PHONE_0_19`, under `@media screen and (max-width: 899px)` on `:root`
 - **CHECK** `tests/product-scale.test.mjs` › "tokens.css adds only the phone type rule to its width queries"

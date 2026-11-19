@@ -38,7 +38,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
     Check:
 
-    - With `CHANGED_0_19` and `PHONE_0_19` emptied for one run, the four 0.18.0 tests pass on the untouched code (0.18.0 against itself) and fail once you change one value by hand in `dist/kairos.css`, and again once you add a `@media (max-width: 899px) { :root { --kairos-text-body: 1rem; } }` rule to `dist/tokens.css`. Try both, then revert.
+    - With `CHANGED_0_19` and `PHONE_0_19` emptied for one run, the four 0.18.0 tests pass on the untouched code (0.18.0 against itself) and fail once you change one value by hand in `dist/kairos.css`, and again once you add a `@media screen and (max-width: 899px) { :root { --kairos-text-body: 1rem; } }` rule to `dist/tokens.css`. Try both, then revert.
     - With the lists in place, "every 0.18.0 declaration resolves the same…" and "tokens.css adds only the phone type rule…" fail until groups 2 and 3 are done; that is expected.
     - `node --test tests/product-scale.test.mjs` passes every 0.14 and 0.17.0 test.
 
@@ -83,9 +83,9 @@ Add no dependency. While working, run only the test files a task names; the full
     - `stories/foundations/Type.stories.tsx`: the Scale note and the new "Phone Sizes" story;
     - `stories/foundations/Geometry.stories.tsx`: the stamp and surfaces sections, the ledes, and the new "Elevation" story.
 
-    Keep every existing story export. Use `getComputedStyle` (or `style()` from `../brand/computed`), `expect` from `storybook/test`, and `matchMedia` for the one width-dependent check; no hover, no assertion on text width or the viewport size. Then run `npx vitest run --project stories stories/foundations stories/brand`.
+    Keep every existing story export. Use `getComputedStyle` (or `style()` from `../brand/computed`) and `expect` from `storybook/test`. "Phone Sizes" sets `globals: { viewport: { value: 'narrow' } }` (419px) and asserts 16px, 14px and 13px; no other story names a viewport or asserts anything width-dependent, and none asserts a hover or text width. Then run `npx vitest run --project stories stories/foundations stories/brand`.
 
-    Covers: kairos-design-product-scale › "Phone sizes in the workshop", "Elevation in the workshop".
+    Covers: kairos-design-product-scale › "Phone sizes in the workshop", "Elevation in the workshop"; kairos-design-brand-scale › "Soft shadows replace the stamp" (Brand/Surfaces › "Cards And Bands", unedited).
 
     Check:
 
@@ -108,10 +108,7 @@ Add no dependency. While working, run only the test files a task names; the full
     - kairos-design-release-0-19 › "Version and exports", "Docs present", "Names still declared";
     - the earlier docs tests "the docs describe 0.16.0", "the docs describe 0.18.0" and "the docs tell apps to load Epilogue", which must still pass.
 
-    Check:
-
-    - `npm test` passes.
-    - `grep -n "6px" docs/kairos-ui.md | grep -i "stamp"` prints nothing.
+    Check: `npm test` passes.
 
 ## 6. Final checks
 
@@ -147,15 +144,14 @@ Add no dependency. While working, run only the test files a task names; the full
     - `git diff 725c182 -- tests/scale.test.mjs tests/emit.test.mjs tests/contrast.test.mjs tests/contract.test.mjs tests/brand-scale.test.mjs tests/brand-parts.test.mjs` (empty);
     - `git diff 725c182 -- dist/kairos.css` (only the three `.kairos-page-header-primary` lines and comment lines);
     - `node -p "require('./package.json').version"` (prints `0.19.0`) and `node -p "const l=require('./package-lock.json'); l.version+' '+l.packages[''].version"` (prints `0.19.0 0.19.0`);
-    - a `node -e` compare of `package.json` with `git show 725c182:package.json`, ignoring `version`, that prints `manifest: same (ignored version)`;
-    - the grep of task 5.1.
+    - a `node -e` compare of `package.json` with `git show 725c182:package.json`, ignoring `version`, that prints `manifest: same (ignored version)`.
 
     Then validate the plan. `OPENSPEC_TELEMETRY=0 npx -y @fission-ai/openspec@1.16.0 validate kairos-design-release-0-19 --strict` stops on the `kairos-plans` store named in `openspec/config.yaml`. Run it in a copy of the repository under `$TMPDIR` with the `store:` line deleted from the copy's `openspec/config.yaml`; don't edit the real file. "Archive would refuse" INFO lines there are expected: the store holds the main specs.
 
     Finish `checks/REPORT.md` with:
 
     - each task, its check and its result;
-    - every CHECK line of the five spec files, with its test or command and result (planner-owned ones marked "planner");
+    - every CHECK line of the five spec files under `specs/` (brand-scale, brand-tokens, product-scale, release-0-18, release-0-19), with its test or command and result (planner-owned ones marked "planner");
     - every file changed, with its reason;
     - anything not run in the sandbox.
 
@@ -184,9 +180,9 @@ Planner work, not builder tasks. The repository has no `qa` branch.
 - **Before/after workshop compare** (kairos-design-product-scale › "Before and after in the workshop"), in the review sandbox, `cdp('Page.bringToFront')` first:
     - build the workshop twice, once as it is and once with the 0.18.0 fixture CSS swapped into `.storybook/preview.tsx`'s imports, in `/tmp`;
     - for Components/Button, Forms, Overlays (dialog, popover, menus opened), Feedback (toast), Density › "Related Sections", Screens/Record list and Sign in, and every Brand story: freeze animations, then dump the computed `font-size`, `line-height`, `box-shadow` and box size of every visible element at 390, 820 and 1366, light and dark, and diff per element;
-    - expected: below 900px, font sizes reading the body step 14 → 16px and button labels 12 → 14px (small 11 → 13px); at every width, the box shadows of the ten surfaces; nothing else at the Product Scale; nothing in the Brand stories that switch the Brand Scale on (Brand/Actions › "Without The Switch" is Product Scale and shows the phone label size);
+    - expected: below 900px, font sizes reading the body step 14 → 16px and button labels 12 → 14px (small 11 → 13px), with the line heights and box sizes that follow from those sizes; at every width, the box shadows of the ten surfaces; nothing else at the Product Scale; nothing in the Brand stories that switch the Brand Scale on (Brand/Actions › "Without The Switch" is Product Scale and shows the phone label size);
     - any other difference is a finding;
-    - take the same stories' before/after shots at 390 and 1366 (light; dark for Record list) into one contact sheet, for the reviewer to see on the release message.
+    - take the same stories' before/after shots at 390 and 1366 (light; dark for Record list) into one contact sheet, plus a panel with its heading and body text at 390 (headings and body are both 16px on phones, `design.md` › Risks), for the reviewer to see on the release message.
 - **Store and pull request.**
     - Run `npm view kairos-design versions --json` and `git log 725c182..origin/main`. If 0.19.0 is taken or `main` moved, rebase and take the next minor (`npm-package-release.md` › Later versions).
     - Copy this change into `kairos-plans` as `kairos-design-release-0-19` and validate it there with `--strict`. Archive it in a scratch copy of the store, then `validate --all --strict`. Fix any 500-character overflow in the merged specs as wording only.

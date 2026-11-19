@@ -51,6 +51,7 @@ Under 0.x a caret range stops at the next minor, so **none of them changes until
 **Non-Goals:**
 
 - Field labels (13px), hints and error lines (12px), chips and table headers (11px), nav rows and meta text (13px) on phones. The decision names body text and the review names buttons; the rest is for the Paykit round 2 review to raise.
+- Headings on phones. `--kairos-text-heading` is `--kairos-text-lg` (16px), so below 900px panel headings, section titles and titles reading it are the same size as body text there and differ only by weight (Risks).
 - Control heights and the 44px touch target (`--kairos-control-h-touch`).
 - `brand.css`, `base.css`, any React module, the dark redesign.
 - Any app's or site's repin.
@@ -58,7 +59,7 @@ Under 0.x a caret range stops at the next minor, so **none of them changes until
 ## Decided
 
 1. **Version 0.19.0**, a minor release: two new tokens, three token values changed and new phone values. Under 0.x, `^0.18.0` excludes it. 0.19.0 is free on npm (`curl -s https://registry.npmjs.org/kairos-design`: versions end at 0.18.0, `/0.19.0` answers 404, 18 November 2026).
-2. **"Phones" is below 900px** (`@media (max-width: 899px)`): the register's boundary where the sidebar goes and the bottom bar appears (`kairos-mobile-only`), and the breakpoint the Paykit redesign plan already uses. A tablet in portrait (768-899px) is on the bottom bar and gets the phone sizes too. 767px, the table-to-card swap, was the other candidate; it would leave the bottom-bar layout between 768 and 899px at 14px.
+2. **"Phones" is a screen below 900px** (`@media screen and (max-width: 899px)`): the register's boundary where the sidebar goes and the bottom bar appears (`kairos-mobile-only`), and the breakpoint the Paykit redesign plan already uses. A tablet in portrait (768-899px) is on the bottom bar and gets the phone sizes too. 767px, the table-to-card swap, was the other candidate; it would leave the bottom-bar layout between 768 and 899px at 14px. The query names `screen` so paper keeps 14px: a printed A4 page is about 739px across, under the boundary (`kairos.css` › "Paper is not a phone"), and an app's printed report (its `kairos-table` reads the body step) would otherwise print at 16px in portrait and 14px in landscape.
 3. **Body 16px as `1rem`.** `--kairos-text-body` stays in rem, as the type scale's comment says, so a reader's browser setting still moves it.
 4. **Button labels 14px (`0.875rem`), small buttons 13px (`var(--kairos-text-md)`), on phones.** Why: a 700-weight label at 14px reads at least as large as 16px body at 400, it keeps the label one step under the body as the prototype does (15 under 16), and both are steps the scale already has, so no 15px step is added. The label takes the rem value the body leaves, so it follows a reader's setting too. 36px and 32px buttons hold a 14px and 13px label with room (the Brand Scale puts 16px in 50px). The prototype's 15px/14px were checked against this: one pixel smaller, no new step.
 5. **One new rule in `tokens.css`**, after the existing 899px site-header block:
@@ -67,8 +68,9 @@ Under 0.x a caret range stops at the next minor, so **none of them changes until
     /* Phones: below the sidebar boundary, the 899/900 boundary of the register
        below, body text is 16px and button labels 14px (13px small). From 900px
        the sizes above stand. The Brand Scale sets all three at (0,2,0), which
-       outranks this rule, so it is unchanged. */
-    @media (max-width: 899px) {
+       outranks this rule, so it is unchanged. `screen`: paper keeps 14px, since
+       a printed A4 page is narrower than 900px. */
+    @media screen and (max-width: 899px) {
       :root {
         --kairos-text-body: 1rem;
         --kairos-text-button: 0.875rem;
@@ -120,7 +122,7 @@ Copy `dist/tokens.css`, `dist/base.css`, `dist/kairos.css` and `dist/brand.css` 
 - "the 0.18.0 fixture is the published 0.18.0": the four sha256 values above.
 - "every 0.18.0 declaration resolves the same at Product Scale, light and dark, apart from the 0.19 lists": every 0.18.0 token by name, and every `base.css`/`kairos.css` key, exists with an equal resolved value, except the `CHANGED_0_19` entries, which must resolve to the value listed. Every entry must point at a 0.18.0 key, and every token entry must actually change.
 - "a new 0.19 rule on a 0.18.0 class is Brand-scoped or listed": the shape of "a new 0.18 rule on a 0.17.0 class…", against `NEW_0_19`, which is empty. (The page header's primary changes values on existing keys, which this test does not police.)
-- "tokens.css adds only the phone type rule to its width queries": every 0.18.0 `tokens.css` custom property inside a width `@media` (any context other than `@media not print`) is still declared in the same context and selector with the same value, and the only new ones are the three `PHONE_0_19` entries, under `@media (max-width: 899px)` on `:root`.
+- "tokens.css adds only the phone type rule to its width queries": every 0.18.0 `tokens.css` custom property inside a width `@media` (any context other than `@media not print`) is still declared in the same context and selector with the same value, and the only new ones are the three `PHONE_0_19` entries, under `@media screen and (max-width: 899px)` on `:root`.
 
 `tokenMaps()` skips width queries, so without the fourth test the phone rule would pass every guard unseen.
 
@@ -138,9 +140,9 @@ const CHANGED_0_19 = {
   ].map((selector) => ({ selector, prop: 'box-shadow', value: SOFT_0_19 })),
 };
 const PHONE_0_19 = [
-  { context: '@media (max-width: 899px)', selector: ':root', prop: '--kairos-text-body', value: '1rem' },
-  { context: '@media (max-width: 899px)', selector: ':root', prop: '--kairos-text-button', value: '0.875rem' },
-  { context: '@media (max-width: 899px)', selector: ':root', prop: '--kairos-text-button-sm', value: 'var(--kairos-text-md)' },
+  { context: '@media screen and (max-width: 899px)', selector: ':root', prop: '--kairos-text-body', value: '1rem' },
+  { context: '@media screen and (max-width: 899px)', selector: ':root', prop: '--kairos-text-button', value: '0.875rem' },
+  { context: '@media screen and (max-width: 899px)', selector: ':root', prop: '--kairos-text-button-sm', value: 'var(--kairos-text-md)' },
 ];
 const NEW_0_19 = [];
 ```
@@ -160,7 +162,7 @@ The planner's trial passed with exactly these edits.
 - `tests/product-scale.test.mjs`: the fixture path, the lists and the four 0.18.0 tests above; the two `CHANGED_0_19` lookups in the 0.14 and 0.17.0 guards. The header comment says the file guards 0.14, 0.17.0 and 0.18.0.
 - `tests/brand-tokens.test.mjs`: the `LISTED` entries above. No other edit.
 - New `tests/product-type-and-stamp.test.mjs` (top-level `test()`, no `describe`), reading `dist/` with `tests/helpers/css.mjs`:
-    - "below 900px body text is 16px and button labels 14px and 13px": the `@media (max-width: 899px)` `:root` rule in `tokens.css` sets the three values of decision 5, and resolved through the light map (with that rule applied over `:root`) they are `1rem`, `0.875rem` and `13px`.
+    - "below 900px body text is 16px and button labels 14px and 13px": the `@media screen and (max-width: 899px)` `:root` rule in `tokens.css` (the query names `screen`, so paper keeps 14px) sets the three values of decision 5, and resolved through the light map (with that rule applied over `:root`) they are `1rem`, `0.875rem` and `13px`.
     - "from 900px body text and button labels keep their 0.18.0 sizes": the top-level `:root` values resolve to `0.875rem`, `12px` and `11px`, and no `min-width` query in `tokens.css` sets any of the three.
     - "the Brand Scale keeps its body and button sizes on phones": `brand.css`'s one rule is `:root[data-scale='brand']` and sets `--kairos-text-body` 17px and `--kairos-text-button` and `--kairos-text-button-sm` 16px, and the phone rule's selector is exactly `:root`, so the brand rule wins at every width.
     - "only rank-1 buttons wear the ink stamp at the Product Scale": every `kairos.css` declaration of `box-shadow`, `--button-shadow*` or a `--kairos-*shadow*` knob, resolved in light and dark, that is an ink offset (`/\b\d+px \d+px 0 (0 )?#(16110b|f5f1e8)\b/`) is on `.kairos-button--primary`, `.kairos-button--danger-solid` or `.kairos-page-header-primary`, and each of those three has `--button-shadow` at 4px, `--button-shadow-hover` at 6px and `--button-shadow-active` at 2px. The planner's trial found exactly those nine declarations per theme.
@@ -171,18 +173,18 @@ The planner's trial passed with exactly these edits.
 
 ## Workshop
 
-The story tests run in Vitest's browser iframe, whose width is the runner's, not 390 or 1366. No assertion may depend on that width being one or the other; where a value differs by width, the play reads `window.matchMedia('(max-width: 899px)').matches` and expects the value for the width it has. The planner's browser checks cover both widths.
+The story tests run in Vitest's browser iframe at the Storybook Vitest addon's default 1200×900, unless a story names a viewport (`@storybook/addon-vitest` 10.6.7 › `DEFAULT_VIEWPORT_DIMENSIONS`, `setViewport`). Only "Phone Sizes" names one: the workshop's `narrow` viewport (419px, `.storybook/preview.tsx`) through `globals: { viewport: { value: 'narrow' } }`, so its play runs the phone branch. No other assertion may depend on the width. The planner's browser checks cover 390, 820 and 1366.
 
 - `stories/foundations/Type.stories.tsx`:
     - "The steps" note under Scale says the body step is 16px and the button roles 14px and 13px below 900px.
-    - New export `PhoneSizes` (story name "Phone Sizes"): a `p.kairos-body`, a `Button variant="primary"` and a small `Button`. Play: with `phone = matchMedia('(max-width: 899px)').matches`, the paragraph's `fontSize` is `16px` or `14px`, the button's `14px` or `12px`, the small button's `13px` or `11px`; `<html>` has no `data-scale`.
+    - New export `PhoneSizes` (story name "Phone Sizes") with `globals: { viewport: { value: 'narrow' } }`: a `p.kairos-body`, a `Button variant="primary"` and a small `Button`. Play: `matchMedia('screen and (max-width: 899px)').matches` is `true` (so a story left at the default width fails here, not on a size), the paragraph's `fontSize` is `16px`, the button's `14px` and the small button's `13px`; `<html>` has no `data-scale`. 0.18.0 fails this story (14/12/11px).
 - `stories/foundations/Geometry.stories.tsx`:
     - "The stamp" section shows `shadow-stamp`, `shadow-stamp-hover` and `shadow-pressed` with their uses (a rank-1 button at rest, under the cursor, held), and its note says only rank-1 buttons wear it.
     - A new "Surfaces" section shows `shadow`, `shadow-card` and `shadow-lg` (the soft card shadow since 0.19.0: cards, panels, menus, dialogs, toasts).
     - The Shape lede and the Nesting lede and heading drop "stamps"/"stamped" for panels ("the outermost panel is raised and everything nested in it is flat").
-    - New export `Elevation` (story name "Elevation"): a `div.kairos-panel` holding a nested `div.kairos-panel`, a `div.kairos-card`, a primary and a secondary `Button`. Play: the outer panel's and the card's `boxShadow` equal `shadow('--kairos-shadow-soft-card')`; the nested panel's is `none`; the primary's is `` `${rgb('#16110b')} 4px 4px 0px 0px` ``; the secondary has no shadow (`noShadow`). It imports `shadow`, `rgb`, `noShadow` and `style` from `../brand/computed`.
+    - New export `Elevation` (story name "Elevation"): a `div.kairos-panel` holding a nested `div.kairos-panel`, and beside the outer panel (not inside it, where the nested-panel rule flattens a card) a `div.kairos-card`, a primary and a secondary `Button`. Play: the outer panel's and the card's `boxShadow` equal `shadow('--kairos-shadow-soft-card')`; the nested panel's is `none`; the primary's is `` `${rgb('#16110b')} 4px 4px 0px 0px` ``; the secondary has no shadow (`noShadow`). It imports `shadow`, `rgb`, `noShadow` and `style` from `../brand/computed`.
 - `stories/brand/Actions.stories.tsx` › "Without The Switch" already asserts the Product primary's 4px stamp and still passes; no edit.
-- Two new exports: 82 stories in 21 files after, 80 before. No assertion on a hover, text width or the viewport size.
+- Two new exports: 82 stories in 21 files after, 80 before. No assertion on a hover or text width; only "Phone Sizes" names a viewport.
 
 ## Docs
 
@@ -211,6 +213,7 @@ The story tests run in Vitest's browser iframe, whose width is the runner's, not
 ## Risks / Trade-offs
 
 - [Dense app tables between 768 and 899px grow from 14px to 16px and may scroll sideways sooner] → The adoption note names it; the planner's compare takes a 820px width; each app's repin plan takes shots.
+- [Headings equal body text on phones: below 900px `--kairos-text-heading` (16px) and the body step are both 16px, so panel headings, section titles, record-row, disclosure and dialog titles and `dd` values differ from body only by weight] → Accepted for now (planner's pick): no heading step is added. The compare's contact sheet shows a headed panel at 390 so the reviewer sees it, and the reviewer looks again on Paykit's QA after its repin; a phone heading size would be a later release.
 - [Dark surfaces lose the linen stamp and take the interim soft shadow colour, `rgba(0, 0, 0, 0.5)`, which shows little on a dark page] → Panels and cards keep their 1px border. The dark redesign replaces the colour. The compare looks at dark.
 - [Floating layers (menus, popovers, dialogs) get a subtler shadow than their 4-8px stamp] → Their border and the dialog overlay still separate them, as at the Brand Scale. If the reviewer finds a menu hard to see in the compare, `--kairos-shadow-lg` can take the photo shadow in a 0.19.1 (one token).
 - [An app's own button that read `--kairos-shadow` for a stamp would go soft] → None found in internal-tools or the website; the adoption guide names `--kairos-shadow-stamp`.
