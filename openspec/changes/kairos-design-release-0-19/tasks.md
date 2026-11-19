@@ -78,7 +78,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 4. Workshop
 
-- [ ] 4.1 Do `design.md` › Workshop:
+- [x] 4.1 Do `design.md` › Workshop:
 
     - `stories/foundations/Type.stories.tsx`: the Scale note and the new "Phone Sizes" story;
     - `stories/foundations/Geometry.stories.tsx`: the stamp and surfaces sections, the ledes, and the new "Elevation" story.
