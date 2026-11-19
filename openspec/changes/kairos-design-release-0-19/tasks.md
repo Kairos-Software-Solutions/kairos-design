@@ -14,7 +14,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
 ## 1. Baseline and the 0.18.0 guard
 
-- [ ] 1.1 Record the baseline on the untouched checkout (`725c182`), in this order:
+- [x] 1.1 Record the baseline on the untouched checkout (`725c182`), in this order:
 
     - `npm ci`
     - `npx playwright install --with-deps chromium`
@@ -28,7 +28,7 @@ Add no dependency. While working, run only the test files a task names; the full
 
     Check: all five commands complete and the figures are recorded.
 
-- [ ] 1.2 Build the 0.18.0 guard (`design.md` › Guards).
+- [x] 1.2 Build the 0.18.0 guard (`design.md` › Guards).
 
     - Copy `dist/tokens.css`, `dist/base.css`, `dist/kairos.css` and `dist/brand.css` from `725c182` into `tests/fixtures/kairos-design-0.18.0/` byte for byte (`git show 725c182:dist/<file> > …`).
     - In `tests/product-scale.test.mjs`, add `FIXTURE_0_18`, `OLD_0_18`, the constants `SOFT_0_19`, `CHANGED_0_19`, `PHONE_0_19` and `NEW_0_19` exactly as `design.md` gives them, and the four tests "the 0.18.0 fixture is the published 0.18.0", "every 0.18.0 declaration resolves the same at Product Scale, light and dark, apart from the 0.19 lists", "a new 0.19 rule on a 0.18.0 class is Brand-scoped or listed" and "tokens.css adds only the phone type rule to its width queries".
